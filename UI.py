@@ -1,8 +1,8 @@
 """
 UI-related methods here
 """
-import pandas as pd;
 import plotly.express as px;
+
 
 def display_dive(st, diveprofile):
     # Args: streamlit, diveprofile
@@ -20,5 +20,3 @@ def display_dive(st, diveprofile):
                 ====
                 """);
     st.dataframe(df);
-
-
