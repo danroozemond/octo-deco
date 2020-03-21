@@ -1,6 +1,6 @@
 import time, math, numpy as np, pandas as pd;
 import streamlit as st;
-import plotly.express as px;
+
 from DiveProfile import DiveProfile;
 import UI;
 
@@ -22,31 +22,9 @@ _max_width_();
 
 st.sidebar.text("Hello, sidebar!");
 
-##
-## Create the dive
-##
-
 dp = DiveProfile();
 dp.append_section(40,25);
 dp.append_section(30,10);
 dp.append_surfacing();
 
-##
-## Displaying it
-##
-df = dp.dataframe();
-st.markdown("""
-            Dive profile
-            ============
-            """);
-fig = px.line( df, x="time", y="depth");
-fig.update_yaxes(autorange="reversed");
-st.plotly_chart( fig, use_container_width = True );
-
-st.markdown("""
-            Data
-            ====
-            """);
-st.dataframe(df);
-
-# st.button("Re-plot");
+UI.display_dive( st, dp );
