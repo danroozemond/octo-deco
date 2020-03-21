@@ -1,4 +1,5 @@
 import math;
+import pandas as pd;
 
 '''
 Conventions:
@@ -25,6 +26,10 @@ class DiveProfile:
     def points(self):
         return self._points;
 
+    def dataframe(self):
+        return pd.DataFrame([ (p.time, p.depth) for p in self._points ],
+                          columns = [ 'time', 'depth' ]);
+
     '''
     Modifying the profile (adding sections etc)
     '''
@@ -45,3 +50,6 @@ class DiveProfile:
     def append_section(self, depth, duration):
         self._append_transit(depth);
         self._append_point(duration, depth)
+
+    def append_surfacing(self):
+        self._append_transit( 0 );

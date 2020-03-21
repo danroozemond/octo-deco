@@ -1,33 +1,52 @@
-import time, math, numpy as np;
+import time, math, numpy as np, pandas as pd;
 import streamlit as st;
-import UI, DiveProfile;
+import plotly.express as px;
+from DiveProfile import DiveProfile;
+import UI;
 
 #Run as: streamlit run abc.py
 
+def _max_width_():
+    max_width_str = f"max-width: 1500px;"
+    st.markdown(
+        f"""
+    <style>
+    .reportview-container .main .block-container{{
+        {max_width_str}
+    }}
+    </style>    
+    """,
+        unsafe_allow_html=True,
+    )
+_max_width_();
+
 st.sidebar.text("Hello, sidebar!");
+
+##
+## Create the dive
+##
 
 dp = DiveProfile();
 dp.append_section(40,25);
 dp.append_section(30,10);
+dp.append_surfacing();
 
-UI.plot_profile( st, dp );
+##
+## Displaying it
+##
+df = dp.dataframe();
+st.markdown("""
+            Dive profile
+            ============
+            """);
+fig = px.line( df, x="time", y="depth");
+fig.update_yaxes(autorange="reversed");
+st.plotly_chart( fig, use_container_width = True );
 
-chart = st.line_chart()
+st.markdown("""
+            Data
+            ====
+            """);
+st.dataframe(df);
 
-def doplot(nrows):
-    progress_bar.progress(0);
-    last_rows = np.random.randn(1, 1)
-    N = math.ceil(nrows/5);
-    for i in range(1, N+1):
-        new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-        status_text.text("%i%% Complete" % (100.0 * i / N));
-        chart.add_rows(new_rows)
-        progress_bar.progress(i / N)
-        last_rows = new_rows
-        time.sleep(0.05)
-
-    progress_bar.empty()
-
-st.button("Re-plot");
-
-doplot(add_slider);
+# st.button("Re-plot");
