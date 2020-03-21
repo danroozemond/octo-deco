@@ -1,0 +1,18 @@
+First steps
+* Dive profile
+* Deco library (first flat Buhlmann)
+* Analyze profile
+** Ceil
+** Stops
+** TTS
+** GF
+** SurfaceGF
+
+* Buhlmann => GF
+
+* Visualize dive and tissue loading (streamlit?)
+
+* Import CSV from shearwater log
+
+Longer term
+* Gas consumption
