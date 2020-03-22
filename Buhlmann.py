@@ -1,4 +1,6 @@
-import Gas, BuhlmannConstants, Util;
+import BuhlmannConstants
+import Gas
+import Util
 
 """
 Buhlmann class contains all essential logic for deco model
@@ -20,7 +22,7 @@ class Buhlmann:
     """
     TissueState is represented as a list of current tissue loadings (N2, He)
     """
-    def initial_tissue_state(self):
+    def cleared_tissue_state(self):
         gas = Gas.Air();
         return [ (gas['fN2'], gas['fHe'] ) for i in range(self._n_tissues) ];
 
@@ -42,5 +44,5 @@ class Buhlmann:
 # Some testing functions
 #
 bm = Buhlmann();
-ts = bm.initial_tissue_state();
+ts = bm.cleared_tissue_state();
 ts = bm.updated_tissue_state( ts, 10.0, 40.0, Gas.Trimix(21,35));

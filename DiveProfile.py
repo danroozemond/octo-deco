@@ -1,5 +1,8 @@
 import math;
+
 import pandas as pd;
+
+import Buhlmann;
 import Gas;
 
 '''
@@ -14,6 +17,7 @@ class DivePoint:
         self.time = time;
         self.depth = depth;
         self.gas = gas;
+        self.tissue_state = None;
 
     def __repr__(self):
         return '%.1f:%dm' % (self.time, self.depth);
@@ -25,12 +29,23 @@ class DivePoint:
     def dataframe_columns():
         return [ 'time', 'depth', 'gas' ]
 
+    def set_cleared_tissue_state(self, deco_model):
+        self.tissue_state = deco_model.cleared_tissue_state();
+
+    def set_updated_tissue_state(self, deco_model, prev_point):
+        self.tissue_state = deco_model.updated_tissue_state(
+            prev_point.tissue_state,
+            self.time - prev_point.time,
+            self.depth,
+            self.gas );
+
 
 class DiveProfile:
-    def __init__(self, descent_speed = 20, ascent_speed = 10):
+    def __init__(self, descent_speed = 20, ascent_speed = 10, deco_model = Buhlmann.Buhlmann()):
         self._points = [ DivePoint(0, 0, Gas.Air()) ];
         self._descent_speed = descent_speed;
         self._ascent_speed = ascent_speed;
+        self._deco_model = deco_model;
 
     def points(self):
         return self._points;
@@ -65,3 +80,17 @@ class DiveProfile:
 
     def append_surfacing(self, gas = None):
         self.append_section( 0.0, 0 );
+
+    '''
+    Granularity
+    '''
+    # TODO
+
+    '''
+    Deco model calculations
+    '''
+    def update_all_tissue_states(self):
+        assert self._points[0].time == 0.0;
+        self._points[0].set_cleared_tissue_state( self._deco_model );
+        for i in range(1, len(self._points)):
+            self._points[i].set_updated_tissue_state( self._deco_model, self._points[i-1]);
