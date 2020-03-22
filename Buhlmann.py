@@ -34,9 +34,10 @@ class Buhlmann:
         p_amb = Util.depth_to_Pamb(depth);
         pp_amb_n2 = p_amb * gas['fN2'];
         pp_amb_he = p_amb * gas['fHe'];
-        new_state = [ ( Buhlmann._updated_partial_pressure( state[i][0], pp_amb_n2, self._halftimes['N2'][i], duration ),
-                        Buhlmann._updated_partial_pressure( state[i][1], pp_amb_he, self._halftimes['He'][i], duration ),
-                      ) for i in range(self._n_tissues) ];
+        new_state = [
+            ( Buhlmann._updated_partial_pressure( state[i][0], pp_amb_n2, self._halftimes['N2'][i], duration ),
+              Buhlmann._updated_partial_pressure( state[i][1], pp_amb_he, self._halftimes['He'][i], duration ),
+            ) for i in range(self._n_tissues) ];
         return new_state;
 
 
