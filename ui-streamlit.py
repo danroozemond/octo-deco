@@ -1,6 +1,8 @@
 import streamlit as st;
+
+import Gas
+import UI
 from DiveProfile import DiveProfile;
-import UI;
 
 
 # Run as: streamlit run abc.py
@@ -28,8 +30,9 @@ st.sidebar.text("Hello, sidebar!");
 
 # Create dive & display
 dp = DiveProfile();
-dp.append_section(40, 25);
+dp.append_section(40, 25, gas = Gas.Air());
 dp.append_section(30, 10);
 dp.append_surfacing();
+dp.interpolate_points();
 
 UI.display_dive(st, dp);
