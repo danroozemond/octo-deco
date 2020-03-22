@@ -1,4 +1,4 @@
-import Gas, BuhlmannConstants;
+import Gas, BuhlmannConstants, Util;
 
 """
 Buhlmann class contains all essential logic for deco model
@@ -20,14 +20,27 @@ class Buhlmann:
     """
     TissueState is represented as a list of current tissue loadings (N2, He)
     """
-    def init_tissue_state(self):
+    def initial_tissue_state(self):
         gas = Gas.Air();
         return [ (gas['fN2'], gas['fHe'] ) for i in range(self._n_tissues) ];
+
+    @staticmethod
+    def _updated_partial_pressure( pp_tissue, pp_ambient, halftime, duration ):
+        return pp_tissue + ( 1 - pow(.5, duration/halftime ) )*( pp_ambient - pp_tissue );
+
+    def updated_tissue_state(self, state, duration, depth, gas ):
+        p_amb = Util.depth_to_Pamb(depth);
+        pp_amb_n2 = p_amb * gas['fN2'];
+        pp_amb_he = p_amb * gas['fHe'];
+        new_state = [ ( Buhlmann._updated_partial_pressure( state[i][0], pp_amb_n2, self._halftimes['N2'][i], duration ),
+                        Buhlmann._updated_partial_pressure( state[i][1], pp_amb_he, self._halftimes['He'][i], duration ),
+                      ) for i in range(self._n_tissues) ];
+        return new_state;
 
 
 #
 # Some testing functions
 #
 bm = Buhlmann();
-ts = bm.init_tissue_state();
-print(ts);
+ts = bm.initial_tissue_state();
+ts = bm.updated_tissue_state( ts, 10.0, 40.0, Gas.Trimix(21,35));
