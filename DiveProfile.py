@@ -23,11 +23,11 @@ class DivePoint:
         return '%.1f:%dm' % (self.time, self.depth);
 
     def repr_for_dataframe(self):
-        return [ self.time, self.depth, str(self.gas) ];
+        return [ self.time, self.depth, str(self.gas), self.tissue_state ];
 
     @staticmethod
     def dataframe_columns():
-        return [ 'time', 'depth', 'gas' ]
+        return [ 'time', 'depth', 'gas', 'tissue_state' ]
 
     def set_cleared_tissue_state(self, deco_model):
         self.tissue_state = deco_model.cleared_tissue_state();
@@ -81,10 +81,38 @@ class DiveProfile:
     def append_surfacing(self, gas = None):
         self.append_section( 0.0, 0 );
 
+    def append_gas_switch(self, gas, duration = None):
+        # Default duration is 0 if still on surface otherwise 1.0
+        last_point = self._points[-1];
+        if duration is None:
+            duration = 1.0 if last_point.depth > 0 else 0.0;
+        self._append_point( duration, last_point.depth, gas );
+
     '''
     Granularity
     '''
-    # TODO
+    def interpolate_points(self, granularity_mins = 1.0):
+        prev_point = None;
+        new_points = [];
+        for orig_point in self._points:
+            # If not the first point: check if we need to interpolate
+            # between previous and this, and if so, do
+            # We assume previous gas is breathed during interpolated period.
+            if prev_point is not None:
+                tdiff = orig_point.time - prev_point.time;
+                assert tdiff >= 0.0;
+                ddiff = orig_point.depth - prev_point.depth;
+                tcurr = prev_point.time;
+                while tcurr + granularity_mins < orig_point.time:
+                    tcurr += granularity_mins;
+                    dcurr = prev_point.depth \
+                        + (tcurr - prev_point.time) / ( orig_point.time - prev_point.time ) * ddiff;
+                    new_points.append(DivePoint(tcurr, dcurr, prev_point.gas));
+            # Finally, add the point itself
+            new_points.append(orig_point);
+            prev_point = orig_point;
+        self._points = new_points;
+        self.update_all_tissue_states();
 
     '''
     Deco model calculations
