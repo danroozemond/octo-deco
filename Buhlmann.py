@@ -114,5 +114,4 @@ def test():
         di = bm.get_deco_state_info(ts, d);
         print('at %.1f: %s' % (d, di));
 
-
-test();
+#test();

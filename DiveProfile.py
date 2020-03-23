@@ -18,16 +18,24 @@ class DivePoint:
         self.depth = depth;
         self.gas = gas;
         self.tissue_state = None;
+        self.deco_info = None;
 
     def __repr__(self):
         return '%.1f:%dm' % (self.time, self.depth);
 
-    def repr_for_dataframe(self):
-        return [ self.time, self.depth, str(self.gas) ];
-
     @staticmethod
     def dataframe_columns():
-        return [ 'time', 'depth', 'gas' ]
+        return [ 'time', 'depth', 'gas' ] + DivePoint.dataframe_deco_info();
+
+    @staticmethod
+    def dataframe_deco_info():
+        return [ 'ceiling', 'GF99', 'SurfaceGF' ];
+
+    def repr_for_dataframe(self):
+        r = [ self.time, self.depth, str(self.gas) ];
+        if self.deco_info is not None:
+            r += [ self.deco_info[n] for n in DivePoint.dataframe_deco_info() ];
+        return r;
 
     def set_cleared_tissue_state(self, deco_model):
         self.tissue_state = deco_model.cleared_tissue_state();
@@ -38,6 +46,9 @@ class DivePoint:
             self.time - prev_point.time,
             self.depth,
             self.gas );
+
+    def set_updated_deco_info(self, deco_model):
+        self.deco_info = deco_model.get_deco_state_info( self.tissue_state, self.depth );
 
 
 class DiveProfile:
@@ -112,13 +123,18 @@ class DiveProfile:
             new_points.append(orig_point);
             prev_point = orig_point;
         self._points = new_points;
-        self.update_all_tissue_states();
+        self.update_deco_info();
 
     '''
     Deco model calculations
     '''
-    def update_all_tissue_states(self):
+    def _update_all_tissue_states(self):
         assert self._points[0].time == 0.0;
         self._points[0].set_cleared_tissue_state( self._deco_model );
         for i in range(1, len(self._points)):
             self._points[i].set_updated_tissue_state( self._deco_model, self._points[i-1]);
+
+    def update_deco_info(self):
+        self._update_all_tissue_states();
+        for i in range(0, len(self._points)):
+            self._points[i].set_updated_deco_info( self._deco_model );
