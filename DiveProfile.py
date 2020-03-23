@@ -4,6 +4,7 @@ import pandas as pd;
 
 import Buhlmann;
 import Gas;
+import Util;
 
 '''
 Conventions:
@@ -25,14 +26,14 @@ class DivePoint:
 
     @staticmethod
     def dataframe_columns():
-        return [ 'time', 'depth', 'gas' ] + DivePoint.dataframe_deco_info();
+        return [ 'time', 'depth', 'gas', 'ppO2' ] + DivePoint.dataframe_deco_info();
 
     @staticmethod
     def dataframe_deco_info():
         return [ 'ceiling', 'GF99', 'SurfaceGF' ];
 
     def repr_for_dataframe(self):
-        r = [ self.time, self.depth, str(self.gas) ];
+        r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * Util.depth_to_Pamb(self.depth) ];
         if self.deco_info is not None:
             r += [ self.deco_info[n] for n in DivePoint.dataframe_deco_info() ];
         return r;

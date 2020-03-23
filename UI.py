@@ -11,20 +11,26 @@ import plotly.subplots as sp
 
 def _plotly_diveprofile(st, diveprofile):
     df = diveprofile.dataframe();
+    #
+    # Later, for deco info, see filled lines here: https://plot.ly/python/line-charts/
+    #
     st.markdown("""
                 Dive profile
                 ============
                 """);
     fig = sp.make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace( go.Scatter( x=df["time"], y=df["depth"], name='Depth',
-                               line={'color': 'royalblue'} ) );
+                               line={'color': 'rgb(30,7,143)', 'width': 3} ) );
     fig.add_trace( go.Scatter( x=df["time"], y=df["ceiling"], name='Ceiling',
-                               line={'color': 'green'} ) );
+                               line={'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 2} ) );
     fig.add_trace( go.Scatter( x=df["time"], y=df["GF99"], name='GF99',
-                               line={'color': 'red'} ),
+                               line={'color': 'rgb(255,255,0)', 'width': 3} ),
+                   secondary_y = True );
+    fig.add_trace( go.Scatter( x=df["time"], y=100*df["ppO2"], name='ppO2',
+                               line={'color': 'rgb(176,42,143)', 'dash': 'dot', 'width': 1} ),
                    secondary_y = True );
     fig.update_yaxes(secondary_y = False, autorange = "reversed" );
-    fig.update_yaxes(secondary_y = True,  showgrid = False, range=[-1,120], tick0=0, dtick=20);
+    fig.update_yaxes(secondary_y = True,  showgrid = False, range=[-1,140], tick0=0, dtick=20);
     fig.update_xaxes(title_text = "Time");
     st.plotly_chart(fig, use_container_width = True);
 
