@@ -30,15 +30,17 @@ st.sidebar.text("Hello, sidebar!");
 
 # Create dive & display
 dp = DiveProfile();
-dp.append_section(40, 35, gas = Gas.Air());
+dp.append_section(40, 35, gas = Gas.Trimix(21,35));
+dp.append_section(21,1);
+dp.append_gas_switch(gas = Gas.Nitrox(50), duration = 1.0)
 dp.append_section(18, 5);
 dp.append_section(15, 5);
 dp.append_section(12, 5);
 dp.append_section(9, 10);
 dp.append_section(6, 15);
 dp.append_section(3, 30);
-dp.append_section(0, 30)
 dp.append_surfacing();
+dp.append_section(0, 30);
 dp.interpolate_points();
 dp.update_deco_info();
 UI.display_dive(st, dp);

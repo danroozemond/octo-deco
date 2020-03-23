@@ -23,8 +23,8 @@ def _plotly_diveprofile(st, diveprofile):
     fig.add_trace( go.Scatter( x=df["time"], y=df["GF99"], name='GF99',
                                line={'color': 'red'} ),
                    secondary_y = True );
-    fig.update_yaxes(autorange = "reversed", secondary_y = False);
-    fig.update_yaxes(showgrid=False, secondary_y = True);
+    fig.update_yaxes(secondary_y = False, autorange = "reversed" );
+    fig.update_yaxes(secondary_y = True,  showgrid = False, range=[-1,120], tick0=0, dtick=20);
     fig.update_xaxes(title_text = "Time");
     st.plotly_chart(fig, use_container_width = True);
 

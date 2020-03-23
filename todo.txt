@@ -1,15 +1,8 @@
-* Deco library (first flat Buhlmann)
-
-* Analyze profile
-** Ceil
+* Deco stops
 ** Stops
 ** TTS
-** GF
-** SurfaceGF
 
 * Buhlmann => GF
-
-* Visualize dive and tissue loading (streamlit?)
 
 * Import CSV from shearwater log
 

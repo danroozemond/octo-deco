@@ -92,8 +92,10 @@ class DiveProfile:
         if duration > 0.0:
             self._append_point(duration, depth, gas)
 
-    def append_surfacing(self, gas = None):
+    def append_surfacing(self):
         self.append_section( 0.0, 0 );
+        if self._points[ -1 ].gas != Gas.Air():
+            self.append_gas_switch( Gas.Air() );
 
     def append_gas_switch(self, gas, duration = None):
         # Default duration is 0 if still on surface otherwise 1.0
@@ -117,11 +119,12 @@ class DiveProfile:
                 assert tdiff >= 0.0;
                 ddiff = orig_point.depth - prev_point.depth;
                 tcurr = prev_point.time;
+                gas = prev_point.gas if prev_point.depth > 0 else orig_point.gas;
                 while tcurr + granularity_mins < orig_point.time:
                     tcurr += granularity_mins;
                     dcurr = prev_point.depth \
                         + (tcurr - prev_point.time) / ( orig_point.time - prev_point.time ) * ddiff;
-                    new_points.append(DivePoint(tcurr, dcurr, prev_point.gas));
+                    new_points.append(DivePoint(tcurr, dcurr, gas));
             # Finally, add the point itself
             new_points.append(orig_point);
             prev_point = orig_point;

@@ -78,9 +78,11 @@ class Buhlmann:
 
     @staticmethod
     def _get_GF99_for_one_tissue(p_comptmt, p_amb, p_amb_tol):
-        if p_amb > p_comptmt:
+        if p_comptmt == p_amb_tol:
+            return 0.0;
+        if p_comptmt < p_amb:
             # Ongassing
-            return -1;
+            return -1.0;
         return 100.0 * (p_comptmt - p_amb) / (p_comptmt - p_amb_tol);
 
     def get_deco_state_info(self, tissue_state, depth):
@@ -99,8 +101,7 @@ class Buhlmann:
         return {'ceiling': Util.Pamb_to_depth(p_ceiling),
                 'GF99': round(max(gf99s), 1),
                 'SurfaceGF': round(max(surfacegfs), 1),
-                'allGF99s': gf99s,
-                'allSurfaceGFs':surfacegfs
+                'allGF99s': gf99s
                 };
 
 
