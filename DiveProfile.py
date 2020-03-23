@@ -23,11 +23,11 @@ class DivePoint:
         return '%.1f:%dm' % (self.time, self.depth);
 
     def repr_for_dataframe(self):
-        return [ self.time, self.depth, str(self.gas), self.tissue_state ];
+        return [ self.time, self.depth, str(self.gas) ];
 
     @staticmethod
     def dataframe_columns():
-        return [ 'time', 'depth', 'gas', 'tissue_state' ]
+        return [ 'time', 'depth', 'gas' ]
 
     def set_cleared_tissue_state(self, deco_model):
         self.tissue_state = deco_model.cleared_tissue_state();
