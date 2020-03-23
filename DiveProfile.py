@@ -65,6 +65,9 @@ class DiveProfile:
         return pd.DataFrame([ p.repr_for_dataframe() for p in self._points ],
                             columns = DivePoint.dataframe_columns() );
 
+    def deco_model(self):
+        return self._deco_model;
+
     '''
     Modifying the profile (adding sections etc)
     '''

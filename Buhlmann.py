@@ -98,7 +98,9 @@ class Buhlmann:
 
         return {'ceiling': Util.Pamb_to_depth(p_ceiling),
                 'GF99': round(max(gf99s), 1),
-                'SurfaceGF': round(max(surfacegfs), 1)
+                'SurfaceGF': round(max(surfacegfs), 1),
+                'allGF99s': gf99s,
+                'allSurfaceGFs':surfacegfs
                 };
 
 
@@ -108,10 +110,10 @@ class Buhlmann:
 def test():
     bm = Buhlmann();
     ts = bm.cleared_tissue_state();
-    ts = bm.updated_tissue_state(ts, 10.0, 40.0, Gas.Trimix(21, 35));
+    ts = bm.updated_tissue_state(ts, 10.0, 40.0, Gas.Trimix(21, 79));
     print(ts);
     for d in [ 40.0, 10.0, 6.0, 3.0, 0.0 ]:
-        di = bm.get_deco_state_info(ts, d);
+        di = bm.get_deco_state_info(ts, d)['allSurfaceGFs'];
         print('at %.1f: %s' % (d, di));
 
-#test();
+# test();
