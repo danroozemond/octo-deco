@@ -26,16 +26,15 @@ class DivePoint:
 
     @staticmethod
     def dataframe_columns():
-        return [ 'time', 'depth', 'gas', 'ppO2' ] + DivePoint.dataframe_deco_info();
-
-    @staticmethod
-    def dataframe_deco_info():
-        return [ 'Ceil', 'GF99', 'SurfaceGF', 'Stops' ];
+        return [ 'time', 'depth', 'gas', 'ppO2',
+                 'Ceil', 'GF99', 'SurfaceGF',
+                 'Stops' ];
 
     def repr_for_dataframe(self):
         r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * Util.depth_to_Pamb(self.depth) ];
         if self.deco_info is not None:
-            r += [ self.deco_info[n] for n in DivePoint.dataframe_deco_info() ];
+            r += [ self.deco_info[n] for n in [ 'Ceil', 'GF99', 'SurfaceGF' ] ];
+            r += [ Util.stops_to_string( self.deco_info['Stops'] ) ];
         return r;
 
     def set_cleared_tissue_state(self, deco_model):
@@ -58,7 +57,7 @@ class DiveProfile:
         self._points = [ DivePoint(0, 0, Gas.Air()) ];
         self._descent_speed = descent_speed;
         self._ascent_speed = ascent_speed;
-        if ( deco_model is not None ):
+        if deco_model is not None:
             self._deco_model = deco_model;
         else:
             self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high);
@@ -137,7 +136,7 @@ class DiveProfile:
         self.update_deco_info();
 
     '''
-    Deco model calculations
+    Deco model info
     '''
     def _update_all_tissue_states(self):
         assert self._points[0].time == 0.0;
@@ -149,3 +148,35 @@ class DiveProfile:
         self._update_all_tissue_states();
         for i in range(0, len(self._points)):
             self._points[i].set_updated_deco_info( self._deco_model );
+
+    '''
+    Deco profile creation
+    '''
+    def add_stops(self):
+        # TODO Add interpolate here?
+        deco_model = self.deco_model();
+        assert self._points[0].time == 0.0;
+        old_points = self._points;
+        self._points = [ old_points[0] ];
+        self._points[0].set_cleared_tissue_state( deco_model );
+        time_shift = 0;
+        i = 1;
+        while i < len(old_points):
+            p = old_points[i];
+            # Update tissues, based on last point considered
+            p.set_updated_tissue_state( deco_model, self._points[-1]);
+            p.set_updated_deco_info( deco_model );
+            print(p.time, p.depth, p.deco_info['Ceil']);
+            if p.depth < p.deco_info['Ceil']:
+                # Add points before, then do not increase i because we recheck
+                stops = deco_model.compute_deco_profile(self._points[-1].tissue_state, Util.depth_to_Pamb(p.depth));
+                # Do not forget to update tissue state and deco info
+                print("Recomputed stops:");
+                print(Util.stops_to_string(stops));
+
+                i += 100;  # No increment
+            else:
+                # Add new point (tissue state etc is computed correctly by construction)
+                p.time += time_shift;
+                self._points.append(p);
+                i += 1;

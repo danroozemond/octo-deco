@@ -19,3 +19,7 @@ def Pamb_to_Pamb_stop(p_amb):
 
 def next_stop_Pamb(p_amb):
     return p_amb - 0.3;
+
+
+def stops_to_string(stops):
+    return ' '.join([ '%i@%im' % ( s[1], s[0] ) for s in stops ]);

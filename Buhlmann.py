@@ -136,7 +136,8 @@ class Buhlmann:
             tissue_state = self.updated_tissue_state( tissue_state, 1.0, p_amb, gas );
         return stop_length, tissue_state;
 
-    def _compute_deco_profile(self, tissue_state):
+    def compute_deco_profile(self, tissue_state, p_target = 1.0):
+        # Returns triples depth, length, gas
         # Determine ceiling, and allowed supersaturation at the various levels
         p_amb_tol_gflow = self._p_amb_tol_gf(tissue_state, self.gf_low);
         p_ceiling = max(p_amb_tol_gflow);
@@ -145,14 +146,14 @@ class Buhlmann:
         # Determine gas (TODO)
         gas = Gas.Air();
         # 'Walk' up
-        result = {};
+        result = [];
         p_now = p_first_stop;
-        while p_now > 1.01:
+        while p_now > p_target + 0.01:
             stoplength, tissue_state = self._time_to_stay_at_stop(p_now, tissue_state, gas, amb_to_gf);
-            result[ Util.Pamb_to_depth(p_now) ] = stoplength;
+            result.append( ( Util.Pamb_to_depth(p_now), stoplength, gas ) );
             p_now = Util.next_stop_Pamb(p_now);
         # Clean up the result
-        result = dict(filter(lambda x: x[1] != 0, result.items()));
+        result = [ x for x in result if x[1] != 0 ];
         return result;
 
     def deco_info(self, tissue_state, depth, stateOnly = True):
@@ -178,7 +179,7 @@ class Buhlmann:
             return result;
 
         # Below is about computing the decompression profile
-        stops = self._compute_deco_profile(tissue_state);
+        stops = self.compute_deco_profile(tissue_state);
         result['Stops'] = stops;
 
         # Done
