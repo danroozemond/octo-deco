@@ -70,24 +70,24 @@ class Buhlmann:
             b = pp_n2 / (pp_n2 + pp_he) * b + pp_he / (pp_n2 + pp_he) * b_he;
         return a, b;
 
-    def _get_p_amb_tol_one_tissue(self, i, tissue_state_i):
+    def _p_amb_tol_one_tissue(self, i, tissue_state_i):
         a, b = self._get_coeffs_a_b(i, tissue_state_i);
         p_compartment = sum(tissue_state_i);
         p_amb_tol = (p_compartment - a) * b;
         return p_amb_tol;
 
-    def _get_p_amb_tol(self, tissue_state):
-        return [ self._get_p_amb_tol_one_tissue(i, tissue_state[ i ]) for i in range(self._n_tissues) ];
+    def _p_amb_tol(self, tissue_state):
+        return [ self._p_amb_tol_one_tissue(i, tissue_state[ i ]) for i in range(self._n_tissues) ];
 
-    def _get_p_amb_tol_gf(self, tissue_state, gf):
-        p_amb_tol = self._get_p_amb_tol( tissue_state );
+    def _p_amb_tol_gf(self, tissue_state, gf):
+        p_amb_tol = self._p_amb_tol(tissue_state);
         p_comptmt = [ sum(ts) for ts in tissue_state ];
         p = [ p_comptmt[ i ] - gf / 100 * (p_comptmt[ i ] - p_amb_tol[ i ])
               for i in range(self._n_tissues) ];
         return p;
 
     @staticmethod
-    def _get_GF99_for_one_tissue(p_comptmt, p_amb, p_amb_tol):
+    def _GF99_for_one_tissue(p_comptmt, p_amb, p_amb_tol):
         if p_comptmt == p_amb_tol:
             return 0.0;
         if p_comptmt < p_amb:
@@ -95,16 +95,16 @@ class Buhlmann:
             return -1.0;
         return 100.0 * (p_comptmt - p_amb) / (p_comptmt - p_amb_tol);
 
-    def _get_GF99(self, p_comptmt, p_amb, p_amb_tol):
-        return max([ Buhlmann._get_GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
+    def _GF99(self, p_comptmt, p_amb, p_amb_tol):
+        return max([ Buhlmann._GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
                      for i in range(self._n_tissues) ]);
 
-    def _get_map_amb_to_gf_perc(self, tissue_state):
+    def _map_amb_to_gf_perc(self, tissue_state):
         gf_low = self.gf_low
         gf_high = self.gf_high
         # At first stop, allowed supersaturation is GF_LOW % (eg. 35%)
         # At surfacing, allowed supersaturation is GF_HIGH % (eg. 70%)
-        p_amb_tol_gflow = self._get_p_amb_tol_gf(tissue_state, gf_low);
+        p_amb_tol_gflow = self._p_amb_tol_gf(tissue_state, gf_low);
         p_ceiling = max(p_amb_tol_gflow);
         # Round the first stop
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);
@@ -132,8 +132,8 @@ class Buhlmann:
         gf99allowed = amb_to_gf(p_amb_next_stop);
         stop_length = 0;
         while stop_length < 500: # Safety measure
-            p_amb_tol = self._get_p_amb_tol( tissue_state );
-            gf99 = self._get_GF99( [ sum(ts) for ts in tissue_state ], p_amb_next_stop, p_amb_tol );
+            p_amb_tol = self._p_amb_tol(tissue_state);
+            gf99 = self._GF99([ sum(ts) for ts in tissue_state ], p_amb_next_stop, p_amb_tol);
             print("stop_length: %s, gf99: %.1f / %.1f" %( stop_length, gf99, gf99allowed) );
             if gf99 <= gf99allowed:
                 break;
@@ -141,18 +141,18 @@ class Buhlmann:
             tissue_state = self.updated_tissue_state( tissue_state, 1.0, p_amb, gas );
         return stop_length, tissue_state;
 
-    def get_deco_info(self, tissue_state, depth, stateOnly = True):
+    def deco_info(self, tissue_state, depth, stateOnly = True):
         p_amb = Util.depth_to_Pamb(depth);
-        p_amb_tol = self._get_p_amb_tol(tissue_state);
+        p_amb_tol = self._p_amb_tol(tissue_state);
         p_comptmt = [ sum(ts) for ts in tissue_state ];
         p_ceiling_99 = max(p_amb_tol);
-        p_ceiling = max(self._get_p_amb_tol_gf(tissue_state, self.gf_low));
+        p_ceiling = max(self._p_amb_tol_gf(tissue_state, self.gf_low));
         # GF99: how do compartment pressure, ambient pressure, tolerance compare
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
-        gf99s = [ self._get_GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
+        gf99s = [ self._GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
                   for i in range(self._n_tissues) ];
-        surfacegfs = [ self._get_GF99_for_one_tissue(p_comptmt[ i ], 1.0, p_amb_tol[ i ])
+        surfacegfs = [ self._GF99_for_one_tissue(p_comptmt[ i ], 1.0, p_amb_tol[ i ])
                        for i in range(self._n_tissues) ];
         result = {'Ceil': Util.Pamb_to_depth(p_ceiling),
                   'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
@@ -164,10 +164,10 @@ class Buhlmann:
             return result;
 
         # Below is about computing the decompression profile
-        amb_to_gf = self._get_map_amb_to_gf_perc(tissue_state);
+        amb_to_gf = self._map_amb_to_gf_perc(tissue_state);
         for depth in range(30, -6, step := -3):
             pamb = Util.depth_to_Pamb(depth);
-            gf99 = self._get_GF99(p_comptmt, pamb, p_amb_tol);
+            gf99 = self._GF99(p_comptmt, pamb, p_amb_tol);
             print('depth: %.1f, allowed supersat: %.1f, gf99: %.1f' % (depth, amb_to_gf(pamb), gf99));
 
         gas = Gas.Air();
@@ -196,7 +196,7 @@ def test():
     ts = bm.cleared_tissue_state();
     ts = bm.updated_tissue_state(ts, 10.0, 5.0, Gas.Trimix(21, 35));
     print(ts);
-    di = bm.get_deco_info(ts, 40.0, stateOnly = False);
+    di = bm.deco_info(ts, 40.0, stateOnly = False);
     print(di);
     # for d in [ 40.0, 10.0, 6.0, 3.0, 0.0 ]:
     #     di = bm.get_deco_state_info(ts, d);

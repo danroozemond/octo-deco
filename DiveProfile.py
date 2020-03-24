@@ -49,7 +49,7 @@ class DivePoint:
             self.gas );
 
     def set_updated_deco_info(self, deco_model):
-        self.deco_info = deco_model.get_deco_info(self.tissue_state, self.depth, stateOnly = True);
+        self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, stateOnly = True);
 
 
 class DiveProfile:
