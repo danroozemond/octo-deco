@@ -179,9 +179,10 @@ class Buhlmann:
                   };
 
         # Below is about computing the decompression profile
-        stops, p_ceiling, _ = self.compute_deco_profile(tissue_state, gf_now = gf_now);
+        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, gf_now = gf_now);
         result['Ceil'] = Util.Pamb_to_depth(p_ceiling);
         result['Stops'] = stops;
+        result['amb_to_gf'] = amb_to_gf;
 
         # Done
         return result;

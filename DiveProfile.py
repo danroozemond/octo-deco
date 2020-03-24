@@ -111,8 +111,14 @@ class DiveProfile:
 
     def update_deco_info(self):
         self._update_all_tissue_states();
+        amb_to_gf = None;
         for i in range(0, len(self._points)):
-            self._points[i].set_updated_deco_info( self._deco_model );
+            p = self._points[i];
+            gf_now = None if amb_to_gf is None else amb_to_gf( Util.depth_to_Pamb( p.depth ) );
+            p.set_updated_deco_info( self._deco_model, gf_now = gf_now );
+            if amb_to_gf is None and p.is_deco_stop:
+                amb_to_gf = p.deco_info.get('amb_to_gf');
+
 
     '''
     Deco profile creation
@@ -129,6 +135,7 @@ class DiveProfile:
         while i < len(old_points):
             op = old_points[i];
             p = self._append_point( op.time - old_points[i-1].time, op.depth, op.gas );
+            print('appended existing point time/depth = %s/%s' % (op.time - old_points[i-1].time, op.depth ));
             # Update tissues, based on last point considered
             gf_now = None if amb_to_gf is None else amb_to_gf( Util.depth_to_Pamb( op.depth ));
             p.set_updated_tissue_state( deco_model, self._points[-2]);
@@ -148,6 +155,7 @@ class DiveProfile:
                 for s in stops:
                     np = len(self._points);
                     self.append_section( s[0], s[1], gas = s[2]);
+                    print('  appended section %s %s %s' % s)
                     # Update tissue state and deco info
                     for j in range(np, len(self._points)):
                         self._points[j].is_deco_stop = True;

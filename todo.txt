@@ -1,14 +1,16 @@
-* Deco stops
-** Stops
-** TTS
+TODO this list :) [also check TO-DOs in .py's]
 
-* Buhlmann => GF
+Remove many print statements
+
+* Automatic gas switching
+
+* Deco info
+** TTS
 
 * Import CSV from shearwater log
 
 Longer term
 * Gas consumption
-* Automatic gas switching
 * CNS tracking
 
 
@@ -16,7 +18,6 @@ Passing around p_first_stop is ugly. Consider adding this (kind of) info to tiss
 
 
 From https://github.com/torvalds/subsurface-for-dirk/blob/master/core/deco.c
-
 /* Inspired gas loading equations depend on the partial pressure of inert gas in the alveolar.
  * P_alv = (P_amb - P_H2O + (1 - Rq) / Rq * P_CO2) * f
  * where:

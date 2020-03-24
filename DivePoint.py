@@ -16,13 +16,13 @@ class DivePoint:
     @staticmethod
     def dataframe_columns():
         return [ 'time', 'depth', 'gas', 'ppO2',
-                 'Ceil', 'GF99', 'SurfaceGF',
+                 'Ceil', 'Ceil99', 'GF99', 'SurfaceGF',
                  'Stops' ];
 
     def repr_for_dataframe(self):
         r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * Util.depth_to_Pamb(self.depth) ];
         if self.deco_info is not None:
-            r += [ self.deco_info[n] for n in [ 'Ceil', 'GF99', 'SurfaceGF' ] ];
+            r += [ self.deco_info[n] for n in [ 'Ceil', 'Ceil99', 'GF99', 'SurfaceGF' ] ];
             r += [ Util.stops_to_string( self.deco_info['Stops'] ) ];
         return r;
 
@@ -30,7 +30,7 @@ class DivePoint:
         self.tissue_state = deco_model.cleared_tissue_state();
 
     def set_updated_tissue_state(self, deco_model, prev_point):
-        assert self.time > prev_point.time;  # Otherwise divepoints are in a broken sequence
+        assert self.time >= prev_point.time;  # Otherwise divepoints are in a broken sequence
         self.tissue_state = deco_model.updated_tissue_state(
             prev_point.tissue_state,
             self.time - prev_point.time,
