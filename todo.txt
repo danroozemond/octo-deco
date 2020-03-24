@@ -12,6 +12,9 @@ Longer term
 * CNS tracking
 
 
+Passing around p_first_stop is ugly. Consider adding this (kind of) info to tissue_state.
+
+
 From https://github.com/torvalds/subsurface-for-dirk/blob/master/core/deco.c
 
 /* Inspired gas loading equations depend on the partial pressure of inert gas in the alveolar.

@@ -136,11 +136,15 @@ class Buhlmann:
             tissue_state = self.updated_tissue_state( tissue_state, 1.0, p_amb, gas );
         return stop_length, tissue_state;
 
-    def compute_deco_profile(self, tissue_state, p_target = 1.0):
+    def compute_deco_profile(self, tissue_state, p_target = 1.0, gf_now = None):
         # Returns triples depth, length, gas
+        # Allowed to pass in gf_now in case we recompute part of the deco after it has already started
         # Determine ceiling, and allowed supersaturation at the various levels
-        p_amb_tol_gflow = self._p_amb_tol_gf(tissue_state, self.gf_low);
-        p_ceiling = max(p_amb_tol_gflow);
+        if gf_now is None:
+            gf_now = self.gf_low;
+        p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, gf_now);
+        p_ceiling = max(p_amb_tol_gfnow);
+        assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
         amb_to_gf = self._map_amb_to_gf_perc(p_first_stop);
         # Determine gas (TODO)
@@ -154,14 +158,13 @@ class Buhlmann:
             p_now = Util.next_stop_Pamb(p_now);
         # Clean up the result
         result = [ x for x in result if x[1] != 0 ];
-        return result;
+        return result, p_ceiling, amb_to_gf;
 
-    def deco_info(self, tissue_state, depth, stateOnly = True):
+    def deco_info(self, tissue_state, depth, gf_now = None):
         p_amb = Util.depth_to_Pamb(depth);
         p_amb_tol = self._p_amb_tol(tissue_state);
         p_comptmt = [ sum(ts) for ts in tissue_state ];
         p_ceiling_99 = max(p_amb_tol);
-        p_ceiling = max(self._p_amb_tol_gf(tissue_state, self.gf_low));
         # GF99: how do compartment pressure, ambient pressure, tolerance compare
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
@@ -169,17 +172,15 @@ class Buhlmann:
                   for i in range(self._n_tissues) ];
         surfacegfs = [ self._GF99_for_one_tissue(p_comptmt[ i ], 1.0, p_amb_tol[ i ])
                        for i in range(self._n_tissues) ];
-        result = {'Ceil': Util.Pamb_to_depth(p_ceiling),
-                  'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
+        result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
                   'GF99': round(max(gf99s), 1),
                   'SurfaceGF': round(max(surfacegfs), 1),
                   'allGF99s': gf99s
                   };
-        if stateOnly:
-            return result;
 
         # Below is about computing the decompression profile
-        stops = self.compute_deco_profile(tissue_state);
+        stops, p_ceiling, _ = self.compute_deco_profile(tissue_state, gf_now = gf_now);
+        result['Ceil'] = Util.Pamb_to_depth(p_ceiling);
         result['Stops'] = stops;
 
         # Done
@@ -194,7 +195,7 @@ def test():
     ts = bm.cleared_tissue_state();
     ts = bm.updated_tissue_state(ts, 20.0, 5.0, Gas.Trimix(21, 35));
     print(ts);
-    di = bm.deco_info(ts, 40.0, stateOnly = False);
+    di = bm.deco_info(ts, 40.0);
     print(di);
     # for d in [ 40.0, 10.0, 6.0, 3.0, 0.0 ]:
     #     di = bm.get_deco_state_info(ts, d);

@@ -8,6 +8,7 @@ class DivePoint:
         self.gas = gas;
         self.tissue_state = None;
         self.deco_info = None;
+        self.is_deco_stop = False;
 
     def __repr__(self):
         return '%.1f:%dm' % (self.time, self.depth);
@@ -29,13 +30,14 @@ class DivePoint:
         self.tissue_state = deco_model.cleared_tissue_state();
 
     def set_updated_tissue_state(self, deco_model, prev_point):
+        assert self.time > prev_point.time;  # Otherwise divepoints are in a broken sequence
         self.tissue_state = deco_model.updated_tissue_state(
             prev_point.tissue_state,
             self.time - prev_point.time,
             Util.depth_to_Pamb(self.depth),
             self.gas );
 
-    def set_updated_deco_info(self, deco_model):
-        self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, stateOnly = False);
+    def set_updated_deco_info(self, deco_model, gf_now = None ):
+        self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, gf_now = gf_now );
 
 

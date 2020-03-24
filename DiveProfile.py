@@ -40,7 +40,9 @@ class DiveProfile:
     '''
     def _append_point(self, time_diff, new_depth, gas):
         new_time = self._points[ -1 ].time + time_diff;
-        self._points.append(DivePoint(new_time, new_depth, gas));
+        p = DivePoint(new_time, new_depth, gas);
+        self._points.append(p);
+        return p;
 
     def _append_transit(self, new_depth, gas, round_to_mins = True):
         current_depth = self._points[ -1 ].depth;
@@ -122,24 +124,35 @@ class DiveProfile:
         old_points = self._points;
         self._points = [ old_points[0] ];
         self._points[0].set_cleared_tissue_state( deco_model );
-        time_shift = 0;
+        amb_to_gf = None;
         i = 1;
         while i < len(old_points):
-            p = old_points[i];
+            op = old_points[i];
+            p = self._append_point( op.time - old_points[i-1].time, op.depth, op.gas );
             # Update tissues, based on last point considered
-            p.set_updated_tissue_state( deco_model, self._points[-1]);
-            p.set_updated_deco_info( deco_model );
-            print(p.time, p.depth, p.deco_info['Ceil']);
+            gf_now = None if amb_to_gf is None else amb_to_gf( Util.depth_to_Pamb( op.depth ));
+            p.set_updated_tissue_state( deco_model, self._points[-2]);
+            p.set_updated_deco_info( deco_model, gf_now = gf_now );
+            print('point:', p.time, p.depth, p.deco_info['Ceil']);
             if p.depth < p.deco_info['Ceil']:
-                # Add points before, then do not increase i because we recheck
-                stops = deco_model.compute_deco_profile(self._points[-1].tissue_state, Util.depth_to_Pamb(p.depth));
+                # Undo adding this point, then attempt to readd in next iteration
+                self._points.pop();
+                # Add points before, but take care to live along the
+                stops, _, amb_to_gf = deco_model.compute_deco_profile(
+                                            self._points[-1].tissue_state,
+                                            p_target = Util.depth_to_Pamb(op.depth),
+                                            gf_now = gf_now );
+                assert len(stops) > 0;
+                print('adding stops:', i, stops, len(self._points));
                 # Do not forget to update tissue state and deco info
-                print("Recomputed stops:");
-                print(Util.stops_to_string(stops));
-
-                i += 100;  # No increment
+                for s in stops:
+                    np = len(self._points);
+                    self.append_section( s[0], s[1], gas = s[2]);
+                    # Update tissue state and deco info
+                    for j in range(np, len(self._points)):
+                        self._points[j].is_deco_stop = True;
+                        self._points[j].set_updated_tissue_state(deco_model, self._points[ j - 1 ]);
+                        self._points[j].set_updated_deco_info(deco_model);
             else:
                 # Add new point (tissue state etc is computed correctly by construction)
-                p.time += time_shift;
-                self._points.append(p);
                 i += 1;
