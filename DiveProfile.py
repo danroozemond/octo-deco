@@ -30,7 +30,7 @@ class DivePoint:
 
     @staticmethod
     def dataframe_deco_info():
-        return [ 'ceiling', 'GF99', 'SurfaceGF' ];
+        return [ 'Ceil99', 'GF99', 'SurfaceGF' ];
 
     def repr_for_dataframe(self):
         r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * Util.depth_to_Pamb(self.depth) ];
@@ -49,15 +49,20 @@ class DivePoint:
             self.gas );
 
     def set_updated_deco_info(self, deco_model):
-        self.deco_info = deco_model.get_deco_state_info( self.tissue_state, self.depth );
+        self.deco_info = deco_model.get_deco_info(self.tissue_state, self.depth, stateOnly = True);
 
 
 class DiveProfile:
-    def __init__(self, descent_speed = 20, ascent_speed = 10, deco_model = Buhlmann.Buhlmann()):
+    def __init__(self, descent_speed = 20, ascent_speed = 10,
+                 deco_model = None, gf_low = 35, gf_high = 70):
         self._points = [ DivePoint(0, 0, Gas.Air()) ];
         self._descent_speed = descent_speed;
         self._ascent_speed = ascent_speed;
-        self._deco_model = deco_model;
+        if ( deco_model is not None ):
+            self._deco_model = deco_model;
+        else:
+            self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high);
+
 
     def points(self):
         return self._points;

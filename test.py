@@ -8,5 +8,5 @@ dp.append_surfacing();
 
 dp.interpolate_points();
 dp.update_deco_info();
-print(dp.dataframe());
+# print(dp.dataframe());
 
