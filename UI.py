@@ -21,7 +21,7 @@ def _plotly_diveprofile(st, diveprofile):
     fig = sp.make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace( go.Scatter( x=df["time"], y=df["depth"], name='Depth',
                                line={'color': 'rgb(30,7,143)', 'width': 3} ) );
-    fig.add_trace( go.Scatter( x=df["time"], y=df["Ceil99"], name='Ceil99',
+    fig.add_trace( go.Scatter( x=df["time"], y=df["Ceil"], name='Ceil',
                                line={'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 2} ) );
     fig.add_trace( go.Scatter( x=df["time"], y=df["GF99"], name='GF99',
                                line={'color': 'rgb(255,255,0)', 'width': 3} ),

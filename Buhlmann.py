@@ -17,6 +17,8 @@ class Buhlmann:
                         'He': {'a': BuhlmannConstants.ZHL_16C_HE_A_VALUES,
                                'b': BuhlmannConstants.ZHL_16C_HE_B_VALUES}
                         };
+        self.gf_low = gf_low;
+        self.gf_high = gf_high;
 
     """
     TissueState is represented as a list of current tissue loadings (N2, He)
@@ -30,8 +32,7 @@ class Buhlmann:
     def _updated_partial_pressure(pp_tissue, pp_ambient, halftime, duration):
         return pp_tissue + (1 - pow(.5, duration / halftime)) * (pp_ambient - pp_tissue);
 
-    def updated_tissue_state(self, state, duration, depth, gas):
-        p_amb = Util.depth_to_Pamb(depth);
+    def updated_tissue_state(self, state, duration, p_amb, gas):
         pp_amb_n2 = p_amb * gas[ 'fN2' ];
         pp_amb_he = p_amb * gas[ 'fHe' ];
         new_state = [
@@ -55,6 +56,7 @@ class Buhlmann:
     alternatively lineartly interpolate the a and b values themselves, 
     based on proportions of gas load in each tissue
     """
+
     def _get_coeffs_a_b(self, i, tissue_state_i):
         a = self._coeffs[ 'N2' ][ 'a' ][ i ];
         b = self._coeffs[ 'N2' ][ 'b' ][ i ];
@@ -68,11 +70,21 @@ class Buhlmann:
             b = pp_n2 / (pp_n2 + pp_he) * b + pp_he / (pp_n2 + pp_he) * b_he;
         return a, b;
 
-    def _get_p_amb_tol(self, i, tissue_state_i):
+    def _get_p_amb_tol_one_tissue(self, i, tissue_state_i):
         a, b = self._get_coeffs_a_b(i, tissue_state_i);
         p_compartment = sum(tissue_state_i);
         p_amb_tol = (p_compartment - a) * b;
         return p_amb_tol;
+
+    def _get_p_amb_tol(self, tissue_state):
+        return [ self._get_p_amb_tol_one_tissue(i, tissue_state[ i ]) for i in range(self._n_tissues) ];
+
+    def _get_p_amb_tol_gf(self, tissue_state, gf):
+        p_amb_tol = self._get_p_amb_tol( tissue_state );
+        p_comptmt = [ sum(ts) for ts in tissue_state ];
+        p = [ p_comptmt[ i ] - gf / 100 * (p_comptmt[ i ] - p_amb_tol[ i ])
+              for i in range(self._n_tissues) ];
+        return p;
 
     @staticmethod
     def _get_GF99_for_one_tissue(p_comptmt, p_amb, p_amb_tol):
@@ -83,17 +95,21 @@ class Buhlmann:
             return -1.0;
         return 100.0 * (p_comptmt - p_amb) / (p_comptmt - p_amb_tol);
 
-    def _get_map_amb_to_gf_perc(self,  p_comptmt, p_amb_tol):
-        gf_low  = 35; # self.gf_low
-        gf_high = 70; # self.gf_high
+    def _get_GF99(self, p_comptmt, p_amb, p_amb_tol):
+        return max([ Buhlmann._get_GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
+                     for i in range(self._n_tissues) ]);
+
+    def _get_map_amb_to_gf_perc(self, tissue_state):
+        gf_low = self.gf_low
+        gf_high = self.gf_high
         # At first stop, allowed supersaturation is GF_LOW % (eg. 35%)
         # At surfacing, allowed supersaturation is GF_HIGH % (eg. 70%)
-        p_amb_tol_gflow = [ p_comptmt[ i ] - gf_low / 100 * (p_comptmt[ i ] - p_amb_tol[ i ]) for i in
-                            range(self._n_tissues) ];
+        p_amb_tol_gflow = self._get_p_amb_tol_gf(tissue_state, gf_low);
         p_ceiling = max(p_amb_tol_gflow);
         # Round the first stop
-        p_first_stop = Util.depth_to_Pamb(Util.Pamb_to_depth(p_ceiling, 3));
+        p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);
         p_surface = 1.0;
+
         # So, at p_first_stop, allowed supersat is gf_low
         # and at p_surface, allowed supersat is gf_high
         # We return a function that linearly interpolates; is flat outside the bounds
@@ -103,15 +119,34 @@ class Buhlmann:
             elif p_amb < p_surface:
                 return gf_high;
             else:
-                return gf_high + (p_amb - p_surface)/(p_first_stop - p_surface) * ( gf_low - gf_high );
-
+                return gf_high + (p_amb - p_surface) / (p_first_stop - p_surface) * (gf_low - gf_high);
         return m;
 
-    def get_deco_info(self, tissue_state, depth, stateOnly=True):
+    def _time_to_stay_at_stop(self, p_amb, tissue_state, gas, amb_to_gf):
+        # Returns both the time (integer) and the updated tissue_state.
+        # TODO: Check performance. The "+1" is tricky. Binary search?
+        # Straight computation is probably not feasible since a/b coeff's are dependent on pp
+        # Straight computation could work for Nitrox, probably not for Trimix?
+        p_amb_next_stop = Util.next_stop_Pamb(p_amb);
+
+        gf99allowed = amb_to_gf(p_amb_next_stop);
+        stop_length = 0;
+        while stop_length < 500: # Safety measure
+            p_amb_tol = self._get_p_amb_tol( tissue_state );
+            gf99 = self._get_GF99( [ sum(ts) for ts in tissue_state ], p_amb_next_stop, p_amb_tol );
+            print("stop_length: %s, gf99: %.1f / %.1f" %( stop_length, gf99, gf99allowed) );
+            if gf99 <= gf99allowed:
+                break;
+            stop_length += 1;
+            tissue_state = self.updated_tissue_state( tissue_state, 1.0, p_amb, gas );
+        return stop_length, tissue_state;
+
+    def get_deco_info(self, tissue_state, depth, stateOnly = True):
         p_amb = Util.depth_to_Pamb(depth);
-        p_amb_tol = [ self._get_p_amb_tol(i, tissue_state[ i ]) for i in range(self._n_tissues) ];
+        p_amb_tol = self._get_p_amb_tol(tissue_state);
         p_comptmt = [ sum(ts) for ts in tissue_state ];
-        p_ceiling = max(p_amb_tol);
+        p_ceiling_99 = max(p_amb_tol);
+        p_ceiling = max(self._get_p_amb_tol_gf(tissue_state, self.gf_low));
         # GF99: how do compartment pressure, ambient pressure, tolerance compare
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
@@ -119,20 +154,35 @@ class Buhlmann:
                   for i in range(self._n_tissues) ];
         surfacegfs = [ self._get_GF99_for_one_tissue(p_comptmt[ i ], 1.0, p_amb_tol[ i ])
                        for i in range(self._n_tissues) ];
-        result = { 'Ceil99': Util.Pamb_to_depth(p_ceiling),
-                    'GF99': round(max(gf99s), 1),
-                    'SurfaceGF': round(max(surfacegfs), 1),
-                    'allGF99s': gf99s
-                    };
+        result = {'Ceil': Util.Pamb_to_depth(p_ceiling),
+                  'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
+                  'GF99': round(max(gf99s), 1),
+                  'SurfaceGF': round(max(surfacegfs), 1),
+                  'allGF99s': gf99s
+                  };
         if stateOnly:
             return result;
 
         # Below is about computing the decompression profile
-        print(result)
+        amb_to_gf = self._get_map_amb_to_gf_perc(tissue_state);
+        for depth in range(30, -6, step := -3):
+            pamb = Util.depth_to_Pamb(depth);
+            gf99 = self._get_GF99(p_comptmt, pamb, p_amb_tol);
+            print('depth: %.1f, allowed supersat: %.1f, gf99: %.1f' % (depth, amb_to_gf(pamb), gf99));
 
-        m = self._get_map_amb_to_gf_perc( p_comptmt, p_amb_tol );
-        for depth in range(30,-6,step := -3):
-            print("depth: %.1f, allowed supersat: %.1f" % ( depth, m(Util.depth_to_Pamb(depth))));
+        gas = Gas.Air();
+        stl, tissue_state = self._time_to_stay_at_stop(2.8, tissue_state, gas, amb_to_gf);
+        print(stl);
+        stl, tissue_state = self._time_to_stay_at_stop(2.5, tissue_state, gas, amb_to_gf);
+        print(stl);
+        stl, tissue_state = self._time_to_stay_at_stop(2.2, tissue_state, gas, amb_to_gf);
+        print(stl);
+        stl, tissue_state = self._time_to_stay_at_stop(1.9, tissue_state, gas, amb_to_gf);
+        print(stl);
+        stl, tissue_state = self._time_to_stay_at_stop(1.6, tissue_state, gas, amb_to_gf);
+        print(stl);
+        stl, tissue_state = self._time_to_stay_at_stop(1.3, tissue_state, gas, amb_to_gf);
+        print(stl);
 
         # Done
         return result;
@@ -142,14 +192,15 @@ class Buhlmann:
 # Some testing functions
 #
 def test():
-    bm = Buhlmann(35,70);
+    bm = Buhlmann(35, 70);
     ts = bm.cleared_tissue_state();
-    ts = bm.updated_tissue_state(ts, 10.0, 40.0, Gas.Trimix(21, 35));
+    ts = bm.updated_tissue_state(ts, 10.0, 5.0, Gas.Trimix(21, 35));
     print(ts);
-    di = bm.get_deco_info(ts, 40.0, stateOnly=False);
+    di = bm.get_deco_info(ts, 40.0, stateOnly = False);
     print(di);
     # for d in [ 40.0, 10.0, 6.0, 3.0, 0.0 ]:
     #     di = bm.get_deco_state_info(ts, d);
     #     print('at %.1f: %s' % (d, di));
+
 
 test();

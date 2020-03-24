@@ -30,7 +30,7 @@ class DivePoint:
 
     @staticmethod
     def dataframe_deco_info():
-        return [ 'Ceil99', 'GF99', 'SurfaceGF' ];
+        return [ 'Ceil', 'GF99', 'SurfaceGF' ];
 
     def repr_for_dataframe(self):
         r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * Util.depth_to_Pamb(self.depth) ];
@@ -45,7 +45,7 @@ class DivePoint:
         self.tissue_state = deco_model.updated_tissue_state(
             prev_point.tissue_state,
             self.time - prev_point.time,
-            self.depth,
+            Util.depth_to_Pamb(self.depth),
             self.gas );
 
     def set_updated_deco_info(self, deco_model):
@@ -62,7 +62,6 @@ class DiveProfile:
             self._deco_model = deco_model;
         else:
             self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high);
-
 
     def points(self):
         return self._points;
