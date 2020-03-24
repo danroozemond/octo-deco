@@ -30,7 +30,7 @@ class DivePoint:
 
     @staticmethod
     def dataframe_deco_info():
-        return [ 'Ceil', 'GF99', 'SurfaceGF' ];
+        return [ 'Ceil', 'GF99', 'SurfaceGF', 'Stops' ];
 
     def repr_for_dataframe(self):
         r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * Util.depth_to_Pamb(self.depth) ];
@@ -49,7 +49,7 @@ class DivePoint:
             self.gas );
 
     def set_updated_deco_info(self, deco_model):
-        self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, stateOnly = True);
+        self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, stateOnly = False);
 
 
 class DiveProfile:

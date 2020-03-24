@@ -1,14 +1,9 @@
 import math;
 
 
-def Pamb_to_depth(Pamb, round_to=0.1):
+def Pamb_to_depth(Pamb):
     d = 10.0*(Pamb - 1.0);
-    if round_to == 0.0:
-        return d;
-    if d < 0:
-        return 0;
-    d_rounded = round_to * math.ceil( d / round_to );
-    return d_rounded;
+    return round(d, 1);
 
 
 def depth_to_Pamb(depth):
@@ -16,7 +11,10 @@ def depth_to_Pamb(depth):
 
 
 def Pamb_to_Pamb_stop(p_amb):
-    return depth_to_Pamb(Pamb_to_depth(p_amb, 3));
+    t = Pamb_to_depth(p_amb);
+    if (t % 3) > 0.01:
+        t = 3*(math.floor(t/3) + 1);
+    return depth_to_Pamb(t);
 
 
 def next_stop_Pamb(p_amb):
