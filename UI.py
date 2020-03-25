@@ -2,22 +2,25 @@
 UI-related methods here
 """
 import numpy;
+import pandas;
 import plotly.graph_objects as go
 import plotly.subplots as sp
 
 
 # See https://plot.ly/python/multiple-axes/ for some documentation
 
+def st_header(st, text):
+    st.markdown("""
+                %s
+                ============
+                """ % text);
 
-def _plotly_diveprofile(st, diveprofile):
+
+def st_plotly_diveprofile(st, diveprofile):
     df = diveprofile.dataframe();
     #
     # Later, for deco info, see filled lines here: https://plot.ly/python/line-charts/
     #
-    st.markdown("""
-                Dive profile
-                ============
-                """);
     fig = sp.make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace( go.Scatter( x=df["time"], y=df["depth"], name='Depth',
                                line={'color': 'rgb(30,7,143)', 'width': 3} ) );
@@ -37,12 +40,9 @@ def _plotly_diveprofile(st, diveprofile):
     fig.update_xaxes(title_text = "Time");
     st.plotly_chart(fig, use_container_width = True);
 
-
-def _plotly_tissue_heatmap( st, diveprofile ):
+def st_plotly_tissue_heatmap( st, diveprofile ):
     st.markdown(
         """
-        Heatmap
-        =======
         Displays (scaled) compartment pressure (actually: GF99)
         """);
     # https://plot.ly/python/heatmaps/
@@ -60,14 +60,11 @@ def _plotly_tissue_heatmap( st, diveprofile ):
     st.plotly_chart(fig, use_container_width = True);
 
 
-def display_dive(st, diveprofile):
-    # Args: streamlit, diveprofile
-    _plotly_diveprofile( st, diveprofile );
+def st_data(st, diveprofile):
+    st.write(diveprofile.dataframe());
 
-    _plotly_tissue_heatmap( st, diveprofile );
 
-    st.markdown("""
-                Data
-                ====
-                """);
-    st.dataframe(diveprofile.dataframe());
+def st_dive_summary(st, diveprofile):
+    ds = diveprofile.dive_summary();
+    dsdf = pandas.DataFrame( [ [ k, v] for k,v in ds.items() ]);
+    st.write(dsdf);

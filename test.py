@@ -16,7 +16,5 @@ dp.append_surfacing();
 dp.add_stops();
 dp.append_section(0, 30);
 dp.interpolate_points();
-print("\n\n");
-dp.update_deco_info();
 df = dp.dataframe();
-# print(df.loc[102:112]);
+print(df);

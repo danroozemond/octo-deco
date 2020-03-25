@@ -9,6 +9,8 @@ probably update logic so that if first stop becomes deeper, amb_to_gf is updated
 ** TTS
 
 * Import CSV from shearwater log
+https://docs.streamlit.io/api.html#add-widgets-to-sidebar
+=> streamlit.file_uploader
 
 Longer term
 * Gas consumption

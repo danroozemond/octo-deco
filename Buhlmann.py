@@ -23,7 +23,12 @@ class Buhlmann:
     """
     TissueState is represented as a list of current tissue loadings (N2, He)
     """
+    def description(self):
+        return 'ZHL-16C GF %s/%s' % (self.gf_low, self.gf_high);
 
+    """
+    TissueState is represented as a list of current tissue loadings (N2, He)
+    """
     def cleared_tissue_state(self):
         gas = Gas.Air();
         return [ (gas[ 'fN2' ], gas[ 'fHe' ]) for i in range(self._n_tissues) ];

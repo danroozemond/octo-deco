@@ -36,6 +36,21 @@ class DiveProfile:
         return self._deco_model;
 
     '''
+    Deco model info
+    '''
+    def dive_summary(self):
+        v = { 'Decompression model': self._deco_model.description() };
+
+        divetime = sum([ self._points[i].time - self._points[i-1].time for i in range(1, len(self._points))
+                         if self._points[i].depth > 0]);
+        decotime = sum([ self._points[i].time - self._points[i-1].time for i in range(1, len(self._points))
+                         if self._points[i].depth > 0 and self._points[i].is_deco_stop]);
+
+        v['Total dive time'] = '%.1f mins'% divetime;
+        v['Decompression time'] = '%.1f mins'% decotime;
+        return v;
+
+    '''
     Modifying the profile (adding sections etc)
     '''
     def _append_point(self, time_diff, new_depth, gas):
@@ -93,7 +108,9 @@ class DiveProfile:
                     tcurr += granularity_mins;
                     dcurr = prev_point.depth \
                         + (tcurr - prev_point.time) / ( orig_point.time - prev_point.time ) * ddiff;
-                    new_points.append(DivePoint(tcurr, dcurr, gas));
+                    pt = DivePoint(tcurr, dcurr, gas);
+                    new_points.append(pt);
+                    pt.is_deco_stop = orig_point.is_deco_stop;
             # Finally, add the point itself
             new_points.append(orig_point);
             prev_point = orig_point;
@@ -118,7 +135,6 @@ class DiveProfile:
             p.set_updated_deco_info( self._deco_model, amb_to_gf = amb_to_gf );
             if amb_to_gf is None and p.is_deco_stop:
                 amb_to_gf = p.deco_info.get('amb_to_gf');
-
 
     '''
     Deco profile creation
