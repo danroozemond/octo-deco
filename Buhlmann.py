@@ -149,7 +149,7 @@ class Buhlmann:
             return p_ceiling, self.gf_low, amb_to_gf;
         else:
             gf_now = amb_to_gf(p_amb);
-            p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, self.gf_low);
+            p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, gf_now);
             p_ceiling = max(p_amb_tol_gfnow);
             return p_ceiling, gf_now, amb_to_gf;
 
