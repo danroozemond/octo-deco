@@ -1,6 +1,7 @@
 TODO this list :) [also check TO-DOs in .py's]
 
 Remove many print statements
+probably update logic so that if first stop becomes deeper, amb_to_gf is updated? Both in add_stops and in compute_deco_info then.
 
 * Automatic gas switching
 
@@ -13,6 +14,7 @@ Longer term
 * Gas consumption
 * CNS tracking
 
+Smarter / more precise deco stop length computations
 
 Passing around p_first_stop is ugly. Consider adding this (kind of) info to tissue_state.
 

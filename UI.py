@@ -29,6 +29,9 @@ def _plotly_diveprofile(st, diveprofile):
     fig.add_trace( go.Scatter( x=df["time"], y=100*df["ppO2"], name='ppO2',
                                line={'color': 'rgb(176,42,143)', 'dash': 'dot', 'width': 1} ),
                    secondary_y = True );
+    # fig.add_trace( go.Scatter( x=df["time"], y=(100/16)*(df["LeadingTissueIndex"]+2), name='Leading tissue',
+    #                            line={'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 1} ),
+    #                secondary_y = True );
     fig.update_yaxes(secondary_y = False, autorange = "reversed" );
     fig.update_yaxes(secondary_y = True,  showgrid = False, range=[-1,140], tick0=0, dtick=20);
     fig.update_xaxes(title_text = "Time");

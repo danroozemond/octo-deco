@@ -91,8 +91,8 @@ class Buhlmann:
         if p_comptmt == p_amb_tol:
             return 0.0;
         if p_comptmt < p_amb:
-            # Ongassing
-            return -1.0;
+            # No super saturation
+            return 0.0;
         return 100.0 * (p_comptmt - p_amb) / (p_comptmt - p_amb_tol);
 
     def _GF99(self, p_comptmt, p_amb, p_amb_tol):
@@ -123,30 +123,41 @@ class Buhlmann:
         # TODO: Check performance. The "+1" is tricky. Binary search?
         # Straight computation is probably not feasible since a/b coeff's are dependent on pp
         # Straight computation could work for Nitrox, probably not for Trimix?
-        p_amb_next_stop = Util.next_stop_Pamb(p_amb);
+        p_amb_next_stop = Util.next_stop_Pamb( p_amb );
 
-        gf99allowed = amb_to_gf(p_amb_next_stop);
+        gf99allowed_next = amb_to_gf( p_amb_next_stop );
+        gf99allowed_curr = amb_to_gf( p_amb );
         stop_length = 0;
         while stop_length < 500:    # Safety measure
             p_amb_tol = self._p_amb_tol(tissue_state);
-            gf99 = self._GF99([ sum(ts) for ts in tissue_state ], p_amb_next_stop, p_amb_tol);
-            if gf99 <= gf99allowed:
+            gf99_next = self._GF99([ sum(ts) for ts in tissue_state ], p_amb_next_stop, p_amb_tol);
+            gf99_curr = self._GF99([ sum(ts) for ts in tissue_state ], p_amb, p_amb_tol);
+            if gf99_next <= gf99allowed_next and gf99_curr <= gf99allowed_curr:
                 break;
             stop_length += 1;
             tissue_state = self.updated_tissue_state( tissue_state, 1.0, p_amb, gas );
         return stop_length, tissue_state;
 
-    def compute_deco_profile(self, tissue_state, p_target = 1.0, gf_now = None):
-        # Returns triples depth, length, gas
-        # Allowed to pass in gf_now in case we recompute part of the deco after it has already started
+    def _get_ceiling_gfnow_ambtogf(self, tissue_state, p_amb, amb_to_gf = None):
+        # Allowed to pass in amb_to_gf in case we recompute part of the deco after it has already started
         # Determine ceiling, and allowed supersaturation at the various levels
-        if gf_now is None:
-            gf_now = self.gf_low;
-        p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, gf_now);
-        p_ceiling = max(p_amb_tol_gfnow);
+        if amb_to_gf is None:
+            p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, self.gf_low);
+            p_ceiling = max(p_amb_tol_gfnow);
+            p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
+            amb_to_gf = self._map_amb_to_gf_perc(p_first_stop);
+            return p_ceiling, self.gf_low, amb_to_gf;
+        else:
+            gf_now = amb_to_gf(p_amb);
+            p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, self.gf_low);
+            p_ceiling = max(p_amb_tol_gfnow);
+            return p_ceiling, gf_now, amb_to_gf;
+
+    def compute_deco_profile(self, tissue_state, p_amb, p_target = 1.0, amb_to_gf = None):
+        # Returns triples depth, length, gas
+        p_ceiling, gf_now, amb_to_gf = self._get_ceiling_gfnow_ambtogf(tissue_state, p_amb, amb_to_gf);
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
-        amb_to_gf = self._map_amb_to_gf_perc(p_first_stop);
         # Determine gas (TODO)
         gas = Gas.Air();
         # 'Walk' up
@@ -160,7 +171,7 @@ class Buhlmann:
         result = [ x for x in result if x[1] != 0 ];
         return result, p_ceiling, amb_to_gf;
 
-    def deco_info(self, tissue_state, depth, gf_now = None):
+    def deco_info(self, tissue_state, depth, amb_to_gf = None):
         p_amb = Util.depth_to_Pamb(depth);
         p_amb_tol = self._p_amb_tol(tissue_state);
         p_comptmt = [ sum(ts) for ts in tissue_state ];
@@ -170,16 +181,19 @@ class Buhlmann:
         # if ambient pressure is bigger than compartment pressure: ongassing
         gf99s = [ self._GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
                   for i in range(self._n_tissues) ];
+        gf99 = max(gf99s);
+        leading_tissue_i = gf99s.index(gf99);
         surfacegfs = [ self._GF99_for_one_tissue(p_comptmt[ i ], 1.0, p_amb_tol[ i ])
                        for i in range(self._n_tissues) ];
         result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
-                  'GF99': round(max(gf99s), 1),
+                  'GF99': round(gf99, 1),
                   'SurfaceGF': round(max(surfacegfs), 1),
+                  'LeadingTissueIndex': leading_tissue_i,
                   'allGF99s': gf99s
                   };
 
         # Below is about computing the decompression profile
-        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, gf_now = gf_now);
+        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, amb_to_gf = amb_to_gf);
         result['Ceil'] = Util.Pamb_to_depth(p_ceiling);
         result['Stops'] = stops;
         result['amb_to_gf'] = amb_to_gf;
@@ -188,19 +202,3 @@ class Buhlmann:
         return result;
 
 
-#
-# Some testing functions
-#
-def test():
-    bm = Buhlmann(35, 70);
-    ts = bm.cleared_tissue_state();
-    ts = bm.updated_tissue_state(ts, 20.0, 5.0, Gas.Trimix(21, 35));
-    print(ts);
-    di = bm.deco_info(ts, 40.0);
-    print(di);
-    # for d in [ 40.0, 10.0, 6.0, 3.0, 0.0 ]:
-    #     di = bm.get_deco_state_info(ts, d);
-    #     print('at %.1f: %s' % (d, di));
-
-
-test();
