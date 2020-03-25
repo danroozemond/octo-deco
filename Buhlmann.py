@@ -175,7 +175,7 @@ class Buhlmann:
             p_ceiling = max(p_amb_tol_gfnow);
             return p_ceiling, gf_now, amb_to_gf;
 
-    def compute_deco_profile(self, tissue_state, p_amb, p_target = 1.0, amb_to_gf = None):
+    def compute_deco_profile(self, tissue_state, p_amb, gases, p_target = 1.0, amb_to_gf = None):
         # Returns triples depth, length, gas
         p_ceiling, gf_now, amb_to_gf = self._get_ceiling_gfnow_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
@@ -193,7 +193,7 @@ class Buhlmann:
         result = [ x for x in result if x[1] != 0 ];
         return result, p_ceiling, amb_to_gf;
 
-    def deco_info(self, tissue_state, depth, amb_to_gf = None):
+    def deco_info(self, tissue_state, depth, gases, amb_to_gf = None):
         p_amb = Util.depth_to_Pamb(depth);
         p_amb_tol = self._p_amb_tol(tissue_state);
         p_comptmt = [ sum(ts) for ts in tissue_state ];
@@ -215,7 +215,7 @@ class Buhlmann:
                   };
 
         # Below is about computing the decompression profile
-        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, amb_to_gf = amb_to_gf);
+        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, gases, amb_to_gf = amb_to_gf);
         result['Ceil'] = Util.Pamb_to_depth(p_ceiling);
         result['Stops'] = stops;
         result['amb_to_gf'] = amb_to_gf;

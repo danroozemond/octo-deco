@@ -37,7 +37,7 @@ class DivePoint:
             Util.depth_to_Pamb(self.depth),
             self.gas );
 
-    def set_updated_deco_info(self, deco_model, amb_to_gf = None ):
-        self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, amb_to_gf = amb_to_gf );
+    def set_updated_deco_info(self, deco_model, gases, amb_to_gf = None ):
+        self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, gases, amb_to_gf = amb_to_gf );
 
 

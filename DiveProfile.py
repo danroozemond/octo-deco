@@ -144,7 +144,7 @@ class DiveProfile:
         amb_to_gf = None;
         for i in range(0, len(self._points)):
             p = self._points[i];
-            p.set_updated_deco_info( self._deco_model, amb_to_gf = amb_to_gf );
+            p.set_updated_deco_info( self._deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = Buhlmann.AmbientToGF.consider_void(amb_to_gf, Util.depth_to_Pamb(p.depth));
 
     '''
@@ -165,7 +165,7 @@ class DiveProfile:
             print('appending existing point time/depth = %s/%s' % (op.time - old_points[i-1].time, op.depth ));
             # Update tissues, based on last point considered
             p.set_updated_tissue_state( deco_model, self._points[-2]);
-            p.set_updated_deco_info( deco_model, amb_to_gf = amb_to_gf );
+            p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             p_amb = Util.depth_to_Pamb(p.depth);
             gf_now = p.deco_info['amb_to_gf'](p_amb);
             print('  point:', p.time, p.depth, 'ceils', p.deco_info['Ceil'], p.deco_info['Ceil99'], 'gf now', gf_now);
@@ -178,6 +178,7 @@ class DiveProfile:
                 stops, p_ceiling, amb_to_gf = deco_model.compute_deco_profile(
                                             self._points[-1].tissue_state,
                                             Util.depth_to_Pamb( self._points[-1].depth ),
+                                            self._gases_carried,
                                             p_target = Util.depth_to_Pamb(op.depth),
                                             amb_to_gf = amb_to_gf );
                 print('  adding stops:', 'ceil', p_ceiling, 'stops',stops);
@@ -190,7 +191,7 @@ class DiveProfile:
                     for j in range(np, len(self._points)):
                         self._points[j].is_deco_stop = True;
                         self._points[j].set_updated_tissue_state(deco_model, self._points[ j - 1 ]);
-                        self._points[j].set_updated_deco_info(deco_model, amb_to_gf = amb_to_gf);
+                        self._points[j].set_updated_deco_info(deco_model, self._gases_carried, amb_to_gf = amb_to_gf);
             else:
                 # Add new point (tissue state etc is computed correctly by construction)
                 print('  No further action required');
