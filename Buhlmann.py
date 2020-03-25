@@ -2,12 +2,48 @@ import BuhlmannConstants
 import Gas
 import Util
 
-"""
-Buhlmann class contains all essential logic for deco model
-"""
+
+class AmbientToGF:
+    """
+    Helper class to store/keep gradient factor line
+
+    At first stop, allowed supersaturation is GF_LOW % (eg. 35%)
+    At surfacing, allowed supersaturation is GF_HIGH % (eg. 70%)
+
+    So, at p_first_stop, allowed supersat is gf_low
+    and at p_surface, allowed supersat is gf_high
+    We return a function that linearly interpolates; is flat outside the bounds
+    """
+    def __init__(self, p_first_stop, p_surface, p_target, gf_low, gf_high):
+        self.p_first_stop = p_first_stop;
+        self.p_surface = p_surface;
+        self.gf_low = gf_low;
+        self.gf_high = gf_high;
+        self.p_target = p_target;
+
+    def __call__(self, p_amb):
+        if p_amb > self.p_first_stop:
+            return self.gf_low;
+        elif p_amb < self.p_surface:
+            return self.gf_high;
+        else:
+            return self.gf_high + \
+                   (p_amb - self.p_surface) / (self.p_first_stop - self.p_surface) * (self.gf_low - self.gf_high);
+
+    @staticmethod
+    def consider_void(old, p_amb):
+        if old is None:
+            return None;
+        if p_amb <= old.p_target:
+            # We've finished deco
+            return None;
+        return old;
 
 
 class Buhlmann:
+    """
+    Buhlmann class contains all essential logic for deco model
+    """
     def __init__(self, gf_low, gf_high):
         self._n_tissues = BuhlmannConstants.ZHL_16C_N_TISSUES;
         self._halftimes = {'N2': BuhlmannConstants.ZHL_16C_N2_HALFTIMES,
@@ -104,25 +140,6 @@ class Buhlmann:
         return max([ Buhlmann._GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
                      for i in range(self._n_tissues) ]);
 
-    def _map_amb_to_gf_perc(self, p_first_stop):
-        gf_low = self.gf_low
-        gf_high = self.gf_high
-        # At first stop, allowed supersaturation is GF_LOW % (eg. 35%)
-        # At surfacing, allowed supersaturation is GF_HIGH % (eg. 70%)
-        p_surface = 1.0;
-
-        # So, at p_first_stop, allowed supersat is gf_low
-        # and at p_surface, allowed supersat is gf_high
-        # We return a function that linearly interpolates; is flat outside the bounds
-        def m(p_amb):
-            if p_amb > p_first_stop:
-                return gf_low;
-            elif p_amb < p_surface:
-                return gf_high;
-            else:
-                return gf_high + (p_amb - p_surface) / (p_first_stop - p_surface) * (gf_low - gf_high);
-        return m;
-
     def _time_to_stay_at_stop(self, p_amb, tissue_state, gas, amb_to_gf):
         # Returns both the time (integer) and the updated tissue_state.
         # TODO: Check performance. The "+1" is tricky. Binary search?
@@ -143,14 +160,14 @@ class Buhlmann:
             tissue_state = self.updated_tissue_state( tissue_state, 1.0, p_amb, gas );
         return stop_length, tissue_state;
 
-    def _get_ceiling_gfnow_ambtogf(self, tissue_state, p_amb, amb_to_gf = None):
+    def _get_ceiling_gfnow_ambtogf(self, tissue_state, p_amb, p_target, amb_to_gf = None):
         # Allowed to pass in amb_to_gf in case we recompute part of the deco after it has already started
         # Determine ceiling, and allowed supersaturation at the various levels
         if amb_to_gf is None:
             p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, self.gf_low);
             p_ceiling = max(p_amb_tol_gfnow);
             p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
-            amb_to_gf = self._map_amb_to_gf_perc(p_first_stop);
+            amb_to_gf = AmbientToGF( p_first_stop, 1.0, p_target, self.gf_low, self.gf_high );
             return p_ceiling, self.gf_low, amb_to_gf;
         else:
             gf_now = amb_to_gf(p_amb);
@@ -160,7 +177,7 @@ class Buhlmann:
 
     def compute_deco_profile(self, tissue_state, p_amb, p_target = 1.0, amb_to_gf = None):
         # Returns triples depth, length, gas
-        p_ceiling, gf_now, amb_to_gf = self._get_ceiling_gfnow_ambtogf(tissue_state, p_amb, amb_to_gf);
+        p_ceiling, gf_now, amb_to_gf = self._get_ceiling_gfnow_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
         # Determine gas (TODO)
