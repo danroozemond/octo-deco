@@ -5,7 +5,6 @@ import pandas as pd;
 
 import Buhlmann;
 import Gas;
-import Util;
 from DivePoint import DivePoint
 
 '''
@@ -143,7 +142,7 @@ class DiveProfile:
         for i in range(0, len(self._points)):
             p = self._points[i];
             p.set_updated_deco_info( self._deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
-            amb_to_gf = Buhlmann.AmbientToGF.consider_void(amb_to_gf, Util.depth_to_Pamb(p.depth));
+            amb_to_gf = Buhlmann.AmbientToGF.consider_void(amb_to_gf, p.p_amb);
 
     '''
     Deco profile creation
@@ -164,10 +163,9 @@ class DiveProfile:
             # Update tissues, based on last point considered
             p.set_updated_tissue_state( deco_model );
             p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
-            p_amb = Util.depth_to_Pamb(p.depth);
-            gf_now = p.deco_info['amb_to_gf'](p_amb);
+            gf_now = p.deco_info['amb_to_gf'](p.p_amb);
             print('  point:', p.time, p.depth, 'ceils', p.deco_info['Ceil'], p.deco_info['Ceil99'], 'gf now', gf_now);
-            amb_to_gf = Buhlmann.AmbientToGF.consider_void(amb_to_gf, p_amb);
+            amb_to_gf = Buhlmann.AmbientToGF.consider_void(amb_to_gf, p.p_amb);
             # Are we in violation?
             if p.deco_info['GF99'] > gf_now:
                 # Undo adding this point, then attempt to readd in next iteration
@@ -175,9 +173,9 @@ class DiveProfile:
                 # Add points before, but take care to live along the GF line
                 stops, p_ceiling, amb_to_gf = deco_model.compute_deco_profile(
                                             self._points[-1].tissue_state,
-                                            Util.depth_to_Pamb( self._points[-1].depth ),
+                                            self._points[-1].p_amb,
                                             self._gases_carried,
-                                            p_target = Util.depth_to_Pamb(op.depth),
+                                            p_target = op.p_amb,
                                             amb_to_gf = amb_to_gf );
                 print('  adding stops:', 'ceil', p_ceiling, 'stops',stops);
                 assert len(stops) > 0;
