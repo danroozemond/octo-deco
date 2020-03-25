@@ -18,7 +18,7 @@ Conventions:
 class DiveProfile:
     def __init__(self, descent_speed = 20, ascent_speed = 10,
                  deco_model = None, gf_low = 35, gf_high = 70):
-        self._points = [ DivePoint(0, 0, Gas.Air()) ];
+        self._points = [ DivePoint(0, 0, Gas.Air(), None) ];
         self._descent_speed = descent_speed;
         self._ascent_speed = ascent_speed;
         self._gases_carried = set();
@@ -46,10 +46,8 @@ class DiveProfile:
               'Gases carried': self._gases_carried
             };
 
-        divetime = sum([ self._points[i].time - self._points[i-1].time for i in range(1, len(self._points))
-                         if self._points[i].depth > 0]);
-        decotime = sum([ self._points[i].time - self._points[i-1].time for i in range(1, len(self._points))
-                         if self._points[i].depth > 0 and self._points[i].is_deco_stop]);
+        divetime = sum([ p.duration() for p in self._points if p.depth > 0 ]);
+        decotime = sum([ p.duration() for p in self._points if p.depth > 0 and p.is_deco_stop ]);
 
         v['Total dive time'] = '%.1f mins' % divetime;
         v['Decompression time'] = '%.1f mins' % decotime;
@@ -64,7 +62,7 @@ class DiveProfile:
 
     def _append_point(self, time_diff, new_depth, gas):
         new_time = self._points[ -1 ].time + time_diff;
-        p = DivePoint(new_time, new_depth, gas);
+        p = DivePoint(new_time, new_depth, gas, self._points[-1]);
         self._points.append(p);
         return p;
 
@@ -121,7 +119,7 @@ class DiveProfile:
                     tcurr += granularity_mins;
                     dcurr = prev_point.depth \
                         + (tcurr - prev_point.time) / ( orig_point.time - prev_point.time ) * ddiff;
-                    pt = DivePoint(tcurr, dcurr, gas);
+                    pt = DivePoint(tcurr, dcurr, gas, new_points[-1]);
                     new_points.append(pt);
                     pt.is_deco_stop = orig_point.is_deco_stop;
             # Finally, add the point itself
@@ -137,7 +135,7 @@ class DiveProfile:
         assert self._points[0].time == 0.0;
         self._points[0].set_cleared_tissue_state( self._deco_model );
         for i in range(1, len(self._points)):
-            self._points[i].set_updated_tissue_state( self._deco_model, self._points[i-1]);
+            self._points[i].set_updated_tissue_state( self._deco_model );
 
     def update_deco_info(self):
         self._update_all_tissue_states();
@@ -161,10 +159,10 @@ class DiveProfile:
         i = 1;
         while i < len(old_points):
             op = old_points[i];
-            p = self._append_point( op.time - old_points[i-1].time, op.depth, op.gas );
-            print('appending existing point time/depth = %s/%s' % (op.time - old_points[i-1].time, op.depth ));
+            p = self._append_point( op.duration(), op.depth, op.gas );
+            print('appending existing point time/depth = %s/%s' % (op.duration(), op.depth ));
             # Update tissues, based on last point considered
-            p.set_updated_tissue_state( deco_model, self._points[-2]);
+            p.set_updated_tissue_state( deco_model );
             p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             p_amb = Util.depth_to_Pamb(p.depth);
             gf_now = p.deco_info['amb_to_gf'](p_amb);
@@ -190,7 +188,7 @@ class DiveProfile:
                     # Update tissue state and deco info
                     for j in range(np, len(self._points)):
                         self._points[j].is_deco_stop = True;
-                        self._points[j].set_updated_tissue_state(deco_model, self._points[ j - 1 ]);
+                        self._points[j].set_updated_tissue_state(deco_model);
                         self._points[j].set_updated_deco_info(deco_model, self._gases_carried, amb_to_gf = amb_to_gf);
             else:
                 # Add new point (tissue state etc is computed correctly by construction)
