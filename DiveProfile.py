@@ -123,6 +123,7 @@ class DiveProfile:
                     new_points.append(pt);
                     pt.is_deco_stop = orig_point.is_deco_stop;
             # Finally, add the point itself
+            orig_point.prev = new_points[-1] if len(new_points) > 0 else None;
             new_points.append(orig_point);
             prev_point = orig_point;
         self._points = new_points;
