@@ -16,6 +16,9 @@ class Gas(dict):
         else:
             return 'Tx%d/%d' % (100 * self[ 'fO2' ], 100 * self[ 'fHe' ]);
 
+    def __hash__(self):
+        return hash( self['fO2'] ) + 3 * hash(self['fHe']);
+
 def Air():
     return Gas({ 'fO2': 0.21, 'fN2': 0.79, 'fHe': 0.0 });
 

@@ -30,7 +30,7 @@ st.sidebar.text("Hello, sidebar!");
 
 
 # Create dive & display
-# allow_output_mutation because I'm too lazy to figure out why warning
+# allow_output_mutation because I'm too lazy to figure out why warning :)
 @st.cache(allow_output_mutation=True)
 def do_the_dive():
     dp = DiveProfile();

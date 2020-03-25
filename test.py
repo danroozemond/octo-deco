@@ -11,10 +11,9 @@ from DiveProfile import DiveProfile;
 # print(dp.dataframe());
 
 dp = DiveProfile();
-dp.append_section(40, 35, gas = Gas.Air());
+dp.add_gas( Gas.Nitrox(50));
+dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
 dp.append_surfacing();
 dp.add_stops();
 dp.append_section(0, 30);
 dp.interpolate_points();
-df = dp.dataframe();
-print(df);

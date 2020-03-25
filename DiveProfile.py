@@ -20,6 +20,7 @@ class DiveProfile:
         self._points = [ DivePoint(0, 0, Gas.Air()) ];
         self._descent_speed = descent_speed;
         self._ascent_speed = ascent_speed;
+        self._gases_carried = set();
         if deco_model is not None:
             self._deco_model = deco_model;
         else:
@@ -39,7 +40,9 @@ class DiveProfile:
     Deco model info
     '''
     def dive_summary(self):
-        v = { 'Decompression model': self._deco_model.description() };
+        v = { 'Decompression model': self._deco_model.description(),
+              'Gases carried': self._gases_carried
+            };
 
         divetime = sum([ self._points[i].time - self._points[i-1].time for i in range(1, len(self._points))
                          if self._points[i].depth > 0]);
@@ -53,6 +56,9 @@ class DiveProfile:
     '''
     Modifying the profile (adding sections etc)
     '''
+    def add_gas(self, gas):
+        self._gases_carried.add( gas );
+
     def _append_point(self, time_diff, new_depth, gas):
         new_time = self._points[ -1 ].time + time_diff;
         p = DivePoint(new_time, new_depth, gas);
@@ -72,6 +78,8 @@ class DiveProfile:
     def append_section(self, depth, duration, gas = None):
         if gas is None:
             gas = self._points[ -1 ].gas;
+        if depth > 0:
+            self.add_gas(gas);
         self._append_transit(depth, gas);
         if duration > 0.0:
             self._append_point(duration, depth, gas)
@@ -86,6 +94,8 @@ class DiveProfile:
         last_point = self._points[-1];
         if duration is None:
             duration = 1.0 if last_point.depth > 0 else 0.0;
+        if last_point.depth > 0:
+            self.add_gas(gas);
         self._append_point( duration, last_point.depth, gas );
 
     '''
