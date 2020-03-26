@@ -41,9 +41,9 @@ class DiveProfile:
     Deco model info
     '''
     def dive_summary(self):
-        v = { 'Decompression model': self._deco_model.description(),
-              'Gases carried': self._gases_carried
-            };
+        v = {'Decompression model': self._deco_model.description(),
+             'Gases carried': self._gases_carried
+             };
 
         divetime = sum([ p.duration() for p in self._points if p.depth > 0 ]);
         decotime = sum([ p.duration() for p in self._points if p.depth > 0 and p.is_deco_stop ]);
@@ -160,12 +160,10 @@ class DiveProfile:
         while i < len(old_points):
             op = old_points[i];
             p = self._append_point( op.duration(), op.depth, op.gas );
-            print('appending existing point time/depth = %s/%s' % (op.duration(), op.depth ));
             # Update tissues, based on last point considered
             p.set_updated_tissue_state( deco_model );
             p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             gf_now = p.deco_info['amb_to_gf'](p.p_amb);
-            print('  point:', p.time, p.depth, 'ceils', p.deco_info['Ceil'], p.deco_info['Ceil99'], 'gf now', gf_now);
             amb_to_gf = Buhlmann.AmbientToGF.consider_void(amb_to_gf, p.p_amb);
             # Are we in violation?
             if p.deco_info['GF99'] > gf_now:
@@ -178,7 +176,6 @@ class DiveProfile:
                                             self._gases_carried,
                                             p_target = op.p_amb,
                                             amb_to_gf = amb_to_gf );
-                print('  adding stops:', 'ceil', p_ceiling, 'stops',stops);
                 assert len(stops) > 0;
                 # Do not forget to update tissue state and deco info
                 for s in stops:
@@ -191,7 +188,6 @@ class DiveProfile:
                         self._points[j].set_updated_deco_info(deco_model, self._gases_carried, amb_to_gf = amb_to_gf);
             else:
                 # Add new point (tissue state etc is computed correctly by construction)
-                print('  No further action required');
                 i += 1;
         # Done!
         self._deco_stops_computation_time = time.perf_counter() - t0;

@@ -210,7 +210,7 @@ class Buhlmann:
             result.append( ( Util.Pamb_to_depth(p_now), stoplength, gas ) );
             p_now = Util.next_stop_Pamb(p_now);
         # Clean up the result
-        result = [ x for x in result if x[1] != 0 ];
+        result = [ x for x in result if round(x[1]) != 0 ];
         return result, p_ceiling, amb_to_gf;
 
     def deco_info(self, tissue_state, depth, gases, amb_to_gf = None):

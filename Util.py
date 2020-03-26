@@ -22,4 +22,4 @@ def next_stop_Pamb(p_amb):
 
 
 def stops_to_string(stops):
-    return ' '.join([ '%i@%im' % ( s[1], s[0] ) for s in stops ]);
+    return ' '.join([ '%i@%im' % ( round(s[1]), s[0] ) for s in stops ]);
