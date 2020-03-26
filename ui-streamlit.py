@@ -39,8 +39,7 @@ def do_the_dive():
     dp.append_section(20, 35, gas = Gas.Trimix(21, 35));
     dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
     dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
-    dp.append_surfacing();
-    dp.add_stops();
+    dp.add_stops_to_surface();
     dp.append_section(0, 30);
     dp.interpolate_points();
     return dp;

@@ -44,7 +44,7 @@ class Buhlmann:
     """
     Buhlmann class contains all essential logic for deco model
     """
-    def __init__(self, gf_low, gf_high):
+    def __init__(self, gf_low, gf_high, descent_speed, ascent_speed):
         self._n_tissues = BuhlmannConstants.ZHL_16C_N_TISSUES;
         self._halftimes = {'N2': BuhlmannConstants.ZHL_16C_N2_HALFTIMES,
                            'He': BuhlmannConstants.ZHL_16C_HE_HALFTIMES};
@@ -56,10 +56,9 @@ class Buhlmann:
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = 1.60;
+        self.descent_speed = descent_speed;
+        self.ascent_speed = ascent_speed;
 
-    """
-    TissueState is represented as a list of current tissue loadings (N2, He)
-    """
     def description(self):
         return 'ZHL-16C GF %s/%s' % (self.gf_low, self.gf_high);
 
@@ -104,7 +103,6 @@ class Buhlmann:
         b = self._coeffs[ 'N2' ][ 'b' ][ i ];
         pp_n2, pp_he = tissue_state_i;
         if pp_he > 0.0:
-            # TODO test Trimix case
             # Trimix case
             a_he = self._coeffs[ 'He' ][ 'a' ][ i ];
             b_he = self._coeffs[ 'He' ][ 'b' ][ i ];
@@ -239,6 +237,7 @@ class Buhlmann:
         result['Ceil'] = Util.Pamb_to_depth(p_ceiling);
         result['Stops'] = stops;
         result['amb_to_gf'] = amb_to_gf;
+        result['TTS'] = depth/self.ascent_speed + sum([ s[1] for s in stops ]);
 
         # Done
         return result;

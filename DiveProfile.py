@@ -25,7 +25,7 @@ class DiveProfile:
         if deco_model is not None:
             self._deco_model = deco_model;
         else:
-            self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high);
+            self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high, self._descent_speed, self._ascent_speed);
 
     def points(self):
         return self._points;
@@ -75,17 +75,18 @@ class DiveProfile:
         self._append_point(transit_time, new_depth, gas);
 
     # Relatively clever functions to modify
-    def append_section(self, depth, duration, gas = None):
+    def append_section(self, depth, duration, gas = None, transit = True):
         if gas is None:
             gas = self._points[ -1 ].gas;
         if depth > 0:
             self.add_gas(gas);
-        self._append_transit(depth, gas);
+        if transit:
+            self._append_transit(depth, gas);
         if duration > 0.0:
             self._append_point(duration, depth, gas)
 
-    def append_surfacing(self):
-        self.append_section( 0.0, 0 );
+    def append_surfacing(self, transit = True):
+        self.append_section( 0.0, 0.1, transit = transit );
         if self._points[ -1 ].gas != Gas.Air():
             self.append_gas_switch( Gas.Air() );
 
@@ -97,6 +98,10 @@ class DiveProfile:
         if last_point.depth > 0:
             self.add_gas(gas);
         self._append_point( duration, last_point.depth, gas );
+
+    def add_stops_to_surface(self):
+        self.append_surfacing( transit = False );
+        self.add_stops();
 
     '''
     Granularity
