@@ -55,6 +55,7 @@ class Buhlmann:
                         };
         self.gf_low = gf_low;
         self.gf_high = gf_high;
+        self.max_pO2_deco = 1.60;
 
     """
     TissueState is represented as a list of current tissue loadings (N2, He)
@@ -140,11 +141,19 @@ class Buhlmann:
         return max([ Buhlmann._GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
                      for i in range(self._n_tissues) ]);
 
-    def _time_to_stay_at_stop(self, p_amb, tissue_state, gas, amb_to_gf):
+    def _best_deco_gas(self, p_amb, gases):
+        # What is the best deco gas at this ambient pressure?
+        suitable = [ gas for gas in gases if p_amb * gas['fO2'] <= self.max_pO2_deco ];
+        assert(len(suitable) > 0);
+        gas = max( gases, key=lambda g: g['fO2']);
+        return gas;
+
+    def _time_to_stay_at_stop_old(self, p_amb, tissue_state, gas, amb_to_gf):
         # Returns both the time (integer) and the updated tissue_state.
         # TODO: Check performance. The "+1" is tricky. Binary search?
         # Straight computation is probably not feasible since a/b coeff's are dependent on pp
-        # Straight computation could work for Nitrox, probably not for Trimix?
+        # Correction: it is possible (also for Trimix), but solving a pretty messy quadratic
+        # equation.
         p_amb_next_stop = Util.next_stop_Pamb( p_amb );
 
         gf99allowed_next = amb_to_gf( p_amb_next_stop );
@@ -159,6 +168,39 @@ class Buhlmann:
             stop_length += 1;
             tissue_state = self.updated_tissue_state( tissue_state, 1.0, p_amb, gas );
         return stop_length, tissue_state;
+
+    def _time_to_stay_at_stop(self, p_amb, tissue_state, gas, amb_to_gf):
+        # Returns both the time (integer) and the updated tissue_state.
+        # Straight computation is possible (even for Trimix), but comes down to solving
+        # a pretty messy quadratic equation, and I'm too lazy for that.
+        # Binary search is fast enough and more robust (and again, lazy)
+        p_amb_next_stop = Util.next_stop_Pamb( p_amb );
+        gf99allowed_next = amb_to_gf( p_amb_next_stop );
+
+        def max_over_supersat(t):
+            ts2 = self.updated_tissue_state(tissue_state, t, p_amb, gas);
+            p_at = self._p_amb_tol_gf(ts2, gf99allowed_next);  # using GF for next stop
+            x = [ p - p_amb_next_stop for p in p_at ];
+            return max(x);
+
+        # Binary search:
+        #   t0 <= t <= t1, max_over_supersat(t) = 0.
+        #   max_over_supersat(t0) > 0
+        #   max_over_supersat(t1) < 0
+        t0 = 0.0;
+        t1 = 1440.0;
+        if max_over_supersat(t0) < 0:
+            return 0.0, tissue_state;
+        assert max_over_supersat(t1) < 0;  # Otherwise even a 24hr stop is not enough??
+        while t1 - t0 > 1:
+            h = t0 + (t1 - t0) / 2;
+            if max_over_supersat(h) > 0:
+                t0 = h;
+            else:
+                t1 = h;
+        stop_length = t1;
+        tissue_state_after_stop = self.updated_tissue_state( tissue_state, stop_length, p_amb, gas );
+        return stop_length, tissue_state_after_stop;
 
     def _get_ceiling_gfnow_ambtogf(self, tissue_state, p_amb, p_target, amb_to_gf = None):
         # Allowed to pass in amb_to_gf in case we recompute part of the deco after it has already started
@@ -180,12 +222,11 @@ class Buhlmann:
         p_ceiling, gf_now, amb_to_gf = self._get_ceiling_gfnow_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
-        # Determine gas (TODO)
-        gas = Gas.Air();
         # 'Walk' up
         result = [];
         p_now = p_first_stop;
         while p_now > p_target + 0.01:
+            gas = self._best_deco_gas( p_now, gases );
             stoplength, tissue_state = self._time_to_stay_at_stop(p_now, tissue_state, gas, amb_to_gf);
             result.append( ( Util.Pamb_to_depth(p_now), stoplength, gas ) );
             p_now = Util.next_stop_Pamb(p_now);
@@ -222,5 +263,4 @@ class Buhlmann:
 
         # Done
         return result;
-
 
