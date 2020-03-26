@@ -11,7 +11,8 @@ from DiveProfile import DiveProfile;
 # print(dp.dataframe());
 
 dp = DiveProfile();
-# dp.add_gas( Gas.Nitrox(50));
+dp.add_gas( Gas.Air() );
+dp.add_gas( Gas.Nitrox(50) );
 dp.append_section(20, 35, gas = Gas.Trimix(21, 35));
 dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
 dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
