@@ -148,27 +148,6 @@ class Buhlmann:
         gas = max( gases, key=lambda g: g['fO2']);
         return gas;
 
-    def _time_to_stay_at_stop_old(self, p_amb, tissue_state, gas, amb_to_gf):
-        # Returns both the time (integer) and the updated tissue_state.
-        # TODO: Check performance. The "+1" is tricky. Binary search?
-        # Straight computation is probably not feasible since a/b coeff's are dependent on pp
-        # Correction: it is possible (also for Trimix), but solving a pretty messy quadratic
-        # equation.
-        p_amb_next_stop = Util.next_stop_Pamb( p_amb );
-
-        gf99allowed_next = amb_to_gf( p_amb_next_stop );
-        gf99allowed_curr = amb_to_gf( p_amb );
-        stop_length = 0;
-        while stop_length < 500:    # Safety measure
-            p_amb_tol = self._p_amb_tol(tissue_state);
-            gf99_next = self._GF99([ sum(ts) for ts in tissue_state ], p_amb_next_stop, p_amb_tol);
-            gf99_curr = self._GF99([ sum(ts) for ts in tissue_state ], p_amb, p_amb_tol);
-            if gf99_next <= gf99allowed_next and gf99_curr <= gf99allowed_curr:
-                break;
-            stop_length += 1;
-            tissue_state = self.updated_tissue_state( tissue_state, 1.0, p_amb, gas );
-        return stop_length, tissue_state;
-
     def _time_to_stay_at_stop(self, p_amb, tissue_state, gas, amb_to_gf):
         # Returns both the time (integer) and the updated tissue_state.
         # Straight computation is possible (even for Trimix), but comes down to solving
