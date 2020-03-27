@@ -26,6 +26,8 @@ class AmbientToGF:
             return self.gf_low;
         elif p_amb < self.p_surface:
             return self.gf_high;
+        elif self.p_first_stop == self.p_surface:
+            return self.gf_high;
         else:
             return self.gf_high + \
                    (p_amb - self.p_surface) / (self.p_first_stop - self.p_surface) * (self.gf_low - self.gf_high);
@@ -34,8 +36,8 @@ class AmbientToGF:
     def consider_void(old, p_amb):
         if old is None:
             return None;
-        if p_amb <= old.p_target:
-            # We've finished deco
+        if p_amb > old.p_first_stop:
+            # We've ducked beyond the original first stop; need to restart the GF computation
             return None;
         return old;
 
@@ -237,6 +239,7 @@ class Buhlmann:
         result['Ceil'] = Util.Pamb_to_depth(p_ceiling);
         result['Stops'] = stops;
         result['amb_to_gf'] = amb_to_gf;
+        result['GFLimitNow'] = amb_to_gf(p_amb) if amb_to_gf is not None else 0.0;
         result['TTS'] = depth/self.ascent_speed + sum([ s[1] for s in stops ]);
 
         # Done

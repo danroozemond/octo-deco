@@ -5,6 +5,7 @@ import pandas as pd;
 
 import Buhlmann;
 import Gas;
+import Util;
 from DivePoint import DivePoint
 
 '''
@@ -145,9 +146,9 @@ class DiveProfile:
     def update_deco_info(self):
         self._update_all_tissue_states();
         amb_to_gf = None;
-        for i in range(0, len(self._points)):
-            p = self._points[i];
+        for p in self._points:
             p.set_updated_deco_info( self._deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
+            amb_to_gf = p.deco_info['amb_to_gf'];
             amb_to_gf = Buhlmann.AmbientToGF.consider_void(amb_to_gf, p.p_amb);
 
     '''
