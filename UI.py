@@ -36,9 +36,10 @@ def st_plotly_diveprofile(st, diveprofile):
     #                            line={'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 1} ),
     #                secondary_y = True );
     fig.update_yaxes(secondary_y = False, autorange = "reversed" );
-    fig.update_yaxes(secondary_y = True,  showgrid = False, range=[-1,140], tick0=0, dtick=20);
+    fig.update_yaxes(secondary_y = True,  showgrid = False, range=[-1, 140], tick0=0, dtick=20);
     fig.update_xaxes(title_text = "Time");
     st.plotly_chart(fig, use_container_width = True);
+
 
 def st_plotly_tissue_heatmap( st, diveprofile ):
     st.markdown(
@@ -71,5 +72,5 @@ def st_data(st, diveprofile):
 
 def st_dive_summary(st, diveprofile):
     ds = diveprofile.dive_summary();
-    dsdf = pandas.DataFrame( [ [ k, v] for k,v in ds.items() ]);
+    dsdf = pandas.DataFrame( [ [ k, v] for k, v in ds.items() ]);
     st.write(dsdf);
