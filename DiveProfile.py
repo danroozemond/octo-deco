@@ -149,7 +149,6 @@ class DiveProfile:
         for p in self._points:
             p.set_updated_deco_info( self._deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = p.deco_info['amb_to_gf'];
-            amb_to_gf = Buhlmann.AmbientToGF.consider_void(amb_to_gf, p.p_amb);
 
     '''
     Deco profile creation
@@ -169,8 +168,10 @@ class DiveProfile:
             # Update tissues, based on last point considered
             p.set_updated_tissue_state( deco_model );
             p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
-            gf_now = p.deco_info['amb_to_gf'](p.p_amb);
-            amb_to_gf = Buhlmann.AmbientToGF.consider_void(amb_to_gf, p.p_amb);
+            print('existing point; time %.1f prev time %.1f duration %.1f depth: %.1f ceil: %.1f' % ( p.time, p.prev.time, p.duration(), p.depth, p.deco_info['Ceil'] ) );
+            amb_to_gf = p.deco_info['amb_to_gf'];
+            gf_now = amb_to_gf(p.p_amb);
+            print('add_stops, time %.1f, depth %.1f, GF %.1f ?<=? %.1f' % ( p.time, p.depth, p.deco_info['GF99'], gf_now) );
             # Are we in violation?
             if p.deco_info['GF99'] > gf_now:
                 # Undo adding this point, then attempt to readd in next iteration

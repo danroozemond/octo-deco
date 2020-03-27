@@ -32,15 +32,6 @@ class AmbientToGF:
             return self.gf_high + \
                    (p_amb - self.p_surface) / (self.p_first_stop - self.p_surface) * (self.gf_low - self.gf_high);
 
-    @staticmethod
-    def consider_void(old, p_amb):
-        if old is None:
-            return None;
-        if p_amb > old.p_first_stop:
-            # We've ducked beyond the original first stop; need to restart the GF computation
-            return None;
-        return old;
-
 
 class Buhlmann:
     """
@@ -194,6 +185,9 @@ class Buhlmann:
             gf_now = amb_to_gf(p_amb);
             p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, gf_now);
             p_ceiling = max(p_amb_tol_gfnow);
+            # The original amb_to_gf should be considered void if the ceiling is now more than orig first stop
+            if p_ceiling > amb_to_gf.p_first_stop:
+                return self._get_ceiling_gfnow_ambtogf( tissue_state, p_amb, p_target);
             return p_ceiling, gf_now, amb_to_gf;
 
     def compute_deco_profile(self, tissue_state, p_amb, gases, p_target = 1.0, amb_to_gf = None):
