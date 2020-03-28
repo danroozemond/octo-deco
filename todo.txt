@@ -6,9 +6,7 @@ https://docs.streamlit.io/api.html#add-widgets-to-sidebar
 
 * deco obligation (shaded) in plotly chart
 * update_stops as opposed to add_stops, so that you can see eg. ceiling and deco obligation compared between GF's
-* Streamlit to separate dir
 * mark interpolated points and remove those when recompute_stops
-Master and develop.
 Git clone op AWS
 
 
