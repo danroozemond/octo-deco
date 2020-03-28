@@ -1,7 +1,13 @@
+# I know this isn't how it should be done.
+# This is better: https://stackoverflow.com/questions/714063/importing-modules-from-parent-folder
+import os
+import sys
+
 import streamlit as st;
 
-import Gas
-import UI
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))));
+import Gas;
+import UI;
 from DiveProfile import DiveProfile;
 
 
