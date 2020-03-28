@@ -162,7 +162,7 @@ class Buhlmann:
         if max_over_supersat(t0) < 0:
             return 0.0, tissue_state;
         assert max_over_supersat(t1) < 0;  # Otherwise even a 24hr stop is not enough??
-        while t1 - t0 > 0.01:
+        while t1 - t0 > 0.1:
             h = t0 + (t1 - t0) / 2;
             if max_over_supersat(h) > 0:
                 t0 = h;
