@@ -32,9 +32,25 @@ def st_plotly_diveprofile(st, diveprofile):
     fig.add_trace( go.Scatter( x=df["time"], y=100*df["ppO2"], name='ppO2',
                                line={'color': 'rgb(176,42,143)', 'dash': 'dot', 'width': 1} ),
                    secondary_y = True );
+    # Leading tissue - not that interesting
     # fig.add_trace( go.Scatter( x=df["time"], y=(100/16)*(df["LeadingTissueIndex"]+2), name='Leading tissue',
     #                            line={'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 1} ),
     #                secondary_y = True );
+    # A bit complicated code for adding the shaded area
+    fs_xs = list(df["time"]);
+    fs_ys1 = df["FirstStop"];
+    fs_ys2 = [ 0 for y in fs_ys1 ];
+    print(len(fs_xs), len(fs_xs[::-1]), len(fs_ys1), len(fs_ys2));
+    fig.add_trace( go.Scatter(
+        x = fs_xs + fs_xs[::-1],
+        y = fs_ys2 + fs_ys1,
+        fill = 'toself',
+        fillcolor = 'rgba(255,0,0,0.2)',
+        line_color = 'rgba(255,0,0,0)',
+        showlegend = True,
+        name = '1st stop',
+    ))
+    #  Set some axes parameters; draw
     fig.update_yaxes(secondary_y = False, autorange = "reversed" );
     fig.update_yaxes(secondary_y = True,  showgrid = False, range=[-1, 140], tick0=0, dtick=20);
     fig.update_xaxes(title_text = "Time");
