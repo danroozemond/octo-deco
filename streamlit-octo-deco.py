@@ -29,8 +29,10 @@ _max_width_();
 # Create dive & display
 # allow_output_mutation because I'm too lazy to figure out why warning :)
 @st.cache(allow_output_mutation=True)
-def do_the_dive(gf_low, gf_high):
-    dp = DiveProfile( gf_low = new_gf_low, gf_high = new_gf_high)
+def do_the_dive(gf_low, gf_high, do_change_stops):
+    gf1 = gf_low if do_change_stops else 35;
+    gf2 = gf_high if do_change_stops else 70;
+    dp = DiveProfile( gf1, gf2 );
     dp.add_gas( Gas.Air() );
     dp.add_gas( Gas.Nitrox(50));
     dp.append_section(20, 35, gas = Gas.Trimix(21, 35));
@@ -39,19 +41,23 @@ def do_the_dive(gf_low, gf_high):
     dp.add_stops_to_surface();
     dp.append_section(0, 30);
     dp.interpolate_points();
+    if not do_change_stops:
+        dp.set_gf( new_gf_low, new_gf_high );
+
     return dp;
 
 # Sidebar
 st.sidebar.markdown("** Hello, world :) **");
 new_gf_low  = st.sidebar.slider('GF low',  10, 100, 35,  5 );
 new_gf_high = st.sidebar.slider('GF high', 10, 100, 70, 5 );
+do_change_stops = st.sidebar.button('Update profile');
 
 # st.sidebar.markdown("** Upload file :) **");
 # uploaded_file = st.sidebar.file_uploader("Upload Shearwater dive CSV", type="csv") ## TODO FINISH THIS ##
 # print(uploaded_file);
 
 # Actual contents
-ddp = do_the_dive(new_gf_low, new_gf_high);
+ddp = do_the_dive(new_gf_low, new_gf_high, do_change_stops);
 
 UI.st_header(st, 'Dive profile');
 UI.st_plotly_diveprofile(st, ddp);
