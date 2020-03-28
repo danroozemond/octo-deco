@@ -40,7 +40,6 @@ def st_plotly_diveprofile(st, diveprofile):
     fs_xs = list(df["time"]);
     fs_ys1 = df["FirstStop"];
     fs_ys2 = [ 0 for y in fs_ys1 ];
-    print(len(fs_xs), len(fs_xs[::-1]), len(fs_ys1), len(fs_ys2));
     fig.add_trace( go.Scatter(
         x = fs_xs + fs_xs[::-1],
         y = fs_ys2 + fs_ys1,
