@@ -42,10 +42,15 @@ def do_the_dive(gf_low, gf_high):
     return dp;
 
 # Sidebar
-st.sidebar.markdown("** Hello, sidebar :) **");
+st.sidebar.markdown("** Hello, world :) **");
 new_gf_low  = st.sidebar.slider('GF low',  10, 100, 35,  5 );
 new_gf_high = st.sidebar.slider('GF high', 10, 100, 70, 5 );
 
+# st.sidebar.markdown("** Upload file :) **");
+# uploaded_file = st.sidebar.file_uploader("Upload Shearwater dive CSV", type="csv") ## TODO FINISH THIS ##
+# print(uploaded_file);
+
+# Actual contents
 ddp = do_the_dive(new_gf_low, new_gf_high);
 
 UI.st_header(st, 'Dive profile');
