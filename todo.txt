@@ -4,10 +4,8 @@ TODO this list :) [also check TO-DOs in .py's]
 https://docs.streamlit.io/api.html#add-widgets-to-sidebar
 => streamlit.file_uploader
 
-* deco obligation (shaded) in plotly chart
 * update_stops as opposed to add_stops, so that you can see eg. ceiling and deco obligation compared between GF's
 * mark interpolated points and remove those when recompute_stops
-Git clone op AWS
 
 
 Longer term

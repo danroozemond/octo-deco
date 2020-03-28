@@ -162,7 +162,7 @@ class Buhlmann:
         if max_over_supersat(t0) < 0:
             return 0.0, tissue_state;
         assert max_over_supersat(t1) < 0;  # Otherwise even a 24hr stop is not enough??
-        while t1 - t0 > 0.1:
+        while t1 - t0 > 0.01:
             h = t0 + (t1 - t0) / 2;
             if max_over_supersat(h) > 0:
                 t0 = h;
@@ -203,8 +203,6 @@ class Buhlmann:
             stoplength, tissue_state = self._time_to_stay_at_stop(p_now, tissue_state, gas, amb_to_gf);
             result.append( ( Util.Pamb_to_depth(p_now), stoplength, gas ) );
             p_now = Util.next_stop_Pamb(p_now);
-        # Clean up the result
-        result = [ x for x in result if x[1] != 0 ];
         return result, p_ceiling, amb_to_gf;
 
     def deco_info(self, tissue_state, depth, gases, amb_to_gf = None):
@@ -232,6 +230,8 @@ class Buhlmann:
         stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, gases, amb_to_gf = amb_to_gf);
         result['Ceil'] = Util.Pamb_to_depth(p_ceiling);
         result['Stops'] = stops;
+        nontrivialstops = [ s for s in stops if round(s[1]) >= 1 ];
+        result['FirstStop'] = nontrivialstops[0][0] if len(nontrivialstops) > 0 else 0;
         result['amb_to_gf'] = amb_to_gf;
         result['GFLimitNow'] = amb_to_gf(p_amb) if amb_to_gf is not None else 0.0;
         result['TTS'] = depth/self.ascent_speed + sum([ s[1] for s in stops ]);
