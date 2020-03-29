@@ -14,9 +14,9 @@ class AmbientToGF:
     and at p_surface, allowed supersat is gf_high
     We return a function that linearly interpolates; is flat outside the bounds
     """
-    def __init__(self, p_first_stop, p_surface, p_target, gf_low, gf_high):
+    def __init__(self, p_first_stop, p_last_stop, p_target, gf_low, gf_high):
         self.p_first_stop = p_first_stop;
-        self.p_surface = p_surface;
+        self.p_last_stop = p_last_stop;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.p_target = p_target;
@@ -24,13 +24,13 @@ class AmbientToGF:
     def __call__(self, p_amb):
         if p_amb > self.p_first_stop:
             return self.gf_low;
-        elif p_amb < self.p_surface:
+        elif p_amb < self.p_last_stop:
             return self.gf_high;
-        elif self.p_first_stop == self.p_surface:
+        elif self.p_first_stop == self.p_last_stop:
             return self.gf_high;
         else:
             return self.gf_high + \
-                   (p_amb - self.p_surface) / (self.p_first_stop - self.p_surface) * (self.gf_low - self.gf_high);
+                   (p_amb - self.p_last_stop) / (self.p_first_stop - self.p_last_stop) * (self.gf_low - self.gf_high);
 
 
 class Buhlmann:
@@ -49,6 +49,8 @@ class Buhlmann:
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = 1.60;
+        self._p_last_stop = 1.3;
+        self._p_water_vapour = 0.0627;
         self.descent_speed = descent_speed;
         self.ascent_speed = ascent_speed;
 
@@ -57,18 +59,21 @@ class Buhlmann:
 
     """
     TissueState is represented as a list of current tissue loadings (N2, He)
+    
+    Note: Inspired gas loading equations depend on the partial pressure of inert gas in the alveolar.
+    WV_Buhlmann = PP_H2O = 0.0627 bar
     """
     def cleared_tissue_state(self):
         gas = Gas.Air();
         return [ (gas[ 'fN2' ], gas[ 'fHe' ]) for i in range(self._n_tissues) ];
 
     @staticmethod
-    def _updated_partial_pressure(pp_tissue, pp_ambient, halftime, duration):
-        return pp_tissue + (1 - pow(.5, duration / halftime)) * (pp_ambient - pp_tissue);
+    def _updated_partial_pressure(pp_tissue, pp_alveolar, halftime, duration):
+        return pp_tissue + (1 - pow(.5, duration / halftime)) * (pp_alveolar - pp_tissue);
 
     def updated_tissue_state(self, state, duration, p_amb, gas):
-        pp_amb_n2 = p_amb * gas[ 'fN2' ];
-        pp_amb_he = p_amb * gas[ 'fHe' ];
+        pp_amb_n2 = (p_amb - self._p_water_vapour) * gas[ 'fN2' ];
+        pp_amb_he = (p_amb - self._p_water_vapour) * gas[ 'fHe' ];
         new_state = [
             (Buhlmann._updated_partial_pressure(state[ i ][ 0 ], pp_amb_n2, self._halftimes[ 'N2' ][ i ], duration),
              Buhlmann._updated_partial_pressure(state[ i ][ 1 ], pp_amb_he, self._halftimes[ 'He' ][ i ], duration)
@@ -106,7 +111,8 @@ class Buhlmann:
     def _p_amb_tol_one_tissue(self, i, tissue_state_i):
         a, b = self._get_coeffs_a_b(i, tissue_state_i);
         p_compartment = sum(tissue_state_i);
-        p_amb_tol = (p_compartment - a) * b;
+        p_alveolar = (p_compartment - a) * b;
+        p_amb_tol = p_alveolar + self._p_water_vapour;
         return p_amb_tol;
 
     def _p_amb_tol(self, tissue_state):
@@ -177,13 +183,15 @@ class Buhlmann:
         # Determine ceiling, and allowed supersaturation at the various levels
         if amb_to_gf is None:
             p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, self.gf_low);
+            # TODO -- issue: p_ceiling gives ceiling assuming *current* gf, and that's incorrect
             p_ceiling = max(p_amb_tol_gfnow);
             p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
-            amb_to_gf = AmbientToGF( p_first_stop, 1.0, p_target, self.gf_low, self.gf_high );
+            amb_to_gf = AmbientToGF( p_first_stop, self._p_last_stop, p_target, self.gf_low, self.gf_high );
             return p_ceiling, self.gf_low, amb_to_gf;
         else:
             gf_now = amb_to_gf(p_amb);
             p_amb_tol_gfnow = self._p_amb_tol_gf(tissue_state, gf_now);
+            # TODO -- issue: p_ceiling gives ceiling assuming *current* gf, and that's incorrect
             p_ceiling = max(p_amb_tol_gfnow);
             # The original amb_to_gf should be considered void if the ceiling is now more than orig first stop
             if p_ceiling > amb_to_gf.p_first_stop:
@@ -219,7 +227,7 @@ class Buhlmann:
                   for i in range(self._n_tissues) ];
         gf99 = max(gf99s);
         leading_tissue_i = gf99s.index(gf99);
-        surfacegfs = [ self._GF99_for_one_tissue(p_comptmt[ i ], 1.0, p_amb_tol[ i ])
+        surfacegfs = [ self._GF99_for_one_tissue(p_comptmt[ i ], self._p_last_stop, p_amb_tol[ i ])
                        for i in range(self._n_tissues) ];
         result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
                   'GF99': round(gf99, 1),
