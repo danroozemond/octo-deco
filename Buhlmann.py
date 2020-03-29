@@ -39,14 +39,8 @@ class Buhlmann:
     Buhlmann class contains all essential logic for deco model
     """
     def __init__(self, gf_low, gf_high, descent_speed, ascent_speed):
-        self._n_tissues = BuhlmannConstants.ZHL_16C_N_TISSUES;
-        self._halftimes = {'N2': BuhlmannConstants.ZHL_16C_N2_HALFTIMES,
-                           'He': BuhlmannConstants.ZHL_16C_HE_HALFTIMES};
-        self._coeffs = {'N2': {'a': BuhlmannConstants.ZHL_16C_N2_A_VALUES,
-                               'b': BuhlmannConstants.ZHL_16C_N2_B_VALUES},
-                        'He': {'a': BuhlmannConstants.ZHL_16C_HE_A_VALUES,
-                               'b': BuhlmannConstants.ZHL_16C_HE_B_VALUES}
-                        };
+        self._constants = BuhlmannConstants.ZHL_16B;
+        self._n_tissues = self._constants.N_TISSUES;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = 1.60;
@@ -76,8 +70,8 @@ class Buhlmann:
         pp_amb_n2 = (p_amb - self._p_water_vapour) * gas[ 'fN2' ];
         pp_amb_he = (p_amb - self._p_water_vapour) * gas[ 'fHe' ];
         new_state = [
-            (Buhlmann._updated_partial_pressure(state[ i ][ 0 ], pp_amb_n2, self._halftimes[ 'N2' ][ i ], duration),
-             Buhlmann._updated_partial_pressure(state[ i ][ 1 ], pp_amb_he, self._halftimes[ 'He' ][ i ], duration)
+            (Buhlmann._updated_partial_pressure(state[ i ][ 0 ], pp_amb_n2, self._constants.N2_HALFTIMES[i], duration),
+             Buhlmann._updated_partial_pressure(state[ i ][ 1 ], pp_amb_he, self._constants.HE_HALFTIMES[i], duration),
              ) for i in range(self._n_tissues) ];
         return new_state;
 
@@ -98,13 +92,13 @@ class Buhlmann:
     """
 
     def _get_coeffs_a_b(self, i, tissue_state_i):
-        a = self._coeffs[ 'N2' ][ 'a' ][ i ];
-        b = self._coeffs[ 'N2' ][ 'b' ][ i ];
+        a = self._constants.N2_A_VALUES[ i ];
+        b = self._constants.N2_B_VALUES[ i ];
         pp_n2, pp_he = tissue_state_i;
         if pp_he > 0.0:
             # Trimix case
-            a_he = self._coeffs[ 'He' ][ 'a' ][ i ];
-            b_he = self._coeffs[ 'He' ][ 'b' ][ i ];
+            a_he = self._constants.HE_A_VALUES[ i ];
+            b_he = self._constants.HE_B_VALUES[ i ];
             a = pp_n2 / (pp_n2 + pp_he) * a + pp_he / (pp_n2 + pp_he) * a_he;
             b = pp_n2 / (pp_n2 + pp_he) * b + pp_he / (pp_n2 + pp_he) * b_he;
         return a, b;
