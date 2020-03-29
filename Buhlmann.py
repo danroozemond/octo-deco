@@ -39,13 +39,12 @@ class Buhlmann:
     Buhlmann class contains all essential logic for deco model
     """
     def __init__(self, gf_low, gf_high, descent_speed, ascent_speed):
-        self._constants = BuhlmannConstants.ZHL_16B;
+        self._constants = BuhlmannConstants.ZHL_16C_1a;
         self._n_tissues = self._constants.N_TISSUES;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = 1.60;
         self._p_last_stop = 1.3;
-        self._p_water_vapour = 0.0627;
         self.descent_speed = descent_speed;
         self.ascent_speed = ascent_speed;
 
@@ -67,8 +66,8 @@ class Buhlmann:
         return pp_tissue + (1 - pow(.5, duration / halftime)) * (pp_alveolar - pp_tissue);
 
     def updated_tissue_state(self, state, duration, p_amb, gas):
-        pp_amb_n2 = (p_amb - self._p_water_vapour) * gas[ 'fN2' ];
-        pp_amb_he = (p_amb - self._p_water_vapour) * gas[ 'fHe' ];
+        pp_amb_n2 = p_amb * gas[ 'fN2' ];
+        pp_amb_he = p_amb * gas[ 'fHe' ];
         new_state = [
             (Buhlmann._updated_partial_pressure(state[ i ][ 0 ], pp_amb_n2, self._constants.N2_HALFTIMES[i], duration),
              Buhlmann._updated_partial_pressure(state[ i ][ 1 ], pp_amb_he, self._constants.HE_HALFTIMES[i], duration),
@@ -107,7 +106,7 @@ class Buhlmann:
         a, b = self._get_coeffs_a_b(i, tissue_state_i);
         p_compartment = sum(tissue_state_i);
         p_alveolar = (p_compartment - a) * b;
-        p_amb_tol = p_alveolar + self._p_water_vapour;
+        p_amb_tol = p_alveolar;
         return p_amb_tol;
 
     def _p_amb_tol(self, tissue_state):
@@ -128,6 +127,14 @@ class Buhlmann:
             # No super saturation
             return 0.0;
         return 100.0 * (p_comptmt - p_amb) / (p_comptmt - p_amb_tol);
+
+    def _GF99_new(self, tissue_state, p_amb):
+        def for_one(i):
+            a, b = self._get_coeffs_a_b(i, tissue_state[i]);
+            m0 = a + p_amb/b;
+            return 100.0 * ( sum(tissue_state[i]) - p_amb ) / ( m0 - p_amb );
+        return [ for_one(i) for i in range(self._n_tissues) ];
+
 
     def _GF99(self, p_comptmt, p_amb, p_amb_tol):
         return max([ Buhlmann._GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
@@ -220,12 +227,11 @@ class Buhlmann:
                   for i in range(self._n_tissues) ];
         gf99 = max(gf99s);
         leading_tissue_i = gf99s.index(gf99);
-        # TODO obviously this was incorrect: surface gf is at p=1.0, not at p_last_stop.
-        surfacegfs = [ self._GF99_for_one_tissue(p_comptmt[ i ], 1.0, p_amb_tol[ i ])
-                       for i in range(self._n_tissues) ];
+        surfacegfs = self._GF99_new( tissue_state, 1.0 );
         result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
                   'GF99': round(gf99, 1),
                   'SurfaceGF': round(max(surfacegfs), 1),
+                  'SurfaceGFs': surfacegfs,
                   'LeadingTissueIndex': leading_tissue_i,
                   'allGF99s': gf99s
                   };
