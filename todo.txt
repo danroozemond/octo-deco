@@ -4,8 +4,11 @@ TODO this list :) [also check TO-DOs in .py's]
 https://docs.streamlit.io/api.html#add-widgets-to-sidebar
 => streamlit.file_uploader
 
-* update_stops as opposed to add_stops, so that you can see eg. ceiling and deco obligation compared between GF's
-* mark interpolated points and remove those when recompute_stops
+* get actual ZHL-16C from decotengu
+* fix p_ceiling to take into account gf's (make it a function on AmbientToGF)
+* (how to take into account alveolar? remove this detail again?)
+
+* licensing? https://www.gnu.org/licenses/lgpl-3.0.txt
 
 
 Longer term

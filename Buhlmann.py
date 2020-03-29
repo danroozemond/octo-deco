@@ -225,7 +225,8 @@ class Buhlmann:
                   for i in range(self._n_tissues) ];
         gf99 = max(gf99s);
         leading_tissue_i = gf99s.index(gf99);
-        surfacegfs = [ self._GF99_for_one_tissue(p_comptmt[ i ], self._p_last_stop, p_amb_tol[ i ])
+        # TODO obviously this was incorrect: surface gf is at p=1.0, not at p_last_stop.
+        surfacegfs = [ self._GF99_for_one_tissue(p_comptmt[ i ], 1.0, p_amb_tol[ i ])
                        for i in range(self._n_tissues) ];
         result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
                   'GF99': round(gf99, 1),
