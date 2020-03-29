@@ -17,7 +17,7 @@ class AmbientToGF:
     """
     def __init__(self, p_first_stop, p_target, gf_low, gf_high):
         self.p_first_stop = p_first_stop;
-        self.p_last_stop = 1.0;
+        self.p_surface = 1.0;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.p_target = p_target;
@@ -25,13 +25,13 @@ class AmbientToGF:
     def __call__(self, p_amb):
         if p_amb > self.p_first_stop:
             return self.gf_low;
-        elif p_amb < self.p_last_stop:
+        elif p_amb < self.p_surface:
             return self.gf_high;
-        elif self.p_first_stop == self.p_last_stop:
+        elif self.p_first_stop == self.p_surface:
             return self.gf_high;
         else:
             return self.gf_high + \
-                   (p_amb - self.p_last_stop) / (self.p_first_stop - self.p_last_stop) * (self.gf_low - self.gf_high);
+                   (p_amb - self.p_surface) / (self.p_first_stop - self.p_surface) * (self.gf_low - self.gf_high);
 
 
 class Buhlmann:
@@ -112,6 +112,7 @@ class Buhlmann:
     def _p_amb_tol(self, tissue_state):
         return [ self._p_amb_tol_one_tissue(i, tissue_state[ i ]) for i in range(self._n_tissues) ];
 
+    # TODO - REMOVE USAGE OF THIS
     def _p_amb_tol_gf(self, tissue_state, gf):
         p_amb_tol = self._p_amb_tol(tissue_state);
         p_comptmt = [ sum(ts) for ts in tissue_state ];
@@ -119,26 +120,12 @@ class Buhlmann:
               for i in range(self._n_tissues) ];
         return p;
 
-    @staticmethod
-    def _GF99_for_one_tissue(p_comptmt, p_amb, p_amb_tol):
-        if p_comptmt == p_amb_tol:
-            return 0.0;
-        if p_comptmt < p_amb:
-            # No super saturation
-            return 0.0;
-        return 100.0 * (p_comptmt - p_amb) / (p_comptmt - p_amb_tol);
-
     def _GF99_new(self, tissue_state, p_amb):
         def for_one(i):
             a, b = self._get_coeffs_a_b(i, tissue_state[i]);
             m0 = a + p_amb/b;
             return 100.0 * ( sum(tissue_state[i]) - p_amb ) / ( m0 - p_amb );
-        return [ for_one(i) for i in range(self._n_tissues) ];
-
-
-    def _GF99(self, p_comptmt, p_amb, p_amb_tol):
-        return max([ Buhlmann._GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
-                     for i in range(self._n_tissues) ]);
+        return [ max(0.0,for_one(i)) for i in range(self._n_tissues) ];
 
     def _best_deco_gas(self, p_amb, gases):
         # What is the best deco gas at this ambient pressure?
@@ -156,9 +143,10 @@ class Buhlmann:
         gf99allowed_next = amb_to_gf( p_amb_next_stop );
 
         def max_over_supersat(t):
-            ts2 = self.updated_tissue_state(tissue_state, t, p_amb, gas);
+            ts2 = self.updated_tissue_state( tissue_state, t, p_amb, gas );
+            gf99attained_next = self._GF99_new( ts2, p_amb_next_stop );
             p_at = self._p_amb_tol_gf(ts2, gf99allowed_next);  # using GF for next stop
-            x = [ p - p_amb_next_stop for p in p_at ];
+            x = [ p - gf99allowed_next for p in gf99attained_next ];
             return max(x);
 
         # Binary search:
@@ -218,13 +206,11 @@ class Buhlmann:
     def deco_info(self, tissue_state, depth, gases, amb_to_gf = None):
         p_amb = Util.depth_to_Pamb(depth);
         p_amb_tol = self._p_amb_tol(tissue_state);
-        p_comptmt = [ sum(ts) for ts in tissue_state ];
         p_ceiling_99 = max(p_amb_tol);
         # GF99: how do compartment pressure, ambient pressure, tolerance compare
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
-        gf99s = [ self._GF99_for_one_tissue(p_comptmt[ i ], p_amb, p_amb_tol[ i ])
-                  for i in range(self._n_tissues) ];
+        gf99s = self._GF99_new(tissue_state, p_amb);
         gf99 = max(gf99s);
         leading_tissue_i = gf99s.index(gf99);
         surfacegfs = self._GF99_new( tissue_state, 1.0 );

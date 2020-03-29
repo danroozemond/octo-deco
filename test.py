@@ -1,8 +1,9 @@
 # Please see LICENSE.md
-import Gas;
-from DiveProfile import DiveProfile;
-
 import sys;
+
+import Gas;
+import Util;
+from DiveProfile import DiveProfile;
 
 # dp = DiveProfile();
 # dp.append_section(40, 35, gas = Gas.Air());
@@ -23,8 +24,21 @@ dp.append_surfacing()
 dp.add_stops_to_surface();
 # dp.append_section(0, 30);
 # dp.append_surfacing();
-# dp.interpolate_points();
+dp.interpolate_points();
 
+bm = dp.deco_model();
+
+p = dp._points[4];
+ts = p.tissue_state;
+pcomp = list(map(lambda t:t[0],ts))
+print('p_comp=',pcomp);
+pat = bm._p_amb_tol(ts);
+print('p_amb_tol=', pat)
+print('p_amb is=', Util.depth_to_Pamb(20));
+surgfnw = bm._GF99_new(ts, 1.0);
+print('surgf =', surgfnw)
+
+# sys.exit(-3);
 
 # Test
 for p in dp.points():
