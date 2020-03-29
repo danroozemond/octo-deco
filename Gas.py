@@ -1,3 +1,5 @@
+# Please see LICENSE.md
+
 """
 Gases are represented as simple dicts mapping string to float
  key: (fO2, fN2, fHe)

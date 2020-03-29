@@ -1,3 +1,4 @@
+# Please see LICENSE.md
 import BuhlmannConstants
 import Gas
 import Util

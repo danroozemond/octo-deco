@@ -1,7 +1,8 @@
-import sys;
-
+# Please see LICENSE.md
 import Gas;
 from DiveProfile import DiveProfile;
+
+import sys;
 
 # dp = DiveProfile();
 # dp.append_section(40, 35, gas = Gas.Air());
