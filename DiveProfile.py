@@ -23,6 +23,8 @@ class DiveProfile:
         self._ascent_speed = ascent_speed;
         self._gases_carried = set();
         self._deco_stops_computation_time = 0.0;
+        self._desc_deco_model_display = '';
+        self._desc_deco_model_profile = '';
         if deco_model is not None:
             self._deco_model = deco_model;
         else:
@@ -42,7 +44,8 @@ class DiveProfile:
     Deco model info
     '''
     def dive_summary(self):
-        v = {'Decompression model': self._deco_model.description(),
+        v = {'Deco model (display)': self._desc_deco_model_display,
+             'Deco model (profile)': self._desc_deco_model_profile,
              'Gases carried': self._gases_carried
              };
 
@@ -127,12 +130,16 @@ class DiveProfile:
                     pt = DivePoint(tcurr, dcurr, gas, new_points[-1]);
                     new_points.append(pt);
                     pt.is_deco_stop = orig_point.is_deco_stop;
+                    pt.is_interpolated_point = True;
             # Finally, add the point itself
             orig_point.prev = new_points[-1] if len(new_points) > 0 else None;
             new_points.append(orig_point);
             prev_point = orig_point;
         self._points = new_points;
         self.update_deco_info();
+
+    def uninterpolate_points(self):
+        self._points = [ p for p in self._points if not p.is_interpolated_point ];
 
     '''
     Deco model info
@@ -149,6 +156,7 @@ class DiveProfile:
         for p in self._points:
             p.set_updated_deco_info( self._deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = p.deco_info['amb_to_gf'];
+        self._desc_deco_model_profile = self._deco_model.description();
 
     '''
     Deco profile creation
@@ -201,11 +209,27 @@ class DiveProfile:
                         p.is_deco_stop = True;
                         p.set_updated_tissue_state(deco_model);
                         p.set_updated_deco_info(deco_model, self._gases_carried, amb_to_gf = amb_to_gf);
-                        # print('new point; time %.1f prev time %.1f duration %.1f depth: %.1f ceil: %.1f' \
-                        #       % ( p.time, p.prev.time, p.duration(), p.depth, p.deco_info['Ceil'] ) );
-                        assert p.depth > p.deco_info['Ceil'];
             else:
                 # Add new point (tissue state etc is computed correctly by construction)
                 i += 1;
         # Done!
+        self._desc_deco_model_profile = deco_model.description();
+        self._desc_deco_model_display = deco_model.description();
         self._deco_stops_computation_time = time.perf_counter() - t0;
+
+    '''
+    Modifying dive
+    '''
+    def set_gf( self, gf_low, gf_high ):
+        self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high, self._descent_speed, self._ascent_speed);
+        self.update_deco_info();
+
+    def update_stops( self ):
+        self._points = [ p for p in self._points if not p.is_deco_stop ];
+        self.uninterpolate_points();
+        self.add_stops();
+        self.interpolate_points();
+
+
+
+

@@ -10,6 +10,7 @@ class DivePoint:
         self.tissue_state = None;
         self.deco_info = None;
         self.is_deco_stop = False;
+        self.is_interpolated_point = False;
         self.prev = prev;
 
     def __repr__(self):
