@@ -1,7 +1,7 @@
 import streamlit as st;
 
-import Gas
-import UI
+import Gas;
+import UI;
 from DiveProfile import DiveProfile;
 
 

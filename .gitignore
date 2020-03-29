@@ -128,5 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Dan, 20200329
-.idea/
+# Dan, manual
+/.idea/
