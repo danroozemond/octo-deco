@@ -45,6 +45,7 @@ class Buhlmann:
         self.gf_high = gf_high;
         self.max_pO2_deco = 1.60;
         self._p_last_stop = 1.3;
+        self._p_water_vapour = 0.0627;
         self.descent_speed = descent_speed;
         self.ascent_speed = ascent_speed;
 
@@ -59,15 +60,15 @@ class Buhlmann:
     """
     def cleared_tissue_state(self):
         gas = Gas.Air();
-        return [ (gas[ 'fN2' ], gas[ 'fHe' ]) for i in range(self._n_tissues) ];
+        return [ ((1.0 - self._p_water_vapour) * gas[ 'fN2' ], (1.0 - self._p_water_vapour) * gas[ 'fHe' ]) for i in range(self._n_tissues) ];
 
     @staticmethod
     def _updated_partial_pressure(pp_tissue, pp_alveolar, halftime, duration):
         return pp_tissue + (1 - pow(.5, duration / halftime)) * (pp_alveolar - pp_tissue);
 
     def updated_tissue_state(self, state, duration, p_amb, gas):
-        pp_amb_n2 = p_amb * gas[ 'fN2' ];
-        pp_amb_he = p_amb * gas[ 'fHe' ];
+        pp_amb_n2 = (p_amb - self._p_water_vapour) * gas[ 'fN2' ];
+        pp_amb_he = (p_amb - self._p_water_vapour) * gas[ 'fHe' ];
         new_state = [
             (Buhlmann._updated_partial_pressure(state[ i ][ 0 ], pp_amb_n2, self._constants.N2_HALFTIMES[i], duration),
              Buhlmann._updated_partial_pressure(state[ i ][ 1 ], pp_amb_he, self._constants.HE_HALFTIMES[i], duration),
@@ -105,14 +106,13 @@ class Buhlmann:
     def _p_amb_tol_one_tissue(self, i, tissue_state_i):
         a, b = self._get_coeffs_a_b(i, tissue_state_i);
         p_compartment = sum(tissue_state_i);
-        p_alveolar = (p_compartment - a) * b;
-        p_amb_tol = p_alveolar;
+        p_amb_tol = (p_compartment - a) * b;
         return p_amb_tol;
 
     def _p_amb_tol(self, tissue_state):
         return [ self._p_amb_tol_one_tissue(i, tissue_state[ i ]) for i in range(self._n_tissues) ];
 
-    # TODO - REMOVE USAGE OF THIS
+    # TODO - REMOVE USAGE OF THIS (it also does not take WV into account)
     def _p_amb_tol_gf(self, tissue_state, gf):
         p_amb_tol = self._p_amb_tol(tissue_state);
         p_comptmt = [ sum(ts) for ts in tissue_state ];
@@ -125,7 +125,7 @@ class Buhlmann:
             a, b = self._get_coeffs_a_b(i, tissue_state[i]);
             m0 = a + p_amb/b;
             return 100.0 * ( sum(tissue_state[i]) - p_amb ) / ( m0 - p_amb );
-        return [ max(0.0,for_one(i)) for i in range(self._n_tissues) ];
+        return [ max(0.0, for_one(i)) for i in range(self._n_tissues) ];
 
     def _best_deco_gas(self, p_amb, gases):
         # What is the best deco gas at this ambient pressure?
@@ -145,7 +145,6 @@ class Buhlmann:
         def max_over_supersat(t):
             ts2 = self.updated_tissue_state( tissue_state, t, p_amb, gas );
             gf99attained_next = self._GF99_new( ts2, p_amb_next_stop );
-            p_at = self._p_amb_tol_gf(ts2, gf99allowed_next);  # using GF for next stop
             x = [ p - gf99allowed_next for p in gf99attained_next ];
             return max(x);
 

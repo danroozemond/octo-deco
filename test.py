@@ -14,11 +14,11 @@ from DiveProfile import DiveProfile;
 # dp.update_deco_info();
 # print(dp.dataframe());
 
-dp = DiveProfile(gf_low = 99, gf_high = 99);
+dp = DiveProfile(gf_low = 35, gf_high = 70);
 # dp.add_gas( Gas.Air() );
 # dp.add_gas( Gas.Nitrox(50) );
 dp.append_section(20, 45, gas = Gas.Air()); # Gas.Trimix(21, 35));
-dp.append_surfacing()
+# dp.append_surfacing()
 # dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
 # dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
 dp.add_stops_to_surface();
@@ -38,7 +38,9 @@ print('p_amb is=', Util.depth_to_Pamb(20));
 surgfnw = bm._GF99_new(ts, 1.0);
 print('surgf =', surgfnw)
 
-# sys.exit(-3);
+print('\n\n\n\n')
+print(dp._points[35].deco_info);
+
 
 # Test
 for p in dp.points():
