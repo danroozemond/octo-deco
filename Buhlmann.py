@@ -14,9 +14,9 @@ class AmbientToGF:
     and at p_surface, allowed supersat is gf_high
     We return a function that linearly interpolates; is flat outside the bounds
     """
-    def __init__(self, p_first_stop, p_last_stop, p_target, gf_low, gf_high):
+    def __init__(self, p_first_stop, p_target, gf_low, gf_high):
         self.p_first_stop = p_first_stop;
-        self.p_last_stop = p_last_stop;
+        self.p_last_stop = 1.0;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.p_target = p_target;
@@ -186,7 +186,7 @@ class Buhlmann:
             # TODO -- issue: p_ceiling gives ceiling assuming *current* gf, and that's incorrect
             p_ceiling = max(p_amb_tol_gfnow);
             p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
-            amb_to_gf = AmbientToGF( p_first_stop, self._p_last_stop, p_target, self.gf_low, self.gf_high );
+            amb_to_gf = AmbientToGF( p_first_stop, p_target, self.gf_low, self.gf_high );
             return p_ceiling, self.gf_low, amb_to_gf;
         else:
             gf_now = amb_to_gf(p_amb);
