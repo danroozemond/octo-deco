@@ -30,6 +30,6 @@ def Nitrox(percO2):
 
 
 def Trimix(percO2, percHe):
-    return Gas({'fO2': percO2/100, 'fN2': 1 - percO2/100 - percO2/100, 'fHe': percHe/100});
+    return Gas({'fO2': percO2/100, 'fN2': 1 - percO2/100 - percHe/100, 'fHe': percHe/100});
 
 
