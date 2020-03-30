@@ -113,7 +113,7 @@ class Buhlmann:
         m0 = a + p_amb / b;
         return m0;
 
-    def _p_ceiling_for_gf_now(self, tissue_state, gf_now):
+    def p_ceiling_for_gf_now(self, tissue_state, gf_now):
         # Derived from _GF99_new as defined below
         gff = gf_now / 100.0;
 
@@ -125,10 +125,6 @@ class Buhlmann:
 
         p_ceilings = [ for_one(i) for i in range(self._n_tissues) ];
         return max(p_ceilings);
-
-    def p_ceiling_for_gf(self, tissue_state, amb_to_gf):
-        pc = self._p_ceiling_for_gf_now(tissue_state, amb_to_gf.gf_high);
-        return pc;
 
     def _GF99_new(self, tissue_state, p_amb):
         def for_one(i):
@@ -181,12 +177,12 @@ class Buhlmann:
         # Allowed to pass in amb_to_gf in case we recompute part of the deco after it has already started
         # Determine ceiling, and allowed supersaturation at the various levels
         if amb_to_gf is None:
-            p_ceiling = self._p_ceiling_for_gf_now(tissue_state, self.gf_low);
+            p_ceiling = self.p_ceiling_for_gf_now(tissue_state, self.gf_low);
             p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
             amb_to_gf = AmbientToGF(p_first_stop, p_target, self.gf_low, self.gf_high);
             return amb_to_gf;
         else:
-            p_ceiling = self.p_ceiling_for_gf(tissue_state, amb_to_gf);
+            p_ceiling = self.p_ceiling_for_gf_now(tissue_state, amb_to_gf(p_amb));
             # The original amb_to_gf should be considered void if the ceiling is now more than orig first stop
             if p_ceiling > amb_to_gf.p_first_stop:
                 return self._get_ambtogf(tissue_state, p_amb, p_target);
@@ -195,7 +191,7 @@ class Buhlmann:
     def compute_deco_profile(self, tissue_state, p_amb, gases, p_target = 1.0, amb_to_gf = None):
         # Returns triples depth, length, gas
         amb_to_gf = self._get_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
-        p_ceiling = self.p_ceiling_for_gf(tissue_state, amb_to_gf);
+        p_ceiling = self.p_ceiling_for_gf_now(tissue_state, amb_to_gf(p_amb));
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
         # 'Walk' up
@@ -210,7 +206,7 @@ class Buhlmann:
 
     def deco_info(self, tissue_state, depth, gases, amb_to_gf = None):
         p_amb = Util.depth_to_Pamb(depth);
-        p_ceiling_99 = self._p_ceiling_for_gf_now(tissue_state, 99.0);
+        p_ceiling_99 = self.p_ceiling_for_gf_now(tissue_state, 99.0);
         # GF99: how do compartment pressure, ambient pressure, tolerance compare
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
