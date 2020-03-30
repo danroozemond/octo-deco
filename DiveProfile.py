@@ -1,3 +1,4 @@
+# Please see LICENSE.md
 import math;
 import time;
 
@@ -5,7 +6,7 @@ import pandas as pd;
 
 import Buhlmann;
 import Gas;
-# import Util;
+import Util;
 from DivePoint import DivePoint
 
 '''
@@ -176,15 +177,15 @@ class DiveProfile:
             # Update tissues, based on last point considered
             p.set_updated_tissue_state( deco_model );
             p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
-            # print('existing point; time %.1f prev time %.1f duration %.1f depth: %.1f ceil: %.1f stops: %s' \
-            #       % ( p.time, p.prev.time, p.duration(), p.depth, \
-            #           p.deco_info['Ceil'], Util.stops_to_string(p.deco_info['Stops']) ) );
+            print('existing point; time %.1f prev time %.1f duration %.1f depth: %.1f ceil: %.1f stops: %s' \
+                  % ( p.time, p.prev.time, p.duration(), p.depth, \
+                      p.deco_info['Ceil'], Util.stops_to_string(p.deco_info['Stops']) ) );
             amb_to_gf = p.deco_info['amb_to_gf'];
             gf_now = amb_to_gf(p.p_amb);
-            # print('add_stops, time %.1f, depth %.1f, GF %.1f ?<=? %.1f' \
-            #       % ( p.time, p.depth, p.deco_info['GF99'], gf_now) );
+            print('add_stops, time %.1f, depth %.1f, GF %.1f ?<=? %.1f' \
+                  % ( p.time, p.depth, p.deco_info['GF99'], gf_now) );
             # Are we in violation?
-            if p.deco_info['GF99'] > gf_now:
+            if p.deco_info['GF99'] > gf_now+0.3:
                 # Undo adding this point, then attempt to readd in next iteration
                 self._points.pop();
                 # Add points before, but take care to live along the GF line
@@ -195,20 +196,23 @@ class DiveProfile:
                                             p_target = op.p_amb,
                                             amb_to_gf = amb_to_gf );
                 assert len(stops) > 0;
-                # print("  adding stops:", Util.stops_to_string(stops));
-                # print("  based stops on point:", self._points[-1].deco_info)
-                # print("  computed ceiling: %.1f = %.1f" %( p_ceiling, Util.Pamb_to_depth(p_ceiling) ));
+                print("  adding stops:", Util.stops_to_string(stops));
+                print("  based stops on point:", self._points[-1].deco_info)
+                print("  computed ceiling: %.1f = %.1f" %( p_ceiling, Util.Pamb_to_depth(p_ceiling) ));
                 # Do not forget to update tissue state and deco info
                 for s in stops:
                     np = len(self._points);
                     self.append_section( s[0], s[1], gas = s[2] );
-                    # print('updating tissue state and deco info, array lengths:', np, len(self._points))
                     # Update tissue state and deco info
                     for j in range(np, len(self._points)):
                         p = self._points[ j ]
                         p.is_deco_stop = True;
                         p.set_updated_tissue_state(deco_model);
                         p.set_updated_deco_info(deco_model, self._gases_carried, amb_to_gf = amb_to_gf);
+                        print('new point; time %.1f prev time %.1f duration %.1f depth: %.1f ceil: %.1f' \
+                              % ( p.time, p.prev.time, p.duration(), p.depth, p.deco_info['Ceil'] ) );
+                        # TODO comment this one back in?
+                        # assert p.depth > p.deco_info['Ceil'];
             else:
                 # Add new point (tissue state etc is computed correctly by construction)
                 i += 1;

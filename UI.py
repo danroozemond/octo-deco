@@ -1,3 +1,4 @@
+# Please see LICENSE.md
 """
 UI-related methods here
 """
