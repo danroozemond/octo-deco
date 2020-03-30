@@ -185,7 +185,7 @@ class DiveProfile:
             print('add_stops, time %.1f, depth %.1f, GF %.1f ?<=? %.1f' \
                   % ( p.time, p.depth, p.deco_info['GF99'], gf_now) );
             # Are we in violation?
-            if p.deco_info['GF99'] > gf_now:
+            if p.deco_info['GF99'] > gf_now+0.3:
                 # Undo adding this point, then attempt to readd in next iteration
                 self._points.pop();
                 # Add points before, but take care to live along the GF line
