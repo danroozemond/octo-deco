@@ -127,16 +127,7 @@ class Buhlmann:
         return max(p_ceilings);
 
     def p_ceiling_for_gf(self, tissue_state, amb_to_gf):
-        i = 0;
-        pcp = 0.0
-        pc = self._p_ceiling_for_gf_now(tissue_state, amb_to_gf.gf_low);
-        while abs(pc - pcp) > 0.1:
-            pcp = pc;
-            pc = self._p_ceiling_for_gf_now(tissue_state, amb_to_gf(pc));
-            # Ugly loop protection
-            i += 1;
-            assert i < 10;
-        # Done
+        pc = self._p_ceiling_for_gf_now(tissue_state, amb_to_gf.gf_high);
         return pc;
 
     def _GF99_new(self, tissue_state, p_amb):
