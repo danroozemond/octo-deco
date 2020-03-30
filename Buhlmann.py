@@ -47,7 +47,6 @@ class Buhlmann:
         self.gf_high = gf_high;
         self.max_pO2_deco = 1.60;
         self._p_last_stop = 1.3;
-        self._p_water_vapour = 0.0627;
         self.descent_speed = descent_speed;
         self.ascent_speed = ascent_speed;
 
@@ -63,7 +62,7 @@ class Buhlmann:
 
     def cleared_tissue_state(self):
         gas = Gas.Air();
-        return [ ((1.0 - self._p_water_vapour) * gas[ 'fN2' ], (1.0 - self._p_water_vapour) * gas[ 'fHe' ]) for i in
+        return [ ( gas[ 'fN2' ], gas[ 'fHe' ]) for i in
                  range(self._n_tissues) ];
 
     @staticmethod
@@ -71,8 +70,8 @@ class Buhlmann:
         return pp_tissue + (1 - pow(.5, duration / halftime)) * (pp_alveolar - pp_tissue);
 
     def updated_tissue_state(self, state, duration, p_amb, gas):
-        pp_amb_n2 = (p_amb - self._p_water_vapour) * gas[ 'fN2' ];
-        pp_amb_he = (p_amb - self._p_water_vapour) * gas[ 'fHe' ];
+        pp_amb_n2 = p_amb * gas[ 'fN2' ];
+        pp_amb_he = p_amb * gas[ 'fHe' ];
         new_state = [
             (
             Buhlmann._updated_partial_pressure(state[ i ][ 0 ], pp_amb_n2, self._constants.N2_HALFTIMES[ i ], duration),
