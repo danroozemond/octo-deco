@@ -139,8 +139,13 @@ class DiveProfile:
         self._points = new_points;
         self.update_deco_info();
 
+    def _fix_all_points_prev(self):
+        for i in range(1, self._points):
+            self._points[i].prev = self._points[i-1];
+
     def uninterpolate_points(self):
         self._points = [ p for p in self._points if not p.is_interpolated_point ];
+        self._fix_all_points_prev();
 
     '''
     Deco model info
@@ -230,6 +235,7 @@ class DiveProfile:
 
     def update_stops( self ):
         self._points = [ p for p in self._points if not p.is_deco_stop ];
+        self._fix_all_points_prev();
         self.uninterpolate_points();
         self.add_stops();
         self.interpolate_points();
