@@ -25,12 +25,10 @@ dp.interpolate_points();
 
 bm = dp.deco_model();
 
-
-
 # # Test
 # for p in dp.points():
 #     print('time %.1f, depth %.1f, %s' % ( p.time, p.depth, p.deco_info) );
-#     if p.time == 44.0:
-#         print(p.deco_info['Stops']);
+#     print('fs: %.1f, ceil: %.1f / %.1f'% ( p.deco_info['FirstStop'], p.deco_info['Ceil'], bm.p_ceiling_for_amb_to_gf(p.tissue_state, p.deco_info['amb_to_gf'])));
+#     if p.time >= 35.0:
 #         print('stop');
 #         sys.exit(-1);

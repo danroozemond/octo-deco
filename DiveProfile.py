@@ -184,17 +184,21 @@ class DiveProfile:
             amb_to_gf = p.deco_info['amb_to_gf'];
             gf_now = amb_to_gf(p.p_amb);
             # Are we in violation?
-            if p.deco_info['GF99'] > gf_now+0.3:
-                # Undo adding this point, then attempt to readd in next iteration
-                self._points.pop();
+            if p.deco_info['GF99'] > gf_now+0.1:
                 # Add points before, but take care to live along the GF line
                 stops, p_ceiling, amb_to_gf = deco_model.compute_deco_profile(
-                                            self._points[-1].tissue_state,
-                                            self._points[-1].p_amb,
+                                            self._points[-2].tissue_state,
+                                            self._points[-2].p_amb,
                                             self._gases_carried,
                                             p_target = op.p_amb,
                                             amb_to_gf = amb_to_gf );
+                if len(stops) == 0:
+                    # Exceptional case, we were /right/ on the edge
+                    i += 1;
+                    continue;
                 assert len(stops) > 0;
+                # Undo adding this point, then attempt to readd in next iteration
+                self._points.pop();
                 # Do not forget to update tissue state and deco info
                 for s in stops:
                     np = len(self._points);
@@ -205,9 +209,10 @@ class DiveProfile:
                         p.is_deco_stop = True;
                         p.set_updated_tissue_state(deco_model);
                         p.set_updated_deco_info(deco_model, self._gases_carried, amb_to_gf = amb_to_gf);
-                        assert p.depth >= p.deco_info['Ceil']-0.1;
+                        # assert p.depth >= p.deco_info['Ceil']-0.1;
             else:
                 # Add new point (tissue state etc is computed correctly by construction)
+                # Careful, there's another i += 1 in an exceptional case above.
                 i += 1;
         # Done!
         self._desc_deco_model_profile = deco_model.description();
