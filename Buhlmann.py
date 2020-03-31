@@ -74,8 +74,7 @@ class Buhlmann:
     def updated_tissue_state(self, state, duration, p_amb, gas):
         pp_amb_n2 = p_amb * gas[ 'fN2' ];
         pp_amb_he = p_amb * gas[ 'fHe' ];
-        new_state = [
-            (
+        new_state = [ (
             Buhlmann._updated_partial_pressure(state[ i ][ 0 ], pp_amb_n2, self._constants.N2_HALFTIMES[ i ], duration),
             Buhlmann._updated_partial_pressure(state[ i ][ 1 ], pp_amb_he, self._constants.HE_HALFTIMES[ i ], duration),
             ) for i in range(self._n_tissues) ];
@@ -149,6 +148,37 @@ class Buhlmann:
                 p1 = h;
         return p1;
 
+    def NDL(self, tissue_state, p_amb, gas):
+        # Binary search, t0/h/t1 the time we still stay at this depth
+        #   t0 < h < t1
+        #   max_over_supersat(t0) < 0
+        #   max_over_supersat(t1) > 0
+
+        def max_over_supersat(t):
+            ts2 = self.updated_tissue_state(tissue_state, t, p_amb, gas);
+            gf99_at_surface = self._GF99_new(ts2, 1.0);
+            x = [ p - self.gf_high for p in gf99_at_surface ];
+            return max(x);
+
+        t0 = 0.0;
+        t1 = 1440.0;
+        if max_over_supersat(t0) > 0:
+            # Already in deco
+            return t0;
+        if max_over_supersat(t1) < 0:
+            # We can stay here indefinitely
+            return t1;
+
+        while t1 - t0 > 0.01:
+            h = t0 + (t1-t0)/2;
+            # print('%.1f < %.1f < %.1f -> %.1f' %( t0,h,t1,max_over_supersat(h)));
+            if max_over_supersat(h) < 0:
+                t0 = h;
+            else:
+                t1 = h;
+
+        return t0;
+
     def _GF99_new(self, tissue_state, p_amb):
         def for_one(i):
             m0 = self._workmann_m0(p_amb, i, tissue_state[ i ]);
@@ -201,7 +231,6 @@ class Buhlmann:
         # Determine ceiling, and allowed supersaturation at the various levels
         if amb_to_gf is None:
             p_ceiling = self.p_ceiling_for_gf_now(tissue_state, self.gf_low);
-            p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
             amb_to_gf = AmbientToGF(p_ceiling, p_target, self.gf_low, self.gf_high);
             return amb_to_gf;
         else:
@@ -227,7 +256,7 @@ class Buhlmann:
             p_now = Util.next_stop_Pamb(p_now);
         return result, p_ceiling, amb_to_gf;
 
-    def deco_info(self, tissue_state, depth, gases, amb_to_gf = None):
+    def deco_info(self, tissue_state, depth, gas, gases_carried, amb_to_gf = None):
         p_amb = Util.depth_to_Pamb(depth);
         p_ceiling_99 = self.p_ceiling_for_gf_now(tissue_state, 99.0);
         # GF99: how do compartment pressure, ambient pressure, tolerance compare
@@ -246,7 +275,7 @@ class Buhlmann:
                   };
 
         # Below is about computing the decompression profile
-        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, gases, amb_to_gf = amb_to_gf);
+        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, gases_carried, amb_to_gf = amb_to_gf);
         result[ 'Ceil' ] = Util.Pamb_to_depth(p_ceiling);
         result[ 'Stops' ] = stops;
         nontrivialstops = [ s for s in stops if round(s[ 1 ]) >= 1 ];
@@ -254,7 +283,7 @@ class Buhlmann:
         result[ 'amb_to_gf' ] = amb_to_gf;
         result[ 'GFLimitNow' ] = amb_to_gf(p_amb) if amb_to_gf is not None else 0.0;
         result[ 'TTS' ] = depth / self.ascent_speed + sum([ s[ 1 ] for s in stops ]);
+        result[ 'NDL' ] = self.NDL( tissue_state, p_amb, gas );
 
         # Done
         return result;
-

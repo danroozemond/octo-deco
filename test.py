@@ -25,6 +25,9 @@ dp.interpolate_points();
 
 bm = dp.deco_model();
 
+p = dp._points[10];
+bm.NDL(p.tissue_state, 3.0, p.gas);
+
 # # Test
 # for p in dp.points():
 #     print('time %.1f, depth %.1f, %s' % ( p.time, p.depth, p.deco_info) );

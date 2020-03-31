@@ -34,6 +34,7 @@ def do_the_dive(gf_low, gf_high):
     dp = DiveProfile( gf_low = gf_low, gf_high = gf_high );
     dp.add_gas( Gas.Air() );
     dp.add_gas( Gas.Nitrox(50));
+    dp.append_section(10, 2, gas = Gas.Trimix(21, 35));
     dp.append_section(20, 35, gas = Gas.Trimix(21, 35));
     dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
     dp.append_section(40, 33, Gas.Trimix(21, 35));

@@ -18,15 +18,19 @@ class DivePoint:
         return '%.1f:%dm' % (self.time, self.depth);
 
     @staticmethod
+    def dataframe_columns_deco_info():
+        return [ 'FirstStop', 'Ceil', 'Ceil99', 'GF99', 'SurfaceGF', 'LeadingTissueIndex', 'TTS', 'NDL' ];
+
+    @staticmethod
     def dataframe_columns():
-        return [ 'time', 'depth', 'gas', 'ppO2',
-                 'FirstStop', 'Ceil', 'Ceil99', 'GF99', 'SurfaceGF', 'LeadingTissueIndex', 'TTS',
-                 'Stops' ];
+        return [ 'time', 'depth', 'gas', 'ppO2' ] \
+                + DivePoint.dataframe_columns_deco_info() \
+                + [ 'Stops' ];
 
     def repr_for_dataframe(self):
         r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * self.p_amb ];
         if self.deco_info is not None:
-            r += [ self.deco_info[n] for n in [ 'FirstStop', 'Ceil', 'Ceil99', 'GF99', 'SurfaceGF', 'LeadingTissueIndex', 'TTS' ] ];
+            r += [ self.deco_info[n] for n in DivePoint.dataframe_columns_deco_info() ];
             r += [ Util.stops_to_string( self.deco_info['Stops'] ) ];
         return r;
 
@@ -48,6 +52,6 @@ class DivePoint:
             self.gas );
 
     def set_updated_deco_info(self, deco_model, gases, amb_to_gf = None ):
-        self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, gases, amb_to_gf = amb_to_gf );
+        self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, self.gas, gases, amb_to_gf = amb_to_gf );
 
 
