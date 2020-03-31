@@ -196,7 +196,6 @@ class DiveProfile:
                     # Exceptional case, we were /right/ on the edge
                     i += 1;
                     continue;
-                assert len(stops) > 0;
                 # Undo adding this point, then attempt to readd in next iteration
                 self._points.pop();
                 # Do not forget to update tissue state and deco info
