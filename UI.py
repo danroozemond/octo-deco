@@ -64,7 +64,7 @@ def st_plotly_tissue_heatmap( st, diveprofile ):
         """);
     # https://plot.ly/python/heatmaps/
     # will need zauto=False, zmin=0, zmax=100
-    tissue_labels = [ 'T%s' % t for t in diveprofile.deco_model()._halftimes['N2'] ];
+    tissue_labels = [ 'T%s' % t for t in diveprofile.deco_model()._constants.N2_HALFTIMES ];
     tissue_labels.reverse();
 
     values = [ p.deco_info[ 'allGF99s' ] for p in diveprofile.points() ];

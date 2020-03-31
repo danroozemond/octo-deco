@@ -6,7 +6,6 @@ import pandas as pd;
 
 import Buhlmann;
 import Gas;
-import Util;
 from DivePoint import DivePoint
 
 '''
@@ -139,8 +138,13 @@ class DiveProfile:
         self._points = new_points;
         self.update_deco_info();
 
+    def _fix_all_points_prev(self):
+        for i in range(1, self._points):
+            self._points[i].prev = self._points[i-1];
+
     def uninterpolate_points(self):
         self._points = [ p for p in self._points if not p.is_interpolated_point ];
+        self._fix_all_points_prev();
 
     '''
     Deco model info
@@ -177,13 +181,8 @@ class DiveProfile:
             # Update tissues, based on last point considered
             p.set_updated_tissue_state( deco_model );
             p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
-            print('existing point; time %.1f prev time %.1f duration %.1f depth: %.1f ceil: %.1f stops: %s' \
-                  % ( p.time, p.prev.time, p.duration(), p.depth, \
-                      p.deco_info['Ceil'], Util.stops_to_string(p.deco_info['Stops']) ) );
             amb_to_gf = p.deco_info['amb_to_gf'];
             gf_now = amb_to_gf(p.p_amb);
-            print('add_stops, time %.1f, depth %.1f, GF %.1f ?<=? %.1f' \
-                  % ( p.time, p.depth, p.deco_info['GF99'], gf_now) );
             # Are we in violation?
             if p.deco_info['GF99'] > gf_now+0.3:
                 # Undo adding this point, then attempt to readd in next iteration
@@ -196,9 +195,6 @@ class DiveProfile:
                                             p_target = op.p_amb,
                                             amb_to_gf = amb_to_gf );
                 assert len(stops) > 0;
-                print("  adding stops:", Util.stops_to_string(stops));
-                print("  based stops on point:", self._points[-1].deco_info)
-                print("  computed ceiling: %.1f = %.1f" %( p_ceiling, Util.Pamb_to_depth(p_ceiling) ));
                 # Do not forget to update tissue state and deco info
                 for s in stops:
                     np = len(self._points);
@@ -209,10 +205,7 @@ class DiveProfile:
                         p.is_deco_stop = True;
                         p.set_updated_tissue_state(deco_model);
                         p.set_updated_deco_info(deco_model, self._gases_carried, amb_to_gf = amb_to_gf);
-                        print('new point; time %.1f prev time %.1f duration %.1f depth: %.1f ceil: %.1f' \
-                              % ( p.time, p.prev.time, p.duration(), p.depth, p.deco_info['Ceil'] ) );
-                        # TODO comment this one back in?
-                        # assert p.depth > p.deco_info['Ceil'];
+                        assert p.depth >= p.deco_info['Ceil']-0.1;
             else:
                 # Add new point (tissue state etc is computed correctly by construction)
                 i += 1;
@@ -230,6 +223,7 @@ class DiveProfile:
 
     def update_stops( self ):
         self._points = [ p for p in self._points if not p.is_deco_stop ];
+        self._fix_all_points_prev();
         self.uninterpolate_points();
         self.add_stops();
         self.interpolate_points();
