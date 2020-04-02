@@ -141,7 +141,7 @@ class DiveProfile:
         self.update_deco_info();
 
     def _fix_all_points_prev(self):
-        for i in range(1, self._points):
+        for i in range(1, len(self._points)):
             self._points[i].prev = self._points[i-1];
 
     def uninterpolate_points(self):
@@ -164,7 +164,7 @@ class DiveProfile:
         for p in self._points:
             p.set_updated_deco_info( self._deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = p.deco_info['amb_to_gf'];
-        self._desc_deco_model_profile = self._deco_model.description();
+        self._desc_deco_model_display = self._deco_model.description();
         self._full_info_computation_time = time.perf_counter() - t0;
 
     '''
