@@ -39,11 +39,13 @@ def st_plotly_diveprofile(st, diveprofile):
     #                secondary_y = True );
     # A bit complicated code for adding the shaded area
     fs_xs = list(df["time"]);
-    fs_ys1 = df["FirstStop"];
+    fs_ys1 = list(df["FirstStop"]);
     fs_ys2 = [ 0 for y in fs_ys1 ];
+    comp_x = fs_xs + [ fs_xs[-1], fs_xs[-1] ] + fs_xs[::-1];
+    comp_y = fs_ys2 + [ 0, fs_ys1[-1] ] + fs_ys1[::-1];
     fig.add_trace( go.Scatter(
-        x = fs_xs + fs_xs[::-1],
-        y = fs_ys2 + fs_ys1,
+        x = comp_x,
+        y = comp_y,
         fill = 'toself',
         fillcolor = 'rgba(255,0,0,0.2)',
         line_color = 'rgba(255,0,0,0)',

@@ -190,7 +190,7 @@ class Buhlmann:
         # What is the best deco gas at this ambient pressure?
         suitable = [ gas for gas in gases if p_amb * gas[ 'fO2' ] <= self.max_pO2_deco ];
         assert (len(suitable) > 0);
-        gas = max(gases, key = lambda g: g[ 'fO2' ]);
+        gas = max(gases, key = lambda g: ( g[ 'fO2' ], -g['fHe'] ) );
         return gas;
 
     def _time_to_stay_at_stop(self, p_amb, tissue_state, gas, amb_to_gf):
