@@ -1,5 +1,5 @@
 # Please see LICENSE.md
-import Util
+from . import Util
 
 
 class DivePoint:

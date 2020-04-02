@@ -1,9 +1,9 @@
 # Please see LICENSE.md
 import streamlit as st;
 
-import Gas;
-import UI;
-from DiveProfile import DiveProfile;
+from deco import DiveProfile;
+from deco import Gas;
+from deco import UI;
 
 
 # Run as: streamlit run abc.py
@@ -31,7 +31,7 @@ _max_width_();
 # allow_output_mutation because I'm too lazy to figure out why warning :)
 #@st.cache(allow_output_mutation=True)
 def do_the_dive(gf_low, gf_high):
-    dp = DiveProfile( gf_low = gf_low, gf_high = gf_high );
+    dp = DiveProfile.DiveProfile( gf_low = gf_low, gf_high = gf_high );
     dp.add_gas( Gas.Air() );
     dp.add_gas( Gas.Nitrox(50));
     dp.append_section(10, 2, gas = Gas.Trimix(21, 35));
