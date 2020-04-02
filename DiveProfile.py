@@ -229,13 +229,25 @@ class DiveProfile:
         self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high, self._descent_speed, self._ascent_speed);
         self.update_deco_info();
 
+    def remove_surface_at_end(self):
+        # Removes surface section at end, returns amt of time removed
+        endtime = self._points[-1].time;
+        begintime = endtime;
+        while self._points[-1].depth == 0:
+            p = self._points.pop();
+            begintime = p.time;
+        return endtime-begintime;
+
     def update_stops( self ):
+        # Remove surface time
+        surfacetime = self.remove_surface_at_end();
+        # Remove deco stops
         self._points = [ p for p in self._points if not p.is_deco_stop ];
         self._fix_all_points_prev();
+        # Remove interpolated points
         self.uninterpolate_points();
+        # Bring back stops, surface section, interpolated points
+        self.append_surfacing(transit = False);
         self.add_stops();
+        self.append_section(0, surfacetime);
         self.interpolate_points();
-
-
-
-
