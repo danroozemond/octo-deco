@@ -1,7 +1,7 @@
 # Please see LICENSE.md
 
-import Gas;
-from DiveProfile import DiveProfile;
+from deco import Gas;
+from deco.DiveProfile import DiveProfile;
 
 # dp = DiveProfile();
 # dp.append_section(40, 35, gas = Gas.Air());
@@ -23,10 +23,12 @@ dp.add_stops_to_surface();
 # dp.append_surfacing();
 dp.interpolate_points();
 
+print(dp.dive_summary());
+
 bm = dp.deco_model();
 
 p = dp._points[10];
-bm.NDL(p.tissue_state, 3.0, p.gas);
+print(bm.NDL(p.tissue_state, 3.0, p.gas));
 
 # # Test
 # for p in dp.points():

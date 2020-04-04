@@ -4,9 +4,9 @@ import time;
 
 import pandas as pd;
 
-import Buhlmann;
-import Gas;
-from DivePoint import DivePoint
+from . import Buhlmann;
+from . import Gas;
+from .DivePoint import DivePoint
 
 '''
 Conventions:

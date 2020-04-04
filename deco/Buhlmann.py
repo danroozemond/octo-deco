@@ -1,7 +1,7 @@
 # Please see LICENSE.md
-import BuhlmannConstants
-import Gas
-import Util
+from . import BuhlmannConstants
+from . import Gas
+from . import Util
 
 
 class AmbientToGF:
