@@ -20,5 +20,8 @@ services:
     mem_limit: 40m
   streamlit:
     image: danroozemond/octodeco
+    volumes:
+      - ./data/git-master:/app2
     mem_limit: 300m
+    command: [ "streamlit", "run", "/app2/octo-deco/run_streamlit_ui.py" ]
 
