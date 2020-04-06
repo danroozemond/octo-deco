@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h2>{% block title %}Dive{% endblock %}</h2>
+{% endblock %}
+
+{% block content %}
+<h2>Dive summary</h2>
+{{ dive.dive_summary() }}
+{% endblock %}

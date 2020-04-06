@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, render_template;
 
 
 def create_app(test_config=None):
@@ -29,7 +29,16 @@ def create_app(test_config=None):
     def hello():
         return 'Hello, World!'
 
+    # blah
+    @app.route('/')
+    def index():
+        return render_template('base.html')
+
     from . import auth;
     app.register_blueprint(auth.bp);
+
+    from . import dive;
+    app.register_blueprint(dive.bp);
+
 
     return app
