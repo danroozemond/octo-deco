@@ -32,7 +32,7 @@
 					<!-- Nav -->
 					<nav id="nav">
 						<ul>
-							{% for x in [('hello', 'Hello'), ('dive.show', 'Dive') ] %}
+							{% for x in config['NAV_ITEMS'] %}
 								{% if request.path.startswith(url_for(x[0])) %}
 								<li class="active"><a href="{{ url_for(x[0]) }}">{{x[1]}}</a></li>
 								{% else %}

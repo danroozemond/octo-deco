@@ -20,24 +20,64 @@
 
 {% block content %}
     <a name="diveprofile"></a>
-    <div class="chart" id="diveprofile">
+    <div class="chart" id="chart_diveprofile">
         <script>
             var graphs = {{dive_profile_plot_json | safe}};
-            Plotly.plot('diveprofile',graphs,{});
+            Plotly.plot('chart_diveprofile',graphs,{});
         </script>
     </div>
 
     <a name="divesummary"></a>
     <h2>Dive summary</h2>
-    {% for table in tables %}
-    {{ table|safe }}
-    {% endfor %}
+    {{ summary_table|safe }}
 
     <a name="heatmap"></a>
-    <h2>Tissue heatmap</h2>
+    <script>
+        function toggleHeatmap(toggle_elt)
+        {
+            elt = document.getElementById("heatmap");
+            if ( elt.style.display == "block" )
+            {
+                elt.style.display="none";
+                toggle_elt.innerHTML = "[show]";
+            }
+            else
+            {
+                elt.style.display="block";
+                toggle_elt.innerHTML = "[hide]";
+                var graphs = {{heatmap_plot_json | safe}};
+                Plotly.plot('chart_heatmap',graphs,{});
+            }
+        }
+    </script>
+    <h2>Tissue heatmap<div class="viztoggle" onclick="toggleHeatmap(this)">[show]</div></h2>
+    <div id="heatmap" style="display: none">
+        <p>Displays (scaled) compartment pressure (actually: GF99)</p>
+        <div class="chart" id="chart_heatmap">
+        </div>
+    </div>
 
     <a name="fulldata"></a>
-    <h2>Full dive data</h2>
+    <script>
+        function toggleFulldata(toggle_elt)
+        {
+            elt = document.getElementById("fulldata");
+            if ( elt.style.display == "block" )
+            {
+                elt.style.display="none";
+                toggle_elt.innerHTML = "[show]";
+            }
+            else
+            {
+                elt.style.display="block";
+                toggle_elt.innerHTML = "[hide]";
+            }
+        }
+    </script>
+    <h2>Full dive data<div class="viztoggle" onclick="toggleFulldata(this)">[show]</div></h2>
+    <div id="fulldata" class="bigtable" style="display: none">
+        {{ fulldata_table|safe }}
+    </div>
 
 {% endblock %}
 

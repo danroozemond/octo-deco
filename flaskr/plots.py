@@ -1,6 +1,7 @@
 # Please see LICENSE.md
 import json;
 
+import numpy;
 import plotly;
 import plotly.graph_objects as go
 import plotly.subplots as sp
@@ -45,6 +46,29 @@ def show_diveprofile(diveprofile):
     fig.update_yaxes(secondary_y = False, autorange = "reversed");
     fig.update_yaxes(secondary_y = True, showgrid = False, range = [ -1, 140 ], tick0 = 0, dtick = 20);
     fig.update_xaxes(title_text = "Time");
-    # st.plotly_chart(fig, use_container_width = True);
+
     graphjson = json.dumps( fig, cls=plotly.utils.PlotlyJSONEncoder);
     return graphjson;
+
+def show_heatmap(diveprofile):
+    # https://plot.ly/python/heatmaps/
+    # will need zauto=False, zmin=0, zmax=100
+    tissue_labels = [ 'T%s' % t for t in diveprofile.deco_model()._constants.N2_HALFTIMES ];
+    tissue_labels.reverse();
+
+    values = [ p.deco_info[ 'allGF99s' ] for p in diveprofile.points() ];
+    for v in values:
+        v.reverse();
+    values = numpy.transpose(values);
+
+    times = [ p.time for p in diveprofile.points() ]
+
+    fig = go.Figure(data = go.Heatmap(
+        z = values,
+        y = tissue_labels,
+        x = times,
+        zauto = False, zmin = 0, zmax = 100 ));
+
+    graphjson = json.dumps(fig, cls = plotly.utils.PlotlyJSONEncoder);
+    return graphjson;
+

@@ -18,9 +18,8 @@ def show():
     dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
     dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
     dp.add_stops_to_surface();
-    dp.interpolate_points();
     dp.append_section(0, 30);
-    dp.update_deco_info();
+    dp.interpolate_points();
 
     # flash('Hello, world!');
     # flash('Wave!');
@@ -28,6 +27,9 @@ def show():
     dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
     return render_template('dive/show.html',
                            dive = dp,
-                           tables = [ dsdf.to_html(classes="smalltable", header="true")],
-                           dive_profile_plot_json = plots.show_diveprofile(dp) );
+                           summary_table = dsdf.to_html(classes="smalltable", header="true"),
+                           dive_profile_plot_json = plots.show_diveprofile(dp),
+                           heatmap_plot_json = plots.show_heatmap(dp),
+                           fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true"),
+                           );
 
