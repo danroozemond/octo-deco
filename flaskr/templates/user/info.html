@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  {% block title %}User info{% endblock %}
+{% endblock %}
+
+{% block sidebaritems %}
+{% endblock %}
+
+{% block content %}
+    <p>user_id: {{ session['user_id'] }} </p>
+{% endblock %}

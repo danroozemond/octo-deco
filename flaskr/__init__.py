@@ -9,7 +9,8 @@ from flask import Flask, session;
 # Define navigation row
 def get_nav_items():
     return [ ('hello', 'Hello'),
-             ('dive.show', 'Dive')
+             ('dive.show', 'Dive'),
+             ('user.info', 'User')
             ];
 
 # Get settings
@@ -55,6 +56,8 @@ from . import auth;
 app.register_blueprint(auth.bp);
 from . import dive;
 app.register_blueprint(dive.bp);
+from . import user;
+app.register_blueprint(user.bp);
 
 
 #
