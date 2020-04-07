@@ -47,4 +47,9 @@ table.dataframe th, td {
     font-size: .9em;
 }
 
+div.chart {
+    width: 100%;
+    margin-left: 0px;
+    margin-right: 0px;
+}
 

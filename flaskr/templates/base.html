@@ -10,8 +10,11 @@
 		<script src="{{ url_for('static', filename='js/skel.min.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/skel-panels.min.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/init.js') }}"></script>
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/skel-noscript.css') }}">
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		{% block extrascripts %}{% endblock %}
+		<noscript>
+			<link rel="stylesheet" href="{{ url_for('static', filename='css/skel-noscript.css') }}">
+			<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		</noscript>
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style-customs.css') }}">
 	</head>
 	<body>
@@ -45,7 +48,7 @@
 			<div id="page">
 				<div class="container">
 					<div class="row">
-						<div class="3u">
+						<div class="2u">
 							<section id="sidebar2">
 								<!--<header>
 									<h2>Sidebar 2</h2>
@@ -57,7 +60,7 @@
 						</div>
 						
 						
-						<div class="9u skel-cell-important">
+						<div class="10u skel-cell-important">
 							<section id="content" >
 							{% for message in get_flashed_messages() %}
 								<div class="flash">{{ message }}</div>

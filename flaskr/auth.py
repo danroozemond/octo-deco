@@ -1,3 +1,4 @@
+# Please see LICENSE.md
 from flask import (
     Blueprint, flash, render_template
 )
