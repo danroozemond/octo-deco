@@ -172,3 +172,7 @@
 
 	#sidebar2 h2 {
 	}
+
+	#sidebar2 li {
+	display: block;
+	}

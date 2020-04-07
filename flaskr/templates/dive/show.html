@@ -1,10 +1,24 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h2>{% block title %}Dive{% endblock %}</h2>
+  {% block title %}Dive{% endblock %}
+{% endblock %}
+
+{% block sidebarheader %} xx {% endblock %}
+
+{% block sidebaritems %}
+    <li class="first"><span class="fa fa-check"></span><a href="#divesummary">Dive summary</a></li>
+    <li><span class="fa fa-check"></span><a href="#">a</a></li>
 {% endblock %}
 
 {% block content %}
-<h2>Dive summary</h2>
-{{ dive.dive_summary() }}
+  <a name="divesummary"></a>
+  <h2>Dive summary</h2>
+  {{ dive.dive_summary() }}
+
+  {% for table in tables %}
+  {{ table|safe }}
+  {% endfor %}
+
 {% endblock %}
+
