@@ -1,6 +1,9 @@
 import os
+from datetime import timedelta
 
-from flask import Flask, render_template;
+import click;
+import flask;
+from flask import Flask, session;
 
 
 # Define navigation row
@@ -9,44 +12,60 @@ def get_nav_items():
              ('dive.show', 'Dive')
             ];
 
+# Get settings
+assert os.environ.get('FLASK_SECRET_KEY') is not None; # Won't store in version control
+setting_secret_key = os.environ.get('FLASK_SECRET_KEY');
+setting_instance_path = os.environ.get('FLASK_INSTANCE_PATH');
 
-def create_app(test_config=None):
-    # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-        NAV_ITEMS=get_nav_items()
-    )
+# create and configure the app
+app = Flask(__name__, instance_relative_config=True, instance_path = setting_instance_path)
+app.config.from_mapping(
+    SECRET_KEY = setting_secret_key,
+    DATABASE = os.path.join(app.instance_path, 'flaskr.sqlite'),
+    NAV_ITEMS = get_nav_items()
+);
+try:
+    os.makedirs(app.instance_path)
+except OSError:
+    pass
 
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
 
-    # ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
+#
+# Database init
+#
+@click.command('init-db')
+@flask.cli.with_appcontext
+def init_db_command():
+    """Clear the existing data and create new tables."""
+    from . import db;
+    db.init_db()
+    click.echo('Initialized the database in %s' % app.config['DATABASE'])
+app.cli.add_command(init_db_command);
 
-    # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
 
-    # blah
-    @app.route('/')
-    def index():
-        return render_template('base.html')
+# Session data
+@app.before_request
+def before_request():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=365);
 
-    from . import auth;
-    app.register_blueprint(auth.bp);
 
-    # Dive
-    from . import dive;
-    app.register_blueprint(dive.bp);
+# Blueprints
+from . import auth;
+app.register_blueprint(auth.bp);
+from . import dive;
+app.register_blueprint(dive.bp);
 
-    return app
+
+#
+# Separate Page definitions
+#
+@app.route('/hello')
+def hello():
+    session[ 'count' ] = session.get('count', 0) + 1;
+    return 'Hello, World! %i'% session['count'];
+
+
+@app.route('/')
+def index():
+    return flask.redirect( flask.url_for('dive.show',id=0), code=307);
