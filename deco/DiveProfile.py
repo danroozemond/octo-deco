@@ -47,7 +47,7 @@ class DiveProfile:
     def dive_summary(self):
         v = {'Deco model (display)': self._desc_deco_model_display,
              'Deco model (profile)': self._desc_deco_model_profile,
-             'Gases carried': self._gases_carried
+             'Gases carried': { str(g) for g in self._gases_carried }
              };
 
         divetime = sum([ p.duration() for p in self._points if p.depth > 0 ]);

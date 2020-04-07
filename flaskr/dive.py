@@ -1,6 +1,6 @@
 import pandas;
 from flask import (
-    Blueprint, flash, render_template
+    Blueprint, render_template
 )
 
 from ..deco import DiveProfile, Gas;
@@ -19,17 +19,11 @@ def show():
     dp.interpolate_points();
     dp.append_section(0, 30);
 
-    flash('Hello, world!');
-    flash('Wave!');
+    # flash('Hello, world!');
+    # flash('Wave!');
 
     dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
-
-    # Better: https://stackoverflow.com/questions/52644035/how-to-show-a-pandas-dataframe-into-a-existing-flask-html-table
-    # Also note: tr:nth-child(even) {
-    #     background-color: #dddddd;
-    # }
-
     return render_template('dive/show.html',
                            dive = dp,
-                           tables = [ dsdf.to_html(classes='data', header="true")]);
+                           tables = [ dsdf.to_html(classes="smalltable", header="true")]);
 

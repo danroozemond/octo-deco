@@ -46,20 +46,6 @@
 		color: #2A2A2A;
 	}
 
-	div.flash {
-	    width: 100%;
-	    color: #505050;
-	    text-align: left;
-	    font-size: 1.5em;
-        padding: 1em;
-        margin: 0.5em;
-        font-weight: bold;
-	    background-color: #e7dca3;
-        border-style: solid;
-        border-color: #505050;
-        border-width: 0px 0px 0px 5px;
-	}
-
 
 	/* Images */
 

@@ -7,18 +7,26 @@
 {% block sidebarheader %} xx {% endblock %}
 
 {% block sidebaritems %}
-    <li class="first"><span class="fa fa-check"></span><a href="#divesummary">Dive summary</a></li>
-    <li><span class="fa fa-check"></span><a href="#">a</a></li>
+    <li class="first"><span class="fa fa-check"></span><a href="#diveprofile">Dive profile</a></li>
+    <li><span class="fa fa-check"></span><a href="#divesummary">Dive summary</a></li>
+    <li><span class="fa fa-check"></span><a href="#heatmap">Heatmap</a></li>
+    <li><span class="fa fa-check"></span><a href="#fulldata">Full dive data</a></li>
 {% endblock %}
 
 {% block content %}
+  <a name="diveprofile"></a>
+
   <a name="divesummary"></a>
   <h2>Dive summary</h2>
-  {{ dive.dive_summary() }}
-
   {% for table in tables %}
   {{ table|safe }}
   {% endfor %}
+
+  <a name="heatmap"></a>
+  <h2>Tissue heatmap</h2>
+
+  <a name="fulldata"></a>
+  <h2>Full dive data</h2>
 
 {% endblock %}
 

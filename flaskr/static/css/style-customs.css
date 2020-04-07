@@ -1,0 +1,50 @@
+/* Dan Roozemond, Octo-Deco Flask specifics */
+
+/*
+ * Flash messages
+ */
+div.flash {
+    width: 100%;
+    color: #505050;
+    text-align: left;
+    font-size: 1.5em;
+    padding: 1em;
+    margin: 0.5em;
+    font-weight: bold;
+    background-color: #e7dca3;
+    border-style: solid;
+    border-color: #505050;
+    border-width: 0px 0px 0px 5px;
+}
+
+/*
+ * Sidebar items
+ */
+#sidebar2 li {
+	display: block;
+}
+
+/*
+ * Content
+ */
+table.dataframe {
+    margin: 1em;
+}
+table.smalltable  {
+    width: 50%;
+}
+table.dataframe tr:nth-child(even) {
+    background-color: #f0f0f0;
+}
+table.dataframe th {
+    font-weight: bold;
+    color: black;
+    text-align: left;
+}
+table.dataframe th, td {
+    padding: .3em;
+    font-family: monospace;
+    font-size: .9em;
+}
+
+
