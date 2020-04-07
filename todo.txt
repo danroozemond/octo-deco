@@ -1,8 +1,6 @@
 TODO this list :) [also check TO-DOs in .py's]
 
-* Editing dives (streamlit, separate branch)
-
-* move UI.py from deco into ui_streamlit
+* Editing dives
 
 * Import CSV from shearwater log
 https://docs.streamlit.io/api.html#add-widgets-to-sidebar
