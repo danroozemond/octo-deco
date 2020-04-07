@@ -50,9 +50,7 @@
 					<div class="row">
 						<div class="2u">
 							<section id="sidebar2">
-								<!--<header>
-									<h2>Sidebar 2</h2>
-								</header>-->
+								{% block sidebarheader %}{% endblock %}
 								<ul class="style1">
 									{% block sidebaritems %}{% endblock %}
 								</ul>
@@ -66,7 +64,7 @@
 								<div class="flash">{{ message }}</div>
 							{% endfor %}
 
-							<header><h2>{% block header %}{% endblock %}</h2></header>
+							<header><h1>{% block header %}{% endblock %}</h1></header>
 
 							{% block content %}{% endblock %}
 							</section>

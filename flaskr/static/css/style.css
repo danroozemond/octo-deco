@@ -98,7 +98,7 @@
 		margin-bottom: .5em;
 	}
 
-	header h2
+	header h1
 	{
 		letter-spacing: -2px;
 		text-transform: uppercase;
@@ -695,10 +695,10 @@ ul.style3 .first {
 	
 	#content header
 	{
-		margin-bottom: 2em !important;
+		margin-bottom: 0em !important;
 	}
 
-	#content header h2
+	#content header h1
 	{
 		line-height: 1.2em;
 		font-size: 3em;

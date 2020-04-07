@@ -9,7 +9,8 @@
   {% block title %}Dive{% endblock %}
 {% endblock %}
 
-{% block sidebarheader %} xx {% endblock %}
+{# block sidebarheader %} Hello for the {{ session['count'] }}th time {% endblock #}
+
 
 {% block sidebaritems %}
     <li class="first"><span class="fa fa-check"></span><a href="#diveprofile">Dive profile</a></li>
@@ -74,7 +75,10 @@
             }
         }
     </script>
-    <h2>Full dive data<div class="viztoggle" onclick="toggleFulldata(this)">[show]</div></h2>
+    <h2>Full dive data
+        <div class="viztoggle" onclick="toggleFulldata(this)">[show]</div>
+        <div class="viztoggle"><a href="{{url_for('dive.csv',id=1)}}">[csv]</a></div>
+    </h2>
     <div id="fulldata" class="bigtable" style="display: none">
         {{ fulldata_table|safe }}
     </div>
