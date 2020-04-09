@@ -7,7 +7,8 @@ def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect(
             current_app.config['DATABASE'],
-            detect_types=sqlite3.PARSE_DECLTYPES
+            detect_types = sqlite3.PARSE_DECLTYPES,
+            isolation_level = None
         )
         g.db.row_factory = sqlite3.Row
 
@@ -22,9 +23,8 @@ def close_db(e=None):
 
 
 def init_db():
-    db = get_db()
-
+    db = get_db();
     with current_app.open_resource('schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
-
+    print('Initialized the database using schema.sql');
 

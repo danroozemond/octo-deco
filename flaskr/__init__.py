@@ -13,6 +13,7 @@ def get_nav_items():
              ('user.info', 'User')
             ];
 
+
 # Get settings
 assert os.environ.get('FLASK_SECRET_KEY') is not None; # Won't store in version control
 setting_secret_key = os.environ.get('FLASK_SECRET_KEY');

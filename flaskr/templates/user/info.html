@@ -9,4 +9,5 @@
 
 {% block content %}
     <p>user_id: {{ session['user_id'] }} </p>
+    {{ request.environ }}
 {% endblock %}

@@ -251,3 +251,18 @@ class DiveProfile:
         self.add_stops();
         self.append_section(0, surfacetime);
         self.interpolate_points();
+
+
+#
+# Demo dive
+#
+def create_demo_dive():
+    dp = DiveProfile(gf_low = 35, gf_high = 70);
+    dp.add_gas( Gas.Nitrox(50) );
+    dp.append_section(20, 43, Gas.Trimix(21, 35));
+    dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
+    dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
+    dp.add_stops_to_surface();
+    dp.append_section(0, 30);
+    dp.interpolate_points();
+    return dp;
