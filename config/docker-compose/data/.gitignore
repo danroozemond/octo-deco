@@ -1,5 +1,5 @@
 certbot/
-!certbot
+!certbot/*
 git-master/
-!git-master
+!git-master/*
 
