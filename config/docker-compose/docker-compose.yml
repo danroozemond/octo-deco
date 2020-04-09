@@ -21,7 +21,8 @@ services:
   streamlit:
     image: danroozemond/octodeco
     volumes:
-      - ./data/git-master:/app2
+      - ~/git-master:/app2
+      - ~/flask_instance:/flask_instance
     mem_limit: 300m
     command: [ "streamlit", "run", "/app2/octo-deco/run_streamlit_ui.py" ]
 
