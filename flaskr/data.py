@@ -104,7 +104,7 @@ def store_dive_new(diveprofile):
 def store_dive_update(diveprofile):
     dive_id = int(diveprofile.dive_id);
     if dive_id is None:
-        raise AttributeError();
+        raise KeyError();
     cur = db.get_db().cursor();
     cur.execute('''
         UPDATE dives
@@ -113,11 +113,11 @@ def store_dive_update(diveprofile):
         ''', [ pickle.dumps(diveprofile), diveprofile.description(),
                dive_id, str(get_user()) ]
                );
-    assert cur.total_changes == 1;
+    assert cur.rowcount == 1;
 
 
 def store_dive(diveprofile):
     try:
         store_dive_update(diveprofile);
-    except AttributeError:
+    except KeyError:
         store_dive_new(diveprofile);
