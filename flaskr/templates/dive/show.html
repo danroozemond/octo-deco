@@ -28,6 +28,29 @@
         </script>
     </div>
 
+    <form method="POST">
+        <div class="adjustGF">
+            GF
+            <label for="ipt_gflow">low</label>
+            <input type="range" min=0 max=100 value={{dive.gf_low_display}} class="slider" id="ipt_gflow" name="gflow"
+                   onchange="document.getElementById('show_gflow').innerHTML=this.value"/>
+
+            /
+            <label for="ipt_gfhigh">high</label>
+            <input type="range" min=0 max=100 value={{dive.gf_high_display}} class="slider" id="ipt_gfhigh" name="gfhigh"
+                   onchange="document.getElementById('show_gfhigh').innerHTML=this.value"/>
+            = GF <span id="show_gflow">{{dive.gf_low_display}}</span> / <span id="show_gfhigh">{{dive.gf_high_display}}</span>
+            <a href="#" onclick="
+                document.getElementById('show_gfhigh').innerHTML
+                    = document.getElementById('ipt_gfhigh').value
+                    = {{dive.gf_high_profile}};
+                document.getElementById('show_gflow').innerHTML
+                    = document.getElementById('ipt_gflow').value
+                    = {{dive.gf_low_profile}};
+                return false;">[reset]</a>
+        </div>
+    </form>
+
     <a name="divesummary"></a>
     <h2>Dive summary</h2>
     {{ summary_table|safe }}

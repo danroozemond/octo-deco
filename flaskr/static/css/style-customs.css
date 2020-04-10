@@ -78,3 +78,9 @@ div.viztoggle {
     margin: 1em;
 }
 
+div.adjust label, input {
+    vertical-align:middle;
+    line-height: 2em;
+    margin: 10px;
+}
+

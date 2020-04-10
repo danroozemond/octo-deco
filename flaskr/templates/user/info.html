@@ -10,4 +10,9 @@
 {% block content %}
     <p>user_id: {{ session['user_id'] }} </p>
     {{ request.environ }}
+    <p>Nr dives stored: {{ divecount }} </p>
+
+    <form method="post" action="{{url_for('user.update')}}">
+        <input type="submit" name="action" value="Reset profile">
+    </form>
 {% endblock %}

@@ -1,7 +1,7 @@
 # Please see LICENSE.md
 import pandas;
 from flask import (
-    Blueprint, render_template, Response, flash
+    Blueprint, render_template, Response, flash, redirect, url_for
 )
 
 from . import data;
@@ -10,18 +10,23 @@ from ..deco import DiveProfile, Gas;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
-@bp.route('/show/', defaults={'id' : 0})
-@bp.route('/show/<int:id>')
-def show(id):
-    dives = data.get_dives();
-    dp = None;
-    if len(dives) == 0:
+
+@bp.route('/show/')
+def show_any():
+    dive_id = data.get_any_dive_id();
+    if dive_id is None:
         dp = DiveProfile.create_demo_dive();
         data.store_dive_new(dp);
-        flash('Generated demo dive [%i]' % dp.dive_id);
-    else:
-        # TODO FIX
-        dp = dives[0];
+        dive_id = dp.dive_id;
+        flash('Generated demo dive [%i]' % dive_id);
+    return redirect(url_for('dive.show', id = dive_id))
+
+
+@bp.route('/show/<int:id>')
+def show(id):
+    dp = data.get_one_dive(id);
+    if dp is None:
+        return redirect(url_for('dive.show_any'));
 
     dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
     return render_template('dive/show.html',

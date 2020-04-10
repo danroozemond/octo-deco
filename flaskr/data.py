@@ -15,28 +15,65 @@ def get_user():
     return session.get('user_id');
 
 
-#
-# Dive
-#
-def get_dives():
+def user_reset_profile():
     cur = db.get_db().cursor();
     cur.execute('''
-        SELECT dive_id, user_id, dive
+        DELETE
         FROM dives
-        WHERE user_id = ?;
+        WHERE user_id = ?
         ''', [ str(get_user()) ]
-                      );
+                );
+    return cur.rowcount;
+
+
+#
+# Dive
+# All functions are focused on the current user.
+#
+def get_dive_count():
+    cur = db.get_db().cursor();
+    cur.execute('''
+        SELECT COUNT(*)
+        FROM dives
+        WHERE user_id = ?
+        ''', [ str(get_user()) ]
+                );
+    return cur.fetchone()[0];
+
+
+def get_any_dive_id():
+    cur = db.get_db().cursor();
+    cur.execute('''
+        SELECT MIN(dive_id)
+        FROM dives
+        WHERE user_id = ?
+        ''', [ str(get_user()) ]
+                );
+    row = cur.fetchone();
+    if row is None:
+        return None
+    return row[0];
+
+
+def construct_dive_from_row(row):
+    if row is None:
+        return None;
+    assert row['user_id'] == str(get_user());
+    diveprofile = pickle.loads(row['dive']);
+    diveprofile.dive_id = row['dive_id'];
+    return diveprofile;
+
+
+def get_one_dive(dive_id:int):
     current_user_id = str(get_user());
-    dives = [ ];
-    while True:
-        row = cur.fetchone()
-        if row is None:
-            break;
-        assert row['user_id'] == current_user_id;
-        diveprofile = pickle.loads(row['dive']);
-        diveprofile.dive_id = row['dive_id'];
-        dives.append(diveprofile);
-    return dives;
+    cur = db.get_db().cursor();
+    cur.execute('''
+        SELECT user_id, dive_id, dive
+        FROM dives
+        WHERE user_id = ? and dive_id = ?
+        ''', [ current_user_id, dive_id ]
+                      );
+    return construct_dive_from_row(cur.fetchone());
 
 
 def store_dive_new(diveprofile):

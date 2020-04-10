@@ -25,11 +25,18 @@ class DiveProfile:
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;
         self._desc_deco_model_display = '';
+        self.gf_low_display = 0;
+        self.gf_high_display = 0;
         self._desc_deco_model_profile = '';
+        self.gf_low_profile = 0;
+        self.gf_high_profile = 0;
+
         if deco_model is not None:
             self._deco_model = deco_model;
         else:
             self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high, self._descent_speed, self._ascent_speed);
+
+        self.update_deco_model_info(update_display = True);
 
     def points(self):
         return self._points;
@@ -58,6 +65,16 @@ class DiveProfile:
         v['Deco profile comp time'] = '%.2f secs' % self._deco_stops_computation_time;
         v['Full info comp time'] = '%.2f secs' % self._full_info_computation_time;
         return v;
+
+    def update_deco_model_info(self, update_display = False, update_profile = False):
+        if update_display:
+            self._desc_deco_model_display = self._deco_model.description();
+            self.gf_low_display = self._deco_model.gf_low;
+            self.gf_high_display = self._deco_model.gf_high;
+        if update_profile:
+            self._desc_deco_model_profile = self._deco_model.description();
+            self.gf_low_profile = self._deco_model.gf_low;
+            self.gf_high_profile = self._deco_model.gf_high;
 
     '''
     Modifying the profile (adding sections etc)
@@ -164,7 +181,7 @@ class DiveProfile:
         for p in self._points:
             p.set_updated_deco_info( self._deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = p.deco_info['amb_to_gf'];
-        self._desc_deco_model_display = self._deco_model.description();
+        self.update_deco_model_info(update_display = True)
         self._full_info_computation_time = time.perf_counter() - t0;
 
     '''
@@ -218,8 +235,7 @@ class DiveProfile:
                 # Careful, there's another i += 1 in an exceptional case above.
                 i += 1;
         # Done!
-        self._desc_deco_model_profile = deco_model.description();
-        self._desc_deco_model_display = deco_model.description();
+        self.update_deco_model_info(update_display = True, update_profile =  True)
         self._deco_stops_computation_time = time.perf_counter() - t0;
 
     '''
