@@ -1,12 +1,12 @@
 # Please see LICENSE.md
 import pandas;
 from flask import (
-    Blueprint, render_template, Response, flash, redirect, url_for
+    Blueprint, render_template, Response, flash, redirect, url_for, request, abort
 )
 
 from . import data;
 from . import plots;
-from ..deco import DiveProfile, Gas;
+from ..deco import DiveProfile;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
@@ -40,13 +40,30 @@ def show(id):
 
 @bp.route('/csv/<int:id>')
 def csv(id):
-    dp = DiveProfile.DiveProfile(gf_low = 35, gf_high = 70);
-    dp.append_section(20, 43, Gas.Trimix(21, 35));
-    dp.add_stops_to_surface();
-    dp.append_section(0, 30);
-    dp.interpolate_points();
+    dp = data.get_one_dive(id);
+    if dp is None:
+        abort(405);
     r = Response(dp.dataframe().to_csv(),
                  mimetype = "text/csv",
                  headers = { "Content-disposition" : "attachment; filename=dive_%i.csv" % id }
     );
     return r;
+
+
+@bp.route('/update/<int:id>', methods = [ 'POST' ])
+def update(id):
+    action = request.form.get('action');
+    dp = data.get_one_dive(id);
+    if dp is None:
+        abort(405);
+    if action == 'Update Display GF' or action == 'Update Stops':
+        gflow = int(request.form.get('gflow', 0));
+        gfhigh = int(request.form.get('gfhigh', 0));
+        dp.set_gf(gflow, gfhigh);
+        if action == 'Update Stops':
+            dp.update_stops();
+            flash('Recomputed stops (deco time: %i mins)' % dp.decotime());
+        data.store_dive(dp);
+        return redirect(url_for('dive.show', id=id));
+    else:
+        abort(405);

@@ -14,7 +14,8 @@ bp = Blueprint('user', __name__, url_prefix='/user')
 def info():
     data.get_user();
     return render_template('user/info.html',
-                           divecount = data.get_dive_count() );
+                           divecount = data.get_dive_count(),
+                           diveinfos = data.get_all_dives() );
 
 
 @bp.route('/update', methods = [ 'POST' ])

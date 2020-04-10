@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 
-{% block header %}
-  {% block title %}User info{% endblock %}
-{% endblock %}
+{% block title %}User info{% endblock %}
 
 {% block sidebaritems %}
 {% endblock %}
 
 {% block content %}
+    <header><h2>User info</h2></header>
     <p>user_id: {{ session['user_id'] }} </p>
     {{ request.environ }}
     <p>Nr dives stored: {{ divecount }} </p>
@@ -15,4 +14,11 @@
     <form method="post" action="{{url_for('user.update')}}">
         <input type="submit" name="action" value="Reset profile">
     </form>
+
+    <h2>Dives</h2>
+    <ul>
+        {% for row in diveinfos %}
+        <li>{{ row['dive_id'] }} : {{ row['dive_desc'] }}</li>
+        {% endfor %}
+    </ul>
 {% endblock %}

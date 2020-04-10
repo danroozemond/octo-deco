@@ -49,22 +49,29 @@ class DiveProfile:
         return self._deco_model;
 
     '''
-    Deco model info
+    Dive / deco model info
     '''
     def dive_summary(self):
         v = {'Deco model (display)': self._desc_deco_model_display,
              'Deco model (profile)': self._desc_deco_model_profile,
-             'Gases carried': { str(g) for g in self._gases_carried }
+             'Gases carried': {str(g) for g in self._gases_carried},
+             'Total dive time': '%.1f mins' % self.divetime(),
+             'Decompression time': '%.1f mins' % self.decotime(),
+             'Deco profile comp time': '%.2f secs' % self._deco_stops_computation_time,
+             'Full info comp time': '%.2f secs' % self._full_info_computation_time
              };
 
-        divetime = sum([ p.duration() for p in self._points if p.depth > 0 ]);
-        decotime = sum([ p.duration() for p in self._points if p.depth > 0 and p.is_deco_stop ]);
-
-        v['Total dive time'] = '%.1f mins' % divetime;
-        v['Decompression time'] = '%.1f mins' % decotime;
-        v['Deco profile comp time'] = '%.2f secs' % self._deco_stops_computation_time;
-        v['Full info comp time'] = '%.2f secs' % self._full_info_computation_time;
         return v;
+
+    def decotime(self):
+        return sum([ p.duration() for p in self._points if p.depth > 0 and p.is_deco_stop ]);
+
+    def divetime(self):
+        return sum([ p.duration() for p in self._points if p.depth > 0 ]);
+
+    def description(self):
+        maxdepth = max(map( lambda p : p.depth, self._points ));
+        return '%.1f m / %i mins' % (maxdepth, self.divetime());
 
     def update_deco_model_info(self, update_display = False, update_profile = False):
         if update_display:

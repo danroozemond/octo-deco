@@ -23,6 +23,7 @@ def user_reset_profile():
         WHERE user_id = ?
         ''', [ str(get_user()) ]
                 );
+    session['user_id'] = None;
     return cur.rowcount;
 
 
@@ -39,6 +40,18 @@ def get_dive_count():
         ''', [ str(get_user()) ]
                 );
     return cur.fetchone()[0];
+
+
+def get_all_dives():
+    cur = db.get_db().cursor();
+    cur.execute('''
+        SELECT dive_id, dive_desc
+        FROM dives
+        WHERE user_id = ?
+        ''', [ str(get_user()) ]
+                );
+    rows = cur.fetchall();
+    return rows;
 
 
 def get_any_dive_id():
@@ -79,9 +92,9 @@ def get_one_dive(dive_id:int):
 def store_dive_new(diveprofile):
     cur = db.get_db().cursor();
     cur.execute('''
-        INSERT INTO dives(user_id, dive)
-        VALUES (?, ?);
-        ''', [ str(get_user()), pickle.dumps(diveprofile) ]
+        INSERT INTO dives(user_id, dive, dive_desc)
+        VALUES (?, ?, ?);
+        ''', [ str(get_user()), pickle.dumps(diveprofile), diveprofile.description() ]
                );
     diveprofile.dive_id = cur.lastrowid;
     print("inserted dive; new id = %i" % cur.lastrowid);
@@ -95,9 +108,10 @@ def store_dive_update(diveprofile):
     cur = db.get_db().cursor();
     cur.execute('''
         UPDATE dives
-        SET dive = ?
+        SET dive = ?, dive_desc = ?
         WHERE dive_id = ? AND user_id = ?;
-        ''', [ pickle.dumps(diveprofile), dive_id, str(get_user()) ]
+        ''', [ pickle.dumps(diveprofile), diveprofile.description(),
+               dive_id, str(get_user()) ]
                );
     assert cur.total_changes == 1;
 
