@@ -79,7 +79,10 @@ div.viztoggle {
     cursor: pointer;
 }
 
-div.adjust label, input {
+div.adjust {
+    vertical-align:middle;
+}
+div.adjust label, input, img {
     vertical-align:middle;
     line-height: 2em;
     margin: 10px;

@@ -26,18 +26,29 @@
         </script>
     </div>
 
-    <form method="POST" action="{{url_for('dive.update', id=dive.dive_id)}}">
-        <div class="adjustGF">
-            GF
-            <label for="ipt_gflow">low</label>
-            <input type="range" min=0 max=100 value={{dive.gf_low_display}} class="slider" id="ipt_gflow" name="gflow"
-                   onchange="document.getElementById('show_gflow').innerHTML=this.value"/>
-
-            /
-            <label for="ipt_gfhigh">high</label>
-            <input type="range" min=0 max=100 value={{dive.gf_high_display}} class="slider" id="ipt_gfhigh" name="gfhigh"
-                   onchange="document.getElementById('show_gfhigh').innerHTML=this.value"/>
-            = GF <span id="show_gflow">{{dive.gf_low_display}}</span> / <span id="show_gfhigh">{{dive.gf_high_display}}</span>
+    <form method="POST" id="form_update" action="{{url_for('dive.update', id=dive.dive_id)}}">
+        <script>
+        function autosubmitGF()
+        {
+            document.getElementById('spinner').style.display = "inline";
+            form = document.getElementById('form_update');
+            form.submit();
+        }
+        </script>
+        <div class="adjust">
+            <datalist id="tickmarks">
+              <option value="0" label="0"></option>
+              <option value="10"></option>
+              <option value="20"></option>
+              <option value="30"></option>
+              <option value="40"></option>
+              <option value="50" label="50"></option>
+              <option value="60"></option>
+              <option value="70"></option>
+              <option value="80"></option>
+              <option value="90"></option>
+              <option value="100" label="99"></option>
+            </datalist>
             <a href="#" onclick="
                 document.getElementById('show_gfhigh').innerHTML
                     = document.getElementById('ipt_gfhigh').value
@@ -46,9 +57,25 @@
                     = document.getElementById('ipt_gflow').value
                     = {{dive.gf_low_profile}};
                 return false;">[reset]</a>
+            GF
+            <label for="ipt_gflow">low</label>
+            <input type="range" min=0 max=100 value={{dive.gf_low_display}} class="slider" list="tickmarks"
+                   id="ipt_gflow" name="gflow"
+                   onmousemove="document.getElementById('show_gflow').innerHTML=this.value;"
+                   onchange="autosubmitGF();"/>
+
+            /
+            <label for="ipt_gfhigh">high</label>
+            <input type="range" min=0 max=100 value={{dive.gf_high_display}} class="slider" list="tickmarks"
+                   id="ipt_gfhigh" name="gfhigh"
+                   onmousemove="document.getElementById('show_gfhigh').innerHTML=this.value;"
+                   onchange="autosubmitGF();"/>
+            = GF <span id="show_gflow">{{dive.gf_low_display}}</span> / <span id="show_gfhigh">{{dive.gf_high_display}}</span>
+            <img id="spinner" style="display:none"
+                 src="{{ url_for('static', filename='images/spinner-51px.gif') }}">
         </div>
         <div>
-            <input type="submit" name="action" value="Update Display GF">
+            <!-- <input type="submit" name="action" value="Update Display GF"> -->
             <input type="submit" name="action" value="Update Stops">
         </div>
     </form>

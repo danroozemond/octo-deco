@@ -53,7 +53,10 @@ def csv(id):
 @bp.route('/update/<int:id>', methods = [ 'POST' ])
 def update(id):
     action = request.form.get('action');
+    if action is None:
+        action = 'Update Display GF';
     dp = data.get_one_dive(id);
+    olddecotime = dp.decotime();
     if dp is None:
         abort(405);
     if action == 'Update Display GF' or action == 'Update Stops':
@@ -62,7 +65,7 @@ def update(id):
         dp.set_gf(gflow, gfhigh);
         if action == 'Update Stops':
             dp.update_stops();
-            flash('Recomputed stops (deco time: %i mins)' % dp.decotime());
+            flash('Recomputed stops (deco time: %i -> %i mins)' % (olddecotime, dp.decotime()));
         data.store_dive(dp);
         return redirect(url_for('dive.show', id=id));
     else:
