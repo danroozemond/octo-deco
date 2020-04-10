@@ -8,8 +8,7 @@ from flask import Flask, session;
 
 # Define navigation row
 def get_nav_items():
-    return [ ('hello', 'Hello'),
-             ('dive.show_any', 'Dive'),
+    return [ ('dive.show_any', 'Dive'),
              ('user.info', 'User')
             ];
 
