@@ -5,7 +5,26 @@
 {% block content %}
     <header><h2>Create new dive</h2></header>
     <form method="post" action="{{url_for('dive.new_do')}}">
-
+        <div>
+            <div id="div_depth_times" class="depth_times" style="display:inline;">
+            </div>
+            <div style="display:inline;">
+            <input id="btnadd" type="button" onclick="add_depth_time();" value="Add section">
+            </div>
+        </div>
+        <script>
+            cnt = -1;
+            function add_depth_time()
+            {
+                cnt += 1;
+                newdiv = document.createElement("span");
+                newdiv.innerHTML = '<br/>At <input type="text" name="depth['+cnt+']"> m for <input type="text" name="time['+cnt+']"> mins';
+                newdiv.class = 'depth_times_inputs';
+                document.getElementById('div_depth_times').appendChild(newdiv);
+            }
+            add_depth_time();
+        </script>
+        <input type="submit" value="Create!">
     </form>
 
 {% endblock %}

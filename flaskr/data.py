@@ -104,7 +104,7 @@ def store_dive_new(diveprofile):
 def store_dive_update(diveprofile):
     dive_id = int(diveprofile.dive_id);
     if dive_id is None:
-        raise KeyError();
+        raise AttributeError();
     cur = db.get_db().cursor();
     cur.execute('''
         UPDATE dives
@@ -119,5 +119,5 @@ def store_dive_update(diveprofile):
 def store_dive(diveprofile):
     try:
         store_dive_update(diveprofile);
-    except KeyError:
+    except AttributeError:
         store_dive_new(diveprofile);

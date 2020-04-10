@@ -81,7 +81,29 @@ def update(id):
 def new_show():
     return render_template('dive/new.html');
 
+def ipt_check(depth, time):
+    try:
+        depth = int(depth);
+        time = int(time);
+        return depth is not None and depth > 0 and depth < 200 \
+            and time is not None and time > 0 and time < 200;
+    except:
+        return False;
+
 @bp.route('/new', methods = [ 'POST' ])
 def new_do():
-    flash('To do');
-    return redirect(url_for('dive.show_any'));
+    result = DiveProfile.DiveProfile();
+    cntok = 0;
+    for i in range(10):
+        depth = request.form.get('depth[%i]' % i, None);
+        time = request.form.get('time[%i]' % i, None);
+        if ipt_check(depth, time):
+            result.append_section(int(depth), int(time));
+            cntok += 1;
+    if cntok == 0:
+        abort(405);
+    result.add_stops_to_surface();
+    result.append_section(0, 30);
+    result.interpolate_points();
+    data.store_dive(result);
+    return redirect(url_for('dive.show', id=result.dive_id));

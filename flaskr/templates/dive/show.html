@@ -27,8 +27,8 @@
     <li><span class="fa fa-play"></span><a href="{{url_for('dive.new_show')}}">New dive..</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#diveprofile">Dive profile</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#divesummary">Dive summary</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#heatmap">Heatmap</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#fulldata">Full dive data</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#aheatmap">Heatmap</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#afulldata">Full dive data</a></li>
 {% endblock %}
 
 {% block content %}
@@ -98,7 +98,7 @@
     <h2>Dive summary</h2>
     {{ summary_table|safe }}
 
-    <a name="heatmap"></a>
+
     <script>
         function toggleHeatmap(toggle_elt)
         {
@@ -117,6 +117,7 @@
             }
         }
     </script>
+    <a name="aheatmap"></a>
     <h2>Tissue heatmap<div class="viztoggle" onclick="toggleHeatmap(this)">[show]</div></h2>
     <div id="heatmap" style="display: none">
         <p>Displays (scaled) compartment pressure (actually: GF99)</p>
@@ -124,7 +125,7 @@
         </div>
     </div>
 
-    <a name="fulldata"></a>
+
     <script>
         function toggleFulldata(toggle_elt)
         {
@@ -141,6 +142,7 @@
             }
         }
     </script>
+    <a name="afulldata"></a>
     <h2>Full dive data
         <div class="viztoggle" onclick="toggleFulldata(this)">[show]</div>
         <div class="viztoggle"><a href="{{url_for('dive.csv',id=1)}}">[csv]</a></div>

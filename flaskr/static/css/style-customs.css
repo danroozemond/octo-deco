@@ -95,3 +95,8 @@ div.divelist
 {
     margin-bottom: 1em;
 }
+
+div.depth_times
+{
+    display: inline;
+}
