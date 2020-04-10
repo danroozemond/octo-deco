@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}New dive{% endblock %}
+
+{% block content %}
+    <header><h2>Create new dive</h2></header>
+    <form method="post" action="{{url_for('dive.new_do')}}">
+
+    </form>
+
+{% endblock %}
+

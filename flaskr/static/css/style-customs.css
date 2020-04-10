@@ -88,3 +88,10 @@ div.adjust label, input, img {
     margin: 10px;
 }
 
+div.divelist form, input, label{
+    display:inline;
+}
+div.divelist
+{
+    margin-bottom: 1em;
+}

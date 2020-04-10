@@ -36,7 +36,7 @@
 								{% if request.path.startswith(url_for(x[0])) %}
 								<li class="active"><a href="{{ url_for(x[0]) }}">{{x[1]}}</a></li>
 								{% else %}
-								<li><a href="{{ url_for(x[0]) }}">{{x[1]}}</a></l>
+								<li><a href="{{ url_for(x[0]) }}">{{x[1]}}</a></li>
 								{% endif %}
 							{% endfor %}
 						</ul>
@@ -48,7 +48,7 @@
 			<div id="page">
 				<div class="container">
 					<div class="row">
-						<div class="2u">
+						<div class="3u">
 							<section id="sidebar2">
 								{% block sidebarheader %}{% endblock %}
 								<ul class="style1">
@@ -58,7 +58,7 @@
 						</div>
 						
 						
-						<div class="10u skel-cell-important">
+						<div class="9u skel-cell-important">
 							<section id="content" >
 							{% for message in get_flashed_messages() %}
 								<div class="flash">{{ message }}</div>

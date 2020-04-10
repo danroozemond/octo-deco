@@ -7,14 +7,28 @@
 
 {% block title %}Dive{% endblock %}
 
-{# block sidebarheader %} hello :) {% endblock #}
+{% block sidebarheader %}
+    <div class="divelist">
+        <form method="post" action="{{url_for('dive.show_post')}}">
+        <label for="dives">Display:</label>
+        <select id="dives" name="dive_id" onchange="this.form.submit()">
+            {% for x in alldives %}
+              <option value="{{x['dive_id']}}"
+              {% if x['dive_id'] == dive.dive_id %} selected {% endif %}
+              >{{x['dive_desc']}}</option>
+            {% endfor %}
+        </select>
+        </form>
+    </div>
+{% endblock %}
 
 
 {% block sidebaritems %}
-    <li class="first"><span class="fa fa-check"></span><a href="#diveprofile">Dive profile</a></li>
-    <li><span class="fa fa-check"></span><a href="#divesummary">Dive summary</a></li>
-    <li><span class="fa fa-check"></span><a href="#heatmap">Heatmap</a></li>
-    <li><span class="fa fa-check"></span><a href="#fulldata">Full dive data</a></li>
+    <li><span class="fa fa-play"></span><a href="{{url_for('dive.new_show')}}">New dive..</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#diveprofile">Dive profile</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#divesummary">Dive summary</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#heatmap">Heatmap</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#fulldata">Full dive data</a></li>
 {% endblock %}
 
 {% block content %}

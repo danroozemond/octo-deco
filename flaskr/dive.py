@@ -11,7 +11,7 @@ from ..deco import DiveProfile;
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
 
-@bp.route('/show/')
+@bp.route('/show/', methods = [ 'GET'])
 def show_any():
     dive_id = data.get_any_dive_id();
     if dive_id is None:
@@ -22,21 +22,26 @@ def show_any():
     return redirect(url_for('dive.show', id = dive_id))
 
 
-@bp.route('/show/<int:id>')
+@bp.route('/show/<int:id>', methods = ['GET'])
 def show(id):
     dp = data.get_one_dive(id);
     if dp is None:
         return redirect(url_for('dive.show_any'));
 
+    alldives = data.get_all_dives();
     dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
     return render_template('dive/show.html',
                            dive = dp,
+                           alldives = alldives,
                            summary_table = dsdf.to_html(classes="smalltable", header="true"),
                            dive_profile_plot_json = plots.show_diveprofile(dp),
                            heatmap_plot_json = plots.show_heatmap(dp),
                            fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true"),
                            );
 
+@bp.route('/show/', methods = [ 'POST' ] )
+def show_post():
+    return show(int(request.form.get('dive_id')));
 
 @bp.route('/csv/<int:id>')
 def csv(id):
@@ -70,3 +75,13 @@ def update(id):
         return redirect(url_for('dive.show', id=id));
     else:
         abort(405);
+
+
+@bp.route('/new', methods = [ 'GET' ])
+def new_show():
+    return render_template('dive/new.html');
+
+@bp.route('/new', methods = [ 'POST' ])
+def new_do():
+    flash('To do');
+    return redirect(url_for('dive.show_any'));
