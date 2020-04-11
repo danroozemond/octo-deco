@@ -77,18 +77,29 @@ def update(id):
         abort(405);
 
 
+@bp.route('/delete/<int:id>', methods = [ 'POST' ])
+def delete(id):
+    aff = data.delete_dive(id);
+    if aff == 0:
+        abort(405);
+    flash('Dive %i is now history' % id);
+    return redirect(url_for('dive.show_any'));
+
+
 @bp.route('/new', methods = [ 'GET' ])
 def new_show():
     return render_template('dive/new.html');
+
 
 def ipt_check(depth, time):
     try:
         depth = int(depth);
         time = int(time);
-        return depth is not None and depth > 0 and depth < 200 \
-            and time is not None and time > 0 and time < 200;
+        return depth is not None and 0 < depth < 200 \
+               and time is not None and 0 < time < 200;
     except:
         return False;
+
 
 @bp.route('/new', methods = [ 'POST' ])
 def new_do():

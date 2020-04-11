@@ -121,3 +121,15 @@ def store_dive(diveprofile):
         store_dive_update(diveprofile);
     except AttributeError:
         store_dive_new(diveprofile);
+
+
+def delete_dive(dive_id:int):
+    current_user_id = str(get_user());
+    cur = db.get_db().cursor();
+    cur.execute('''
+        DELETE
+        FROM dives
+        WHERE user_id = ? and dive_id = ?
+        ''', [ current_user_id, dive_id ]
+                      );
+    return cur.rowcount;

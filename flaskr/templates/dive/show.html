@@ -29,6 +29,7 @@
     <li><span class="fa fa-chevron-circle-right"></span><a href="#divesummary">Dive summary</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#aheatmap">Heatmap</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#afulldata">Full dive data</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#modifydive">Modify</a></li>
 {% endblock %}
 
 {% block content %}
@@ -145,11 +146,18 @@
     <a name="afulldata"></a>
     <h2>Full dive data
         <div class="viztoggle" onclick="toggleFulldata(this)">[show]</div>
-        <div class="viztoggle"><a href="{{url_for('dive.csv',id=1)}}">[csv]</a></div>
+        <div class="viztoggle"><a href="{{url_for('dive.csv',id=dive.dive_id)}}">[csv]</a></div>
     </h2>
     <div id="fulldata" class="bigtable" style="display: none">
         {{ fulldata_table|safe }}
     </div>
 
+    <a name="modifydive"></a>
+    <h2>Modify dive</h2>
+    <div>
+    <form method="POST" action="{{url_for('dive.delete',id=dive.dive_id)}}">
+    <input type="submit" value="Delete this dive" onclick="return confirm('Sure?');">
+    </form>
+    </div>
 {% endblock %}
 
