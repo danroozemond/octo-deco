@@ -94,7 +94,7 @@ def ipt_check(depth, time):
 def new_do():
     result = DiveProfile.DiveProfile();
     cntok = 0;
-    for i in range(10):
+    for i in range(11):
         depth = request.form.get('depth[%i]' % i, None);
         time = request.form.get('time[%i]' % i, None);
         gas = Gas.from_string( request.form.get('gas[%i]' % i, None) );

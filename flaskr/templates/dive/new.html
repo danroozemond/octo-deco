@@ -28,6 +28,8 @@
                 newdiv.innerHTML += ' on <input type="text" name="gas['+cnt+']" id="gas['+cnt+']" value="Air">.';
                 newdiv.class = 'depth_times_inputs';
                 document.getElementById('div_depth_times').appendChild(newdiv);
+
+                if (cnt > 9) document.getElementById('btnadd').style.display = 'none';
             }
             add_depth_time();
 
@@ -67,8 +69,8 @@
 				return ok;
             }
         </script>
-		<input type="button" value="Check inputs" onclick="return check_all();">
-        <input type="submit" value="Create!" onclick="return check_all();">
+		<input type="button" id="btncheck" value="Check inputs" onclick="return check_all();">
+        <input type="submit" id="btnsubmit" value="Create!" onclick="return check_all();">
     </form>
 
 {% endblock %}
