@@ -3,7 +3,7 @@ import streamlit as st;
 
 from deco import DiveProfile;
 from deco import Gas;
-from deco import UI;
+from . import UI;
 
 
 # Run as: streamlit run abc.py
@@ -67,7 +67,7 @@ def go():
     UI.st_header(st, 'Heatmap');
     show_heatmap = st.checkbox('Display heatmap');
     if show_heatmap:
-        UI.st_plotly_tissue_heatmap( st, ddp );
+        UI.st_plotly_tissue_heatmap(st, ddp);
 
     UI.st_header(st, 'Full dive data');
     show_data = st.checkbox('Display full dive data');

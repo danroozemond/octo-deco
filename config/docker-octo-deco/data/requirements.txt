@@ -2,4 +2,6 @@ pandas
 numpy
 streamlit
 plotly
+flaskr
+
 

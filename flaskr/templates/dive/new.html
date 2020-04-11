@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}New dive{% endblock %}
+
+{% block content %}
+    <header><h2>Create new dive</h2></header>
+    <div>
+        Specify gases like &lsquo;Air&rsquo;, &lsquo;Nx32&rsquo;, or &lsquo;Tx21/35&rsquo;.
+        Use &lsquo;Nx99&rsquo; for O<sub>2</sub>.
+    </div>
+    <div class="new_dive">
+    <form method="post" action="{{url_for('dive.new_do')}}">
+        <div class="dive_steps">
+            <div id="div_depth_times" class="depth_times" style="display:inline;">
+            </div>
+            <div style="display:inline;">
+            <input id="btnadd" type="button" onclick="add_depth_time();" value="Add section">
+            </div>
+        </div>
+        <script>
+        	/* Adding inputs */
+            cnt = -1;
+            function add_depth_time()
+            {
+                cnt += 1;
+                newdiv = document.createElement("span");
+                newdiv.innerHTML =  '<br/>At <input type="text" name="depth['+cnt+']" id="depth['+cnt+']">';
+                newdiv.innerHTML += ' m for <input type="text" name="time['+cnt+']" id="time['+cnt+']"> mins';
+                newdiv.innerHTML += ' on <input type="text" name="gas['+cnt+']" id="gas['+cnt+']" value="Air">.';
+                newdiv.class = 'depth_times_inputs';
+                document.getElementById('div_depth_times').appendChild(newdiv);
+
+                if (cnt > 9) document.getElementById('btnadd').style.display = 'none';
+            }
+            add_depth_time();
+
+            /* Checking inputs */
+            function check_input_nr(s, minval, maxval, emptyok)
+            {
+				v = s.trim();
+				if (v == '' && emptyok) return true;
+				vn = Number(v);
+				return v == String(vn) && v >= minval && v <= maxval;
+            }
+            function check_gas(s, emptyok)
+            {
+            	regex = /^(air|nx[0-9][0-9]|tx[0-9][0-9]\/[0-9][0-9])$/i
+            	v = s.trim();
+            	return v.match(regex) ||
+            	        ( v == '' && emptyok );
+            }
+            function check_extra_gases(s)
+            {
+                ss = s.split(',');
+                ok = true;
+                for(i = 0; i < ss.length; i++)
+                    ok = ok && check_gas(ss[i], true);
+                return ok;
+            }
+
+            function check_and_mark(elt, ok)
+            {
+            	elt.className = ( ok ? 'valid' : 'invalid');
+            	return ok;
+            }
+            function check_all()
+            {
+            	ok = true;
+				/* The list */
+				for(i=0;i<=cnt;i++)
+				{
+					d = document.getElementById('depth['+i+']');
+					t = document.getElementById('time['+i+']');
+					g = document.getElementById('gas['+i+']');
+					ok2 = check_and_mark(d, check_input_nr( d.value, 1, 200, i != 0 ) );
+					ok3 = check_and_mark(t, check_input_nr( t.value, 1, 200, i != 0 ) );
+					ok4 = check_and_mark(g, check_gas(g.value, false) );
+					ok = ok && ok2 && ok3 && ok4;
+				}
+				/* The extra gases */
+				eg = document.getElementById('ipt_deco_gas');
+                ok5 = check_and_mark( eg, check_extra_gases( eg.value ) );
+                ok = ok && ok5;
+				return ok;
+            }
+        </script>
+        <div>
+        <label for="ipt_deco_gas">Additional gases (eg. &lsquo;Nx99, Nx50&rsquo;):</label>
+        <input type="text" id="ipt_deco_gas" name="deco_gas">
+        </div>
+        <div>
+		<input type="button" id="btncheck" value="Check inputs" onclick="return check_all();">
+        <input type="submit" id="btnsubmit" value="Create!" onclick="return check_all();">
+        </div>
+    </form>
+    </div>
+
+    <header><h2>..or just recreate the demo dive:</h2></header>
+    <form method="post" action="{{url_for('dive.new_demo')}}">
+        <input type="submit" value="Yes please!">
+    </form>
+{% endblock %}
+

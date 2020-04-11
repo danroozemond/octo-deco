@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block extrascripts %}
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+{% endblock %}
+
+{% block title %}Dive{% endblock %}
+
+{% block sidebarheader %}
+    <div class="divelist">
+        <form method="post" action="{{url_for('dive.show_post')}}">
+        <label for="dives">Display:</label>
+        <select id="dives" name="dive_id" onchange="this.form.submit()">
+            {% for x in alldives %}
+              <option value="{{x['dive_id']}}"
+              {% if x['dive_id'] == dive.dive_id %} selected {% endif %}
+              >{{x['dive_desc']}}</option>
+            {% endfor %}
+        </select>
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block sidebaritems %}
+    <li><span class="fa fa-play"></span><a href="{{url_for('dive.new_show')}}">New dive..</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#diveprofile">Dive profile</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#divesummary">Dive summary</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#aheatmap">Heatmap</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#afulldata">Full dive data</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#amodifydive">Modify</a></li>
+{% endblock %}
+
+{% block content %}
+    <a name="diveprofile"></a>
+    <div class="chart" id="chart_diveprofile">
+        <script>
+            var graphs = {{dive_profile_plot_json | safe}};
+            Plotly.plot('chart_diveprofile',graphs,{});
+        </script>
+    </div>
+
+    <form method="POST" id="form_update" action="{{url_for('dive.update', id=dive.dive_id)}}">
+        <script>
+        function autosubmitGF()
+        {
+            document.getElementById('spinner').style.display = "inline";
+            form = document.getElementById('form_update');
+            form.submit();
+        }
+        </script>
+        <div class="adjust">
+            <datalist id="tickmarks">
+              <option value="0" label="0"></option>
+              <option value="10"></option>
+              <option value="20"></option>
+              <option value="30"></option>
+              <option value="40"></option>
+              <option value="50" label="50"></option>
+              <option value="60"></option>
+              <option value="70"></option>
+              <option value="80"></option>
+              <option value="90"></option>
+              <option value="100" label="99"></option>
+            </datalist>
+            <a href="#" onclick="
+                document.getElementById('show_gfhigh').innerHTML
+                    = document.getElementById('ipt_gfhigh').value
+                    = {{dive.gf_high_profile}};
+                document.getElementById('show_gflow').innerHTML
+                    = document.getElementById('ipt_gflow').value
+                    = {{dive.gf_low_profile}};
+                return false;">[reset]</a>
+            GF
+            <label for="ipt_gflow">low</label>
+            <input type="range" min=0 max=100 value={{dive.gf_low_display}} class="slider" list="tickmarks"
+                   id="ipt_gflow" name="gflow"
+                   onmousemove="document.getElementById('show_gflow').innerHTML=this.value;"
+                   onchange="autosubmitGF();"/>
+
+            /
+            <label for="ipt_gfhigh">high</label>
+            <input type="range" min=0 max=100 value={{dive.gf_high_display}} class="slider" list="tickmarks"
+                   id="ipt_gfhigh" name="gfhigh"
+                   onmousemove="document.getElementById('show_gfhigh').innerHTML=this.value;"
+                   onchange="autosubmitGF();"/>
+            = GF <span id="show_gflow">{{dive.gf_low_display}}</span> / <span id="show_gfhigh">{{dive.gf_high_display}}</span>
+            <img id="spinner" style="display:none"
+                 src="{{ url_for('static', filename='images/spinner-51px.gif') }}">
+        </div>
+        <div>
+            <!-- <input type="submit" name="action" value="Update Display GF"> -->
+            <input type="submit" name="action" value="Update Stops">
+        </div>
+    </form>
+
+    <a name="divesummary"></a>
+    <h2>Dive summary</h2>
+    {{ summary_table|safe }}
+
+
+    <script>
+        function toggleHeatmap(toggle_elt)
+        {
+            elt = document.getElementById("heatmap");
+            if ( elt.style.display == "block" )
+            {
+                elt.style.display="none";
+                toggle_elt.innerHTML = "[show]";
+            }
+            else
+            {
+                elt.style.display="block";
+                toggle_elt.innerHTML = "[hide]";
+                var graphs = {{heatmap_plot_json | safe}};
+                Plotly.plot('chart_heatmap',graphs,{});
+            }
+        }
+    </script>
+    <a name="aheatmap"></a>
+    <h2>Tissue heatmap<div class="viztoggle" onclick="toggleHeatmap(this)">[show]</div></h2>
+    <div id="heatmap" style="display: none">
+        <p>Displays (scaled) compartment pressure (actually: GF99)</p>
+        <div class="chart" id="chart_heatmap">
+        </div>
+    </div>
+
+
+    <script>
+        function togglediv(divname, toggle_elt)
+        {
+            elt = document.getElementById(divname);
+            if ( elt.style.display == "block" )
+            {
+                elt.style.display="none";
+                toggle_elt.innerHTML = "[show]";
+            }
+            else
+            {
+                elt.style.display="block";
+                toggle_elt.innerHTML = "[hide]";
+            }
+        }
+    </script>
+    <a name="afulldata"></a>
+    <h2>Full dive data
+        <div class="viztoggle" onclick="togglediv('fulldata', this)">[show]</div>
+        <div class="viztoggle"><a href="{{url_for('dive.csv',id=dive.dive_id)}}">[csv]</a></div>
+    </h2>
+    <div id="fulldata" class="bigtable" style="display: none">
+        {{ fulldata_table|safe }}
+    </div>
+
+    <a name="amodifydive"></a>
+    <h2>Modify dive
+    <div class="viztoggle" onclick="togglediv('modifydive', this)">[show]</div>
+    </h2>
+    <div id="modifydive" style="display:none">
+    <form method="POST" action="{{url_for('dive.delete',id=dive.dive_id)}}">
+    <input type="submit" value="Delete this dive" onclick="return confirm('Sure?');">
+    </form>
+    </div>
+{% endblock %}
+

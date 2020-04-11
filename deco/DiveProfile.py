@@ -25,11 +25,18 @@ class DiveProfile:
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;
         self._desc_deco_model_display = '';
+        self.gf_low_display = 0;
+        self.gf_high_display = 0;
         self._desc_deco_model_profile = '';
+        self.gf_low_profile = 0;
+        self.gf_high_profile = 0;
+
         if deco_model is not None:
             self._deco_model = deco_model;
         else:
             self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high, self._descent_speed, self._ascent_speed);
+
+        self.update_deco_model_info(update_display = True);
 
     def points(self):
         return self._points;
@@ -42,22 +49,39 @@ class DiveProfile:
         return self._deco_model;
 
     '''
-    Deco model info
+    Dive / deco model info
     '''
     def dive_summary(self):
         v = {'Deco model (display)': self._desc_deco_model_display,
              'Deco model (profile)': self._desc_deco_model_profile,
-             'Gases carried': self._gases_carried
+             'Gases carried': {str(g) for g in self._gases_carried},
+             'Total dive time': '%.1f mins' % self.divetime(),
+             'Decompression time': '%.1f mins' % self.decotime(),
+             'Deco profile comp time': '%.2f secs' % self._deco_stops_computation_time,
+             'Full info comp time': '%.2f secs' % self._full_info_computation_time
              };
 
-        divetime = sum([ p.duration() for p in self._points if p.depth > 0 ]);
-        decotime = sum([ p.duration() for p in self._points if p.depth > 0 and p.is_deco_stop ]);
-
-        v['Total dive time'] = '%.1f mins' % divetime;
-        v['Decompression time'] = '%.1f mins' % decotime;
-        v['Deco profile comp time'] = '%.2f secs' % self._deco_stops_computation_time;
-        v['Full info comp time'] = '%.2f secs' % self._full_info_computation_time;
         return v;
+
+    def decotime(self):
+        return sum([ p.duration() for p in self._points if p.depth > 0 and p.is_deco_stop ]);
+
+    def divetime(self):
+        return sum([ p.duration() for p in self._points if p.depth > 0 ]);
+
+    def description(self):
+        maxdepth = max(map( lambda p : p.depth, self._points ));
+        return '%.1f m / %i mins' % (maxdepth, self.divetime());
+
+    def update_deco_model_info(self, update_display = False, update_profile = False):
+        if update_display:
+            self._desc_deco_model_display = self._deco_model.description();
+            self.gf_low_display = self._deco_model.gf_low;
+            self.gf_high_display = self._deco_model.gf_high;
+        if update_profile:
+            self._desc_deco_model_profile = self._deco_model.description();
+            self.gf_low_profile = self._deco_model.gf_low;
+            self.gf_high_profile = self._deco_model.gf_high;
 
     '''
     Modifying the profile (adding sections etc)
@@ -164,7 +188,7 @@ class DiveProfile:
         for p in self._points:
             p.set_updated_deco_info( self._deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = p.deco_info['amb_to_gf'];
-        self._desc_deco_model_display = self._deco_model.description();
+        self.update_deco_model_info(update_display = True)
         self._full_info_computation_time = time.perf_counter() - t0;
 
     '''
@@ -218,8 +242,7 @@ class DiveProfile:
                 # Careful, there's another i += 1 in an exceptional case above.
                 i += 1;
         # Done!
-        self._desc_deco_model_profile = deco_model.description();
-        self._desc_deco_model_display = deco_model.description();
+        self.update_deco_model_info(update_display = True, update_profile =  True)
         self._deco_stops_computation_time = time.perf_counter() - t0;
 
     '''
@@ -251,3 +274,18 @@ class DiveProfile:
         self.add_stops();
         self.append_section(0, surfacetime);
         self.interpolate_points();
+
+
+#
+# Demo dive
+#
+def create_demo_dive():
+    dp = DiveProfile(gf_low = 35, gf_high = 70);
+    dp.add_gas( Gas.Nitrox(50) );
+    dp.append_section(20, 43, Gas.Trimix(21, 35));
+    dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
+    dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
+    dp.add_stops_to_surface();
+    dp.append_section(0, 30);
+    dp.interpolate_points();
+    return dp;
