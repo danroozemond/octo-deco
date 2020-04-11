@@ -88,15 +88,28 @@ div.adjust label, input, img {
     margin: 10px;
 }
 
-div.divelist form, input, label{
+div.dive_steps form, label {
     display:inline;
 }
-div.divelist
+div.dive_steps input {
+    width: 8em;
+    padding-left:3px;
+    padding-right: 3px;
+}
+div.dive_steps input.valid {
+    background-color: #bffcc6;
+}
+div.dive_steps input.invalid {
+    background-color: #ffcbc1;
+}
+div.dive_steps
 {
     margin-bottom: 1em;
 }
-
 div.depth_times
 {
     display: inline;
 }
+
+
+

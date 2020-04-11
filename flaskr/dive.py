@@ -6,7 +6,7 @@ from flask import (
 
 from . import data;
 from . import plots;
-from ..deco import DiveProfile;
+from ..deco import DiveProfile, Gas;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
@@ -70,7 +70,7 @@ def update(id):
         dp.set_gf(gflow, gfhigh);
         if action == 'Update Stops':
             dp.update_stops();
-            flash('Recomputed stops (deco time: %i -> %i mins)' % (olddecotime, dp.decotime()));
+            flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
         data.store_dive(dp);
         return redirect(url_for('dive.show', id=id));
     else:
@@ -97,8 +97,9 @@ def new_do():
     for i in range(10):
         depth = request.form.get('depth[%i]' % i, None);
         time = request.form.get('time[%i]' % i, None);
-        if ipt_check(depth, time):
-            result.append_section(int(depth), int(time));
+        gas = Gas.from_string( request.form.get('gas[%i]' % i, None) );
+        if ipt_check(depth, time) and gas is not None:
+            result.append_section(int(depth), int(time), gas);
             cntok += 1;
     if cntok == 0:
         abort(405);
