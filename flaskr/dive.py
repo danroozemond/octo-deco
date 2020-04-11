@@ -15,11 +15,9 @@ bp = Blueprint('dive', __name__, url_prefix='/dive')
 def show_any():
     dive_id = data.get_any_dive_id();
     if dive_id is None:
-        dp = DiveProfile.create_demo_dive();
-        data.store_dive_new(dp);
-        dive_id = dp.dive_id;
-        flash('Generated demo dive [%i]' % dive_id);
-    return redirect(url_for('dive.show', id = dive_id))
+        return new_demo();
+    else:
+        return redirect(url_for('dive.show', id = dive_id))
 
 
 @bp.route('/show/<int:id>', methods = ['GET'])
@@ -39,9 +37,11 @@ def show(id):
                            fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true"),
                            );
 
+
 @bp.route('/show/', methods = [ 'POST' ] )
 def show_post():
     return show(int(request.form.get('dive_id')));
+
 
 @bp.route('/csv/<int:id>')
 def csv(id):
@@ -126,3 +126,12 @@ def new_do():
     # Store, done.
     data.store_dive(result);
     return redirect(url_for('dive.show', id=result.dive_id));
+
+
+@bp.route('/new/demo', methods = [ 'POST' ])
+def new_demo():
+    dp = DiveProfile.create_demo_dive();
+    data.store_dive_new(dp);
+    dive_id = dp.dive_id;
+    flash('Generated demo dive [%i]' % dive_id);
+    return redirect(url_for('dive.show', id = dive_id))

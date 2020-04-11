@@ -95,5 +95,9 @@
     </form>
     </div>
 
+    <header><h2>..or just recreate the demo dive:</h2></header>
+    <form method="post" action="{{url_for('dive.new_demo')}}">
+        <input type="submit" value="Yes please!">
+    </form>
 {% endblock %}
 
