@@ -94,6 +94,7 @@ def ipt_check(depth, time):
 def new_do():
     result = DiveProfile.DiveProfile();
     cntok = 0;
+    # Parse the dive steps
     for i in range(11):
         depth = request.form.get('depth[%i]' % i, None);
         time = request.form.get('time[%i]' % i, None);
@@ -103,8 +104,14 @@ def new_do():
             cntok += 1;
     if cntok == 0:
         abort(405);
+    # Parse any additional gas
+    gases = Gas.many_from_string( request.form.get('deco_gas', '') );
+    for g in gases:
+        result.add_gas(g);
+    # Add deco stops
     result.add_stops_to_surface();
     result.append_section(0, 30);
     result.interpolate_points();
+    # Store, done.
     data.store_dive(result);
     return redirect(url_for('dive.show', id=result.dive_id));

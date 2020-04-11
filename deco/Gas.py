@@ -38,12 +38,12 @@ def Trimix(percO2, percHe):
 def from_string(s):
     if s is None:
         return None;
+    s = s.strip().lower();
     m = re.match('(?i)(air|nx[0-9][0-9]|tx[0-9][0-9]/[0-9][0-9])', s )
     if m is None:
         return None;
     # Ok, at this point we know it's reasonably safe to parse.
     # If you're reading this and you disagree, let me know :)
-    s = s.lower();
     result = None;
     if s == 'air':
         result = Air();
@@ -52,3 +52,10 @@ def from_string(s):
     elif s.startswith('tx'):
         result = Trimix(int(s[2:4]), int(s[5:7]));
     return result;
+
+
+def many_from_string(s):
+    r = [ from_string(ss) for ss in s.split(',') ];
+    r = [ g for g in r if g is not None ];
+    return r;
+

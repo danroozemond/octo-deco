@@ -96,10 +96,10 @@ div.dive_steps input {
     padding-left:3px;
     padding-right: 3px;
 }
-div.dive_steps input.valid {
+div.new_dive input.valid {
     background-color: #bffcc6;
 }
-div.dive_steps input.invalid {
+div.new_dive input.invalid {
     background-color: #ffcbc1;
 }
 div.dive_steps
