@@ -53,10 +53,6 @@ def go():
     # do_change_stops = st.sidebar.button('Update profile');
     ddp = do_the_dive(new_gf_low, new_gf_high);
 
-    # st.sidebar.markdown("** Upload file :) **");
-    # uploaded_file = st.sidebar.file_uploader("Upload Shearwater dive CSV", type="csv") ## TODO FINISH THIS ##
-    # print(uploaded_file);
-
     # Actual contents
     UI.st_header(st, 'Dive profile');
     UI.st_plotly_diveprofile(st, ddp);
