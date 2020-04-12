@@ -1,6 +1,6 @@
 # Please see LICENSE.md
 
-from deco import Gas;
+from deco import Gas, Util;
 from deco.DiveProfile import DiveProfile;
 
 # dp = DiveProfile();
@@ -12,23 +12,32 @@ from deco.DiveProfile import DiveProfile;
 # dp.update_deco_info();
 # print(dp.dataframe());
 
-dp = DiveProfile(gf_low = 35, gf_high = 70);
+dp = DiveProfile(gf_low = 70, gf_high = 70);
 # dp.add_gas( Gas.Air() );
-# dp.add_gas( Gas.Nitrox(50) );
-dp.append_section(20, 43, Gas.Trimix(21, 35));
-dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
-dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
+dp.add_gas( Gas.Nitrox(50) );
+# dp.append_section(20, 43, Gas.Trimix(21, 35));
+# dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
+# dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
+dp.append_section(50,20, gas = Gas.Trimix(21,35));
 dp.add_stops_to_surface();
+dp.update_deco_info()
 # dp.append_section(0, 30);
 # dp.append_surfacing();
-dp.interpolate_points();
-
-print(dp.dive_summary());
+# )
 
 bm = dp.deco_model();
 
-p = dp._points[10];
-print(bm.NDL(p.tissue_state, 3.0, p.gas));
+for i in range(1,len(dp._points)):
+    p = dp._points[i];
+    if p.time > 20 and p.time < 30:
+        print('%.1f' % p.time, p.depth, p.gas, 'st', Util.stops_to_string(p.deco_info['Stops']), 'info', p.deco_info);
+
+dp.interpolate_points();
+print('After interpolate:');
+for i in range(1,len(dp._points)):
+    p = dp._points[i];
+    if p.time > 20 and p.time < 30:
+        print('%.1f' % p.time, p.depth, p.gas, 'st', Util.stops_to_string(p.deco_info['Stops']), 'info', p.deco_info);
 
 # # Test
 # for p in dp.points():

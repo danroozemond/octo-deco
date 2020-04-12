@@ -49,7 +49,7 @@ class DivePoint:
             self.prev.tissue_state,
             self.duration(),
             ( self.p_amb + self.prev.p_amb ) / 2,
-            self.gas );
+            self.prev.gas );
 
     def set_updated_deco_info(self, deco_model, gases, amb_to_gf = None ):
         self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, self.gas, gases, amb_to_gf = amb_to_gf );
