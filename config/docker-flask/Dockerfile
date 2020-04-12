@@ -3,8 +3,9 @@ FROM python:3.8.2-buster
 COPY data /data
 RUN pip install -r /data/requirements.txt
 
-COPY scripts /scripts
+# /scripts will be mapped by docker-compose
+#COPY scripts /scripts
 
-# Idea is that you map the right drives and then run_flask.sh
+# Idea is that you map the right drives and then /scripts/run_flask.sh
 CMD [ "/bin/bash" ]
 
