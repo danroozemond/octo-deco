@@ -1,17 +1,12 @@
 TODO this list :) [also check TO-DOs in .py's]
 
-* Editing dives
-
 * Import CSV from shearwater log
-https://docs.streamlit.io/api.html#add-widgets-to-sidebar
-=> streamlit.file_uploader
-
-* (how to take into account alveolar? remove this detail again?)
-
 * Gas consumption
 * CNS tracking
 
 Passing around p_first_stop is ugly. Consider adding this (kind of) info to tissue_state.
+
+* (how to take into account alveolar? remove this detail again?)
 
 
 From https://github.com/torvalds/subsurface-for-dirk/blob/master/core/deco.c

@@ -8,9 +8,9 @@
 {% block title %}Dive{% endblock %}
 
 {% block sidebarheader %}
-    <div class="divelist">
+    <div class="diveselect">
         <form method="post" action="{{url_for('dive.show_post')}}">
-        <label for="dives">Display:</label>
+        <label for="dives" style="display:none">Display:</label>
         <select id="dives" name="dive_id" onchange="this.form.submit()">
             {% for x in alldives %}
               <option value="{{x['dive_id']}}"

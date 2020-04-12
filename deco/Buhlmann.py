@@ -193,12 +193,11 @@ class Buhlmann:
         gas = max(gases, key = lambda g: ( g[ 'fO2' ], -g['fHe'] ) );
         return gas;
 
-    def _time_to_stay_at_stop(self, p_amb, tissue_state, gas, amb_to_gf):
+    def _time_to_stay_at_stop(self, p_amb, p_amb_next_stop, tissue_state, gas, amb_to_gf):
         # Returns both the time (integer) and the updated tissue_state.
         # Straight computation is possible (even for Trimix), but comes down to solving
         # a pretty messy quadratic equation, and I'm too lazy for that.
         # Binary search is fast enough and more robust (and again, lazy)
-        p_amb_next_stop = Util.next_stop_Pamb(p_amb);
         gf99allowed_next = amb_to_gf(p_amb_next_stop);
 
         def max_over_supersat(t):
@@ -240,18 +239,37 @@ class Buhlmann:
                 return self._get_ambtogf(tissue_state, p_amb, p_target);
             return amb_to_gf;
 
+    def _update_tissue_state_travel(self, state, p_amb, p_new_amb, gas):
+        time = 0.0;
+        if p_amb > p_new_amb:
+            time = (p_amb - p_new_amb) / self.ascent_speed;
+        elif p_amb < p_new_amb:
+            time = (p_new_amb - p_amb) / self.descent_speed;
+        if time == 0.0:
+            return state;
+        else:
+            assert time > 0.0;
+            p_avg = (p_amb + p_new_amb)/2.0;
+            return self.updated_tissue_state(state, time, p_avg, gas);
+
+
     def compute_deco_profile(self, tissue_state, p_amb, gases, p_target = 1.0, amb_to_gf = None):
         # Returns triples depth, length, gas
         amb_to_gf = self._get_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
         p_ceiling = self.p_ceiling_for_amb_to_gf(tissue_state, amb_to_gf);
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
+        # Travel to first stop
+        gas = self._best_deco_gas(p_amb, gases);
+        state = self._update_tissue_state_travel(tissue_state, p_amb, p_first_stop, gas);
         # 'Walk' up
         result = [ ];
         p_now = p_first_stop;
+        # Compute stops
         while p_now > p_target + 0.01:
             gas = self._best_deco_gas(p_now, gases);
-            stoplength, tissue_state = self._time_to_stay_at_stop(p_now, tissue_state, gas, amb_to_gf);
+            p_amb_next_stop = Util.next_stop_Pamb(p_now);
+            stoplength, tissue_state = self._time_to_stay_at_stop(p_now, p_amb_next_stop, tissue_state, gas, amb_to_gf);
             result.append((Util.Pamb_to_depth(p_now), stoplength, gas));
             p_now = Util.next_stop_Pamb(p_now);
         return result, p_ceiling, amb_to_gf;
