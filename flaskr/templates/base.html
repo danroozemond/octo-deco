@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<title>Octo-Deco - {% block title %}{% endblock %} - Flaskr</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="{{ url_for('static', filename='js/skel.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/skel-panels.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/init.js') }}"></script>
+		{% block extrascripts %}{% endblock %}
+		<noscript>
+			<link rel="stylesheet" href="{{ url_for('static', filename='css/skel-noscript.css') }}">
+			<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		</noscript>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style-customs.css') }}">
+	</head>
+	<body>
+		<div id="wrapper">
+			
+			<!-- Header -->
+			<div id="header">
+				<div class="container"> 
+					
+					<!-- Logo -->
+					<div id="logo">
+						<h1><a href="/">Octo-Deco</a></h1>
+					</div>
+					
+					<!-- Nav -->
+					<nav id="nav">
+						<ul>
+							{% for x in config['NAV_ITEMS'] %}
+								{% if request.path.startswith(url_for(x[0])) %}
+								<li class="active"><a href="{{ url_for(x[0]) }}">{{x[1]}}</a></li>
+								{% else %}
+								<li><a href="{{ url_for(x[0]) }}">{{x[1]}}</a></li>
+								{% endif %}
+							{% endfor %}
+						</ul>
+					</nav>
+				</div>
+			</div>
+			<!-- /Header -->
+			
+			<div id="page">
+				<div class="container">
+					<div class="row">
+						<div class="3u">
+							<section id="sidebar2">
+								{% block sidebarheader %}{% endblock %}
+								<ul class="style1">
+									{% block sidebaritems %}{% endblock %}
+								</ul>
+							</section>
+						</div>
+						
+						
+						<div class="9u skel-cell-important">
+							<section id="content" >
+							{% for message in get_flashed_messages() %}
+								<div class="flash">{{ message }}</div>
+							{% endfor %}
+
+							{% block content %}{% endblock %}
+							</section>
+						</div>
+					</div>
+
+				</div>	
+			</div>
+
+
+			<!-- Footer -->
+			<div id="footer">
+				<div class="container">
+					<div class="row">
+						<div class="3u">
+							<section id="box1">
+								{% block sidebarleftlow %}{% endblock %}
+							</section>
+						</div>
+						<div class="6u">
+							<section id="box2">
+								{% block contentlow %}{% endblock %}
+							</section>
+						</div>
+						<div class="3u">
+							<section id="box3">
+								{% block sidebarrightlow %}{% endblock %}
+							</section>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Copyright -->
+			<div id="copyright">
+				<div class="container">
+					<p>Octo-Deco is <a href="https://github.com/danroozemond/octo-deco" target="_blank">open source</a> (LPGLv3).
+					<p>Design: Synchronous by <a href="http://templated.co">TEMPLATED</a> Images: <a href="http://unsplash.com">Unsplash</a> (<a href="http://unsplash.com/cc0">CC0</a>)
+				</div>
+			</div>
+			
+		</div>
+	</body>
+</html>

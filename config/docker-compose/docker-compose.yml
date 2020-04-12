@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 services:
   nginx:
     image: nginx:1.15-alpine
@@ -10,13 +10,21 @@ services:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    mem_limit: 40m
   certbot:
     image: certbot/certbot
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"     
-  streamlit:
-    image: danroozemond/octodeco
-
+    mem_limit: 40m
+  flask:
+    image: danroozemond/octo-deco-flask
+    volumes:
+      - ~/git-master/octo-deco:/octo-deco
+      - ~/flask_instance:/flask_instance
+      - ../docker-flask/scripts:/scripts
+    mem_limit: 300m
+    command: "/bin/sh -c 'cd /octo-deco; /scripts/run_flask.sh'" 
+    #command: "/bin/sh -c 'sleep 6h'"
 

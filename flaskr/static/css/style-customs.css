@@ -1,0 +1,115 @@
+/* Dan Roozemond, Octo-Deco Flask specifics */
+
+/*
+ * Flash messages
+ */
+div.flash {
+    width: 100%;
+    color: #505050;
+    text-align: left;
+    font-size: 1.5em;
+    padding: 1em;
+    margin: 0.5em;
+    font-weight: bold;
+    background-color: #e7dca3;
+    border-style: solid;
+    border-color: #505050;
+    border-width: 0px 0px 0px 5px;
+}
+
+/*
+ * Sidebar items
+ */
+#sidebar2 li {
+	display: block;
+}
+
+/*
+ * Content
+ */
+#content h2 {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; height:8px; }
+::-webkit-scrollbar-track { background: #f1f1f1;}
+::-webkit-scrollbar-thumb { background: #888;}
+::-webkit-scrollbar-thumb:hover { background: #555;}
+
+div.bigtable table {
+  display: block;
+  overflow: scroll;
+  width: 100%;
+  height: 200px;
+}
+
+table.dataframe {
+    margin: 1em;
+}
+table.smalltable  {
+    width: 50%;
+}
+table.dataframe tr:nth-child(even) {
+    background-color: #f0f0f0;
+}
+table.dataframe th {
+    font-weight: bold;
+    color: black;
+    text-align: left;
+}
+table.dataframe th, td {
+    padding: .3em;
+    font-family: monospace;
+    font-size: .9em;
+    white-space: nowrap;
+}
+
+div.chart {
+    width: 100%;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+div.viztoggle {
+    display: inline;
+    font-size: 0.5em;
+    margin: 1em;
+    cursor: pointer;
+}
+
+div.adjust {
+    vertical-align:middle;
+}
+div.adjust label, input, img {
+    vertical-align:middle;
+    line-height: 2em;
+    margin: 10px;
+}
+
+div.dive_steps form, label {
+    display:inline;
+}
+div.dive_steps input {
+    width: 8em;
+    padding-left:3px;
+    padding-right: 3px;
+}
+div.new_dive input.valid {
+    background-color: #bffcc6;
+}
+div.new_dive input.invalid {
+    background-color: #ffcbc1;
+}
+div.dive_steps
+{
+    margin-bottom: 1em;
+}
+div.depth_times
+{
+    display: inline;
+}
+
+
+
