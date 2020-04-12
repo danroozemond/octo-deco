@@ -88,6 +88,13 @@ div.adjust label, input, img {
     margin: 10px;
 }
 
+div.diveselect {
+    margin-bottom: 1em;
+}
+div.diveselect select {
+    padding: 5px;
+}
+
 div.dive_steps form, label {
     display:inline;
 }

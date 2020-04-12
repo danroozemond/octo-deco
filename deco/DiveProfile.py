@@ -1,6 +1,8 @@
 # Please see LICENSE.md
+import datetime
 import math;
-import time;
+import pytz
+import time
 
 import pandas as pd;
 
@@ -30,6 +32,7 @@ class DiveProfile:
         self._desc_deco_model_profile = '';
         self.gf_low_profile = 0;
         self.gf_high_profile = 0;
+        self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
 
         if deco_model is not None:
             self._deco_model = deco_model;
@@ -71,7 +74,10 @@ class DiveProfile:
 
     def description(self):
         maxdepth = max(map( lambda p : p.depth, self._points ));
-        return '%.1f m / %i mins' % (maxdepth, self.divetime());
+        if not hasattr(self, 'created'):
+            self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
+        dtc = self.created.strftime('%d-%b-%Y %H:%M');
+        return '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
 
     def update_deco_model_info(self, update_display = False, update_profile = False):
         if update_display:
