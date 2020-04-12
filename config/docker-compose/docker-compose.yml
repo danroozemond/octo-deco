@@ -18,11 +18,13 @@ services:
       - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"     
     mem_limit: 40m
-  streamlit:
-    image: danroozemond/octodeco
+  flask:
+    image: danroozemond/octo-deco-flask
     volumes:
-      - ~/git-master:/app2
+      - ~/git-master/octo-deco:/octo-deco
       - ~/flask_instance:/flask_instance
+      - ../docker-flask/scripts:/scripts
     mem_limit: 300m
-    command: [ "streamlit", "run", "/app2/octo-deco/run_streamlit_ui.py" ]
+    command: "/bin/sh -c 'cd /octo-deco; /scripts/run_flask.sh'" 
+    #command: "/bin/sh -c 'sleep 6h'"
 
