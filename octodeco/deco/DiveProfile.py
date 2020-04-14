@@ -1,10 +1,10 @@
 # Please see LICENSE.md
 import datetime
 import math;
-import pytz
 import time
 
 import pandas as pd;
+import pytz
 
 from . import Buhlmann;
 from . import Gas;
