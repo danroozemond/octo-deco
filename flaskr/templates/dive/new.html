@@ -23,7 +23,7 @@
             function add_depth_time()
             {
                 cnt += 1;
-                newdiv = document.createElement("span");
+                var newdiv = document.createElement("span");
                 newdiv.innerHTML =  '<br/>At <input type="text" name="depth['+cnt+']" id="depth['+cnt+']">';
                 newdiv.innerHTML += ' m for <input type="text" name="time['+cnt+']" id="time['+cnt+']"> mins';
                 newdiv.innerHTML += ' on <input type="text" name="gas['+cnt+']" id="gas['+cnt+']" value="Air">.';
@@ -37,22 +37,22 @@
             /* Checking inputs */
             function check_input_nr(s, minval, maxval, emptyok)
             {
-				v = s.trim();
+				var v = s.trim();
 				if (v == '' && emptyok) return true;
-				vn = Number(v);
+				var vn = Number(v);
 				return v == String(vn) && v >= minval && v <= maxval;
             }
             function check_gas(s, emptyok)
             {
-            	regex = /^(air|nx[0-9][0-9]|tx[0-9][0-9]\/[0-9][0-9])$/i
-            	v = s.trim();
-            	return v.match(regex) ||
+            	var regex = RegExp(/^(air|nx[0-9][0-9]|tx[0-9][0-9]\/[0-9][0-9])$/i);
+            	var v = s.trim();
+            	return regex.test(v) ||
             	        ( v == '' && emptyok );
             }
             function check_extra_gases(s)
             {
-                ss = s.split(',');
-                ok = true;
+                var ss = s.split(',');
+                var ok = true;
                 for(i = 0; i < ss.length; i++)
                     ok = ok && check_gas(ss[i], true);
                 return ok;
@@ -65,21 +65,21 @@
             }
             function check_all()
             {
-            	ok = true;
+            	var ok = true;
 				/* The list */
 				for(i=0;i<=cnt;i++)
 				{
-					d = document.getElementById('depth['+i+']');
-					t = document.getElementById('time['+i+']');
-					g = document.getElementById('gas['+i+']');
-					ok2 = check_and_mark(d, check_input_nr( d.value, 1, 200, i != 0 ) );
-					ok3 = check_and_mark(t, check_input_nr( t.value, 1, 200, i != 0 ) );
-					ok4 = check_and_mark(g, check_gas(g.value, false) );
+					var d = document.getElementById('depth['+i+']');
+					var t = document.getElementById('time['+i+']');
+					var g = document.getElementById('gas['+i+']');
+					var ok2 = check_and_mark(d, check_input_nr( d.value, 1, 200, i != 0 ) );
+					var ok3 = check_and_mark(t, check_input_nr( t.value, 1, 200, i != 0 ) );
+					var ok4 = check_and_mark(g, check_gas(g.value, false) );
 					ok = ok && ok2 && ok3 && ok4;
 				}
 				/* The extra gases */
 				eg = document.getElementById('ipt_deco_gas');
-                ok5 = check_and_mark( eg, check_extra_gases( eg.value ) );
+                var ok5 = check_and_mark( eg, check_extra_gases( eg.value ) );
                 ok = ok && ok5;
 				return ok;
             }

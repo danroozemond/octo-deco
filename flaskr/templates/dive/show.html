@@ -46,8 +46,7 @@
         function autosubmitGF()
         {
             document.getElementById('spinner').style.display = "inline";
-            form = document.getElementById('form_update');
-            form.submit();
+            document.getElementById('form_update').submit();
         }
         </script>
         <div class="adjust">
@@ -103,7 +102,7 @@
     <script>
         function toggleHeatmap(toggle_elt)
         {
-            elt = document.getElementById("heatmap");
+            var elt = document.getElementById("heatmap");
             if ( elt.style.display == "block" )
             {
                 elt.style.display="none";
@@ -130,7 +129,7 @@
     <script>
         function togglediv(divname, toggle_elt)
         {
-            elt = document.getElementById(divname);
+            var elt = document.getElementById(divname);
             if ( elt.style.display == "block" )
             {
                 elt.style.display="none";
