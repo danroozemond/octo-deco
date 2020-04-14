@@ -52,8 +52,6 @@ def before_request():
 
 
 # Blueprints
-from . import auth;
-app.register_blueprint(auth.bp);
 from . import dive;
 app.register_blueprint(dive.bp);
 from . import user;
