@@ -61,12 +61,6 @@ app.register_blueprint(user.bp);
 #
 # Separate Page definitions
 #
-@app.route('/hello')
-def hello():
-    session[ 'count' ] = session.get('count', 0) + 1;
-    return 'Hello, World! %i'% session['count'];
-
-
 @app.route('/')
 def index():
-    return flask.redirect( flask.url_for('dive.show',id=0), code=307);
+    return flask.redirect( flask.url_for('dive.show_any') );
