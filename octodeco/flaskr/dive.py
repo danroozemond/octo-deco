@@ -6,7 +6,7 @@ from flask import (
 
 from . import data;
 from . import plots;
-from ..deco import DiveProfile, Gas;
+from octodeco.deco import DiveProfile, Gas;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
