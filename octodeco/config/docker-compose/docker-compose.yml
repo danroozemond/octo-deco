@@ -25,6 +25,6 @@ services:
       - ~/flask_instance:/flask_instance
       - ../docker-flask/scripts:/scripts
     mem_limit: 300m
-    command: "/bin/sh -c 'cd /octo-deco; /scripts/run_flask.sh'" 
+    command: "/bin/sh -c '/scripts/run_uwsgi.sh'"
     #command: "/bin/sh -c 'sleep 6h'"
 
