@@ -21,7 +21,7 @@ services:
   flask:
     image: danroozemond/octo-deco-uwsgi
     ports:
-      - "9191:9191"
+      - "127.0.0.1:9191:9191"
     volumes:
       - ~/git-master/octo-deco:/octo-deco
       - ~/flask_instance:/flask_instance
