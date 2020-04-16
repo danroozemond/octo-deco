@@ -20,12 +20,14 @@ services:
     mem_limit: 40m
   flask:
     image: danroozemond/octo-deco-uwsgi
+    ports:
+      - "127.0.0.1:9191:9191"
     volumes:
       - ~/git-master/octo-deco:/octo-deco
       - ~/flask_instance:/flask_instance
       - ../docker-flask/scripts:/scripts
-    mem_limit: 300m
-    command: "/bin/sh -c '/scripts/run_uwsgi.sh'"
+    mem_limit: 500m
+    command: "/bin/sh -c '/scripts/run_uwsgi_ini.sh'"
     #command: "/bin/sh -c '/scripts/run_flask_init.sh'"
     #command: "/bin/sh -c 'sleep 6h'"
 
