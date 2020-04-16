@@ -6,7 +6,7 @@ from flask import (
 
 from . import data;
 from . import plots;
-from ..deco import DiveProfile, Gas;
+from octodeco.deco import DiveProfile, Gas;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
@@ -40,7 +40,8 @@ def show(id):
 
 @bp.route('/show/', methods = [ 'POST' ] )
 def show_post():
-    return show(int(request.form.get('dive_id')));
+    dive_id = int(request.form.get('dive_id'));
+    return redirect(url_for('dive.show', id=dive_id));
 
 
 @bp.route('/csv/<int:id>')

@@ -19,12 +19,13 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"     
     mem_limit: 40m
   flask:
-    image: danroozemond/octo-deco-flask
+    image: danroozemond/octo-deco-uwsgi
     volumes:
       - ~/git-master/octo-deco:/octo-deco
       - ~/flask_instance:/flask_instance
       - ../docker-flask/scripts:/scripts
     mem_limit: 300m
-    command: "/bin/sh -c 'cd /octo-deco; /scripts/run_flask.sh'" 
+    command: "/bin/sh -c '/scripts/run_uwsgi.sh'"
+    #command: "/bin/sh -c '/scripts/run_flask_init.sh'"
     #command: "/bin/sh -c 'sleep 6h'"
 
