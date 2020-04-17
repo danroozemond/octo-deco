@@ -97,7 +97,6 @@ def store_dive_new(diveprofile):
         ''', [ str(get_user()), pickle.dumps(diveprofile), diveprofile.description() ]
                );
     diveprofile.dive_id = cur.lastrowid;
-    print("inserted dive; new id = %i" % cur.lastrowid);
     cur.close();
 
 

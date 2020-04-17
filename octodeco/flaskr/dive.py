@@ -3,6 +3,7 @@ import pandas;
 from flask import (
     Blueprint, render_template, Response, flash, redirect, url_for, request, abort
 )
+import sys;
 
 from . import data;
 from . import plots;
@@ -115,4 +116,35 @@ def new_demo():
     data.store_dive_new(dp);
     dive_id = dp.dive_id;
     flash('Generated demo dive [%i]' % dive_id);
+    return redirect(url_for('dive.show', id = dive_id))
+
+
+@bp.route('/new/csv', methods = [ 'POST' ])
+def new_shearwater_csv():
+    CHARSET='utf-8';
+    # Get the object
+    if 'ipt_csv' not in request.files:
+        flash('No file provided');
+        return redirect(url_for('dive.new_show'));
+    file = request.files['ipt_csv'];
+    # Read line by line
+    lines = [];
+    sizeseen = 0;
+    for line in file:
+        lines.append(line.decode(CHARSET));
+        sizeseen += sys.getsizeof(line);
+        if sizeseen > 5e9:
+            flash('File too big');
+            return redirect(url_for('dive.new_show'));
+    # Create the diveprofile object
+    try:
+        dp = CreateDive.create_from_shearwater_csv( lines );
+    except CreateDive.ParseError as err:
+        flash( 'Error parsing CSV: %s' % err.args );
+        return redirect(url_for('dive.new_show'));
+    # Store the dive
+    data.store_dive_new(dp);
+    dive_id = dp.dive_id;
+    flash('Import successful - %s' % dp.description());
+    # Done.
     return redirect(url_for('dive.show', id = dive_id))

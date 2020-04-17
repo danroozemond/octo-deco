@@ -89,7 +89,7 @@ def create_from_shearwater_csv(lines):
             fo2 = float(row[ 'Fraction O2' ]);
             fhe = float(row[ 'Fraction He' ]);
         except KeyError as err:
-            raise ParseError('Could not parse dive piont (%s)' % err.args);
+            raise ParseError('Could not parse dive point (%s)' % err.args);
         # Create gas; for efficiency reasons check whether it's different from last time
         if lastfo2 != fo2 or lastfhe != fhe:
             gas = Gas.Trimix(100*fo2, 100*fhe);
