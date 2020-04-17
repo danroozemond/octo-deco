@@ -99,11 +99,14 @@ class DiveProfile:
     def add_gas(self, gas):
         self._gases_carried.add( gas );
 
-    def _append_point(self, time_diff, new_depth, gas):
-        new_time = self._points[ -1 ].time + time_diff;
+    def _append_point_abstime(self, new_time, new_depth, gas):
         p = DivePoint(new_time, new_depth, gas, self._points[-1]);
         self._points.append(p);
         return p;
+
+    def _append_point(self, time_diff, new_depth, gas):
+        new_time = self._points[ -1 ].time + time_diff;
+        return self._append_point_abstime(new_time, new_depth, gas);
 
     def _append_transit(self, new_depth, gas, round_to_mins = False):
         current_depth = self._points[ -1 ].depth;
