@@ -1,6 +1,5 @@
 TODO this list :) [also check TO-DOs in .py's]
 
-* Import CSV from shearwater log
 * Gas consumption
 * CNS tracking
 
