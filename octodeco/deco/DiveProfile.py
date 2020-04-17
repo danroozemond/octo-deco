@@ -132,6 +132,10 @@ class DiveProfile:
         self.append_section( 0.0, 0.1, transit = transit );
         if self._points[ -1 ].gas != Gas.Air():
             self.append_gas_switch( Gas.Air() );
+        # Round to nearest integral minute, just cause it looks nice
+        p = self._points[-1];
+        if int(p.time) != p.time:
+            self._append_point_abstime( math.ceil(p.time), p.depth, p.gas);
 
     def append_gas_switch(self, gas, duration = None):
         # Default duration is 0 if still on surface otherwise 1.0
