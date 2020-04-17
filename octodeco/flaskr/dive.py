@@ -6,7 +6,7 @@ from flask import (
 
 from . import data;
 from . import plots;
-from octodeco.deco import DiveProfile, Gas;
+from octodeco.deco import CreateDive;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
@@ -92,46 +92,26 @@ def new_show():
     return render_template('dive/new.html');
 
 
-def ipt_check(depth, time):
-    try:
-        depth = int(depth);
-        time = int(time);
-        return depth is not None and 0 < depth < 200 \
-               and time is not None and 0 < time < 200;
-    except:
-        return False;
-
-
 @bp.route('/new', methods = [ 'POST' ])
 def new_do():
-    result = DiveProfile.DiveProfile();
-    cntok = 0;
-    # Parse the dive steps
-    for i in range(11):
-        depth = request.form.get('depth[%i]' % i, None);
-        time = request.form.get('time[%i]' % i, None);
-        gas = Gas.from_string( request.form.get('gas[%i]' % i, None) );
-        if ipt_check(depth, time) and gas is not None:
-            result.append_section(int(depth), int(time), gas);
-            cntok += 1;
-    if cntok == 0:
+    dtgs = [ ( request.form.get('depth[%i]' % i, None),
+               request.form.get('time[%i]' % i, None),
+               request.form.get('gas[%i]' % i, None) )
+             for i in range(11) ];
+    extragas = request.form.get('deco_gas', '');
+    result = CreateDive.create_dive_by_depth_time_gas( dtgs, extragas );
+    if result is None:
+        # Input sanitation takes place properly in JavaScript. So if something did not work
+        # out here, we're not too worried about being nice about it.
         abort(405);
-    # Parse any additional gas
-    gases = Gas.many_from_string( request.form.get('deco_gas', '') );
-    for g in gases:
-        result.add_gas(g);
-    # Add deco stops
-    result.add_stops_to_surface();
-    result.append_section(0, 30);
-    result.interpolate_points();
-    # Store, done.
+    # Store, return result.
     data.store_dive(result);
     return redirect(url_for('dive.show', id=result.dive_id));
 
 
 @bp.route('/new/demo', methods = [ 'POST' ])
 def new_demo():
-    dp = DiveProfile.create_demo_dive();
+    dp = CreateDive.create_demo_dive();
     data.store_dive_new(dp);
     dive_id = dp.dive_id;
     flash('Generated demo dive [%i]' % dive_id);
