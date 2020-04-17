@@ -33,6 +33,7 @@ class DiveProfile:
         self.gf_low_profile = 0;
         self.gf_high_profile = 0;
         self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
+        self.add_custom_desc = '';
 
         if deco_model is not None:
             self._deco_model = deco_model;
@@ -77,7 +78,10 @@ class DiveProfile:
         if not hasattr(self, 'created'):
             self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
         dtc = self.created.strftime('%d-%b-%Y %H:%M');
-        return '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
+        r = '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
+        if hasattr(self, 'add_custom_desc'):
+            r = '%s: %s' % (self.add_custom_desc, r);
+        return r;
 
     def update_deco_model_info(self, update_display = False, update_profile = False):
         if update_display:
