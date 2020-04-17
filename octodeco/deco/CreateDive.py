@@ -1,6 +1,7 @@
 # Please see LICENSE.md
 from .DiveProfile import DiveProfile;
 from . import Gas;
+import csv;
 
 
 #
@@ -57,4 +58,53 @@ def create_dive_by_depth_time_gas(dtgs, extragas):
 #
 # Create: Dive from CSV
 #
-#TODO
+class ParseError(Exception):
+    """to raise & catch unexpected CSV format"""
+    pass
+
+
+def create_from_shearwater_csv(lines):
+    # First two lines contain details about settings etc
+    hlines = lines[ 0:2 ];
+    reader = csv.DictReader(hlines);
+    row = reader.__next__();
+    try:
+        gf_low = int(row[ 'GF Minimum' ]);
+        gf_high = int(row[ 'GF Maximum' ]);
+        divenr = int(row[ 'Dive Number' ]);
+    except KeyError as err:
+        raise ParseError('Could not parse header row (%s)' % err.args);
+    result = DiveProfile(gf_low = gf_low, gf_high = gf_high);
+    result.add_custom_desc = 'SW-%i' % int(divenr);
+    # Rest is actually the dive
+    # (Using DictReader is probably not the most efficient, but soit)
+    del lines[ 0:2 ];
+    reader = csv.DictReader(lines);
+    lastfo2 = None; lastfhe = None; gas = None;
+    for row in reader:
+        # Extract info
+        try:
+            t = float(row[ 'Time (ms)' ]) / 6e4;
+            d = float(row[ 'Depth' ]);
+            fo2 = float(row[ 'Fraction O2' ]);
+            fhe = float(row[ 'Fraction He' ]);
+        except KeyError as err:
+            raise ParseError('Could not parse dive piont (%s)' % err.args);
+        # Create gas; for efficiency reasons check whether it's different from last time
+        if lastfo2 != fo2 or lastfhe != fhe:
+            gas = Gas.Trimix(100*fo2, 100*fhe);
+            result.add_gas(gas);
+        # Append the point
+        result._append_point_abstime(t, d, gas);
+    # Wrap up
+    result.add_stops_to_surface();
+    result.append_section(0, 30);
+    result.interpolate_points();
+    return result;
+
+
+def create_from_shearwater_csv_file(filename):
+    lines = [ ];
+    for line in open(filename, 'r'):
+        lines.append(line);
+    return create_from_shearwater_csv(lines);
