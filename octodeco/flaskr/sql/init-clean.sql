@@ -6,7 +6,7 @@ CREATE TABLE dives (
   dive BLOB NOT NULL
 );
 CREATE TABLE users (
-  user_id INTEGER,
+  user_id INTEGER PRIMARY KEY AUTOINCREMENT,
   google_email TEXT
 );
 CREATE TABLE sessions (

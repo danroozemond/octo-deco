@@ -12,10 +12,10 @@ bp = Blueprint('user', __name__, url_prefix='/user')
 @bp.route('/')
 @bp.route('/info')
 def info():
-    data.get_user();
     return render_template('user/info.html',
-                           divecount = data.get_dive_count(),
-                           diveinfos = data.get_all_dives() );
+                           # divecount = data.get_dive_count(),
+                           # diveinfos = data.get_all_dives(),
+                           user_details = data.get_user_details() );
 
 
 @bp.route('/update', methods = [ 'POST' ])

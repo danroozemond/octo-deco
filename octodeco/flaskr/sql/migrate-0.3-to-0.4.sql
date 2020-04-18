@@ -25,7 +25,7 @@ FROM dives_old;
 UPDATE sessions SET user_id=rowid;
 /* create users table */
 CREATE TABLE users (
-  user_id INTEGER,
+  user_id INTEGER PRIMARY KEY AUTOINCREMENT,
   google_email TEXT
 );
 /* no need to fill users table; once we
