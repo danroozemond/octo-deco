@@ -13,16 +13,21 @@ def show_diveprofile(diveprofile):
     # Later, for deco info, see filled lines here: https://plot.ly/python/line-charts/
     #
     fig = sp.make_subplots(specs = [ [ {"secondary_y": True} ] ])
-    fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "depth" ], name = 'Depth',
-                             line = {'color': 'rgb(30,7,143)', 'width': 3}));
+    fig.add_trace(go.Scatter(x = df[ "time" ], y = 100 * df[ "ppO2" ], name = 'ppO2',
+                             line = {'color': 'rgb(176,42,143)', 'dash': 'dot', 'width': 1},
+                             visible = "legendonly"),
+                  secondary_y = True);
     fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "Ceil" ], name = 'Ceil',
                              line = {'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 2}));
+    fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "SurfaceGF" ], name = 'SurfaceGF',
+                             line = {'color': 'rgb(251,165,56)', 'width': 3},
+                             visible = "legendonly"),
+                  secondary_y = True);
     fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "GF99" ], name = 'GF99',
                              line = {'color': 'rgb(255,255,0)', 'width': 3}),
                   secondary_y = True);
-    fig.add_trace(go.Scatter(x = df[ "time" ], y = 100 * df[ "ppO2" ], name = 'ppO2',
-                             line = {'color': 'rgb(176,42,143)', 'dash': 'dot', 'width': 1}),
-                  secondary_y = True);
+    fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "depth" ], name = 'Depth',
+                             line = {'color': 'rgb(30,7,143)', 'width': 3}));
     # Leading tissue - not that interesting
     # fig.add_trace( go.Scatter( x=df["time"], y=(100/16)*(df["LeadingTissueIndex"]+2), name='Leading tissue',
     #                            line={'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 1} ),

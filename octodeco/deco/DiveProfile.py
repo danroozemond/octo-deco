@@ -33,6 +33,7 @@ class DiveProfile:
         self.gf_low_profile = 0;
         self.gf_high_profile = 0;
         self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
+        self.add_custom_desc = '';
 
         if deco_model is not None:
             self._deco_model = deco_model;
@@ -77,7 +78,10 @@ class DiveProfile:
         if not hasattr(self, 'created'):
             self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
         dtc = self.created.strftime('%d-%b-%Y %H:%M');
-        return '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
+        r = '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
+        if hasattr(self, 'add_custom_desc'):
+            r = '%s: %s' % (self.add_custom_desc, r);
+        return r;
 
     def update_deco_model_info(self, update_display = False, update_profile = False):
         if update_display:
@@ -95,11 +99,14 @@ class DiveProfile:
     def add_gas(self, gas):
         self._gases_carried.add( gas );
 
-    def _append_point(self, time_diff, new_depth, gas):
-        new_time = self._points[ -1 ].time + time_diff;
+    def _append_point_abstime(self, new_time, new_depth, gas):
         p = DivePoint(new_time, new_depth, gas, self._points[-1]);
         self._points.append(p);
         return p;
+
+    def _append_point(self, time_diff, new_depth, gas):
+        new_time = self._points[ -1 ].time + time_diff;
+        return self._append_point_abstime(new_time, new_depth, gas);
 
     def _append_transit(self, new_depth, gas, round_to_mins = False):
         current_depth = self._points[ -1 ].depth;
@@ -125,6 +132,10 @@ class DiveProfile:
         self.append_section( 0.0, 0.1, transit = transit );
         if self._points[ -1 ].gas != Gas.Air():
             self.append_gas_switch( Gas.Air() );
+        # Round to nearest integral minute, just cause it looks nice
+        p = self._points[-1];
+        if int(p.time) != p.time:
+            self._append_point_abstime( math.ceil(p.time), p.depth, p.gas);
 
     def append_gas_switch(self, gas, duration = None):
         # Default duration is 0 if still on surface otherwise 1.0
@@ -282,16 +293,3 @@ class DiveProfile:
         self.interpolate_points();
 
 
-#
-# Demo dive
-#
-def create_demo_dive():
-    dp = DiveProfile(gf_low = 35, gf_high = 70);
-    dp.add_gas( Gas.Nitrox(50) );
-    dp.append_section(20, 43, Gas.Trimix(21, 35));
-    dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
-    dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
-    dp.add_stops_to_surface();
-    dp.append_section(0, 30);
-    dp.interpolate_points();
-    return dp;
