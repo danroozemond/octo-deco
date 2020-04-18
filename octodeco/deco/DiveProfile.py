@@ -33,7 +33,6 @@ class DiveProfile:
         self.gf_low_profile = 0;
         self.gf_high_profile = 0;
         self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
-        self.add_custom_desc = '';
 
         if deco_model is not None:
             self._deco_model = deco_model;

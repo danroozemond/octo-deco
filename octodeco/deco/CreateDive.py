@@ -9,6 +9,7 @@ import csv;
 #
 def create_demo_dive():
     dp = DiveProfile(gf_low = 35, gf_high = 70);
+    dp.is_demo_dive = True;
     dp.add_gas(Gas.Nitrox(50));
     dp.append_section(20, 43, Gas.Trimix(21, 35));
     dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
