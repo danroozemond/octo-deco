@@ -55,16 +55,26 @@ def get_user_details():
     return g.user_details;
 
 
-# TODO FIX
-def user_reset_profile():
+def destroy_session():
+    session_id = get_user_details()['session_id'];
     cur = db.get_db().cursor();
     cur.execute('''
         DELETE
-        FROM dives
-        WHERE user_id = ?
-        ''', [ str(get_user()) ]
+        FROM sessions
+        WHERE session_id = ?
+        ''', [ str(session_id) ]
                 );
-    session['user_id'] = None;
+    g.user_details = None;
+    session.pop('session_id');
+
+
+def user_reset_profile():
+    user_id = get_user_details()['user_id'];
+    cur = db.get_db().cursor();
+    cur.execute('DELETE FROM dives WHERE user_id = ?', [ user_id ] );
+    cur.execute('DELETE FROM sessions WHERE user_id = ?', [ user_id ]);
+    cur.execute('DELETE FROM users WHERE user_id = ?', [ user_id ]);
+    destroy_session();
     return cur.rowcount;
 
 
