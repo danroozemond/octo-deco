@@ -32,7 +32,7 @@ except OSError:
 
 
 #
-# Database init
+# Database manipulations
 #
 @click.command('init-db')
 @flask.cli.with_appcontext
@@ -41,7 +41,19 @@ def init_db_command():
     from . import db;
     db.init_db()
     click.echo('Initialized the database in %s' % app.config['DATABASE'])
+
+@click.command('migrate-db')
+@click.argument('frv')
+@click.argument('tov')
+@flask.cli.with_appcontext
+def migrate_db_command(frv, tov):
+    """Migrate from one data version to another"""
+    from . import db;
+    db.migrate_db(frv,tov)
+    click.echo('Migrated the database in %s' % app.config['DATABASE'])
+
 app.cli.add_command(init_db_command);
+app.cli.add_command(migrate_db_command);
 
 
 # Session data
