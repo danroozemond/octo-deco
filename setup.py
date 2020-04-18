@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name="Octo-Deco",
-    version="0.2",
+    version="0.3",
     packages=find_packages(),
     author="Dan Roozemond",
     author_email="dan.roozemond@gmail.com",
