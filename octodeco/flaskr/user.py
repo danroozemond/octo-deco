@@ -14,15 +14,26 @@ def info():
     return render_template('user/info.html',
                            divecount = db_dive.get_dive_count(),
                            diveinfos = db_dive.get_all_dives(),
+                           allsessions = db_user.get_all_sessions_for_user(),
                            user_details = db_user.get_user_details());
 
 
 @bp.route('/update', methods = [ 'POST' ])
 def update():
     action = request.form.get('action');
-    if action.startswith('Reset'):
-        db_user.user_reset_profile();
-        flash('User profile reset');
+    if action == 'Destroy session':
+        db_user.destroy_session();
+        flash('Session was reset');
+        return redirect(url_for('user.info'));
+    elif action == 'Destroy entire profile':
+        db_user.destroy_user_profile();
+        flash('Your entire profile was removed');
         return redirect(url_for('user.info'));
     else:
         abort(405);
+
+@bp.route('/logout')
+def logout():
+    db_user.destroy_session();
+    flash('You were logged out');
+    return redirect(url_for('user.info'));

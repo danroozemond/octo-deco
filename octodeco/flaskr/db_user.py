@@ -29,7 +29,7 @@ def get_user_details():
     if 'user_details' not in g:
         cur = db.get_db().cursor();
         selectquery = '''
-            SELECT u.user_id, u.google_email
+            SELECT u.*
             FROM sessions s LEFT JOIN users u
             ON s.user_id = u.user_id
             WHERE s.session_id = ?
@@ -47,11 +47,8 @@ def get_user_details():
             cur.execute(selectquery, [ str(session_id) ] );
             row = cur.fetchone();
             assert row is not None;
-        g.user_details = {
-            'session_id' : session_id,
-            'user_id' : row['user_id'],
-            'google_email' : row['google_email']
-        }
+        g.user_details = { 'session_id' : session_id };
+        g.user_details.update(dict(row));
     return g.user_details;
 
 
@@ -76,7 +73,7 @@ def destroy_session():
     session.pop('session_id');
 
 
-def user_reset_profile():
+def destroy_user_profile():
     user_id = get_user_id();
     cur = db.get_db().cursor();
     cur.execute('DELETE FROM dives WHERE user_id = ?', [ user_id ] );
@@ -84,3 +81,33 @@ def user_reset_profile():
     cur.execute('DELETE FROM users WHERE user_id = ?', [ user_id ]);
     destroy_session();
     return cur.rowcount;
+
+
+def get_all_sessions_for_user():
+    user_id = get_user_id();
+    cur = db.get_db().cursor();
+    cur.execute('SELECT session_id FROM sessions WHERE user_id = ?', [ user_id ]);
+    return [ row['session_id'] for row in cur.fetchall() ];
+
+
+#
+# Auth
+#
+def process_valid_google_login(userinfo_json):
+    cur = db.get_db().cursor();
+    cur.execute('SELECT user_id FROM users WHERE google_sub = ?', [ userinfo_json['sub']]);
+    row = cur.fetchone();
+    if row is None:
+        # User previously unknown, update current user_id with these details
+        cur.execute("""
+                    UPDATE users 
+                    SET google_sub = ?, google_given_name = ?, google_picture = ?
+                    WHERE user_id = ?
+                    """,
+                    [ userinfo_json['sub'], userinfo_json['given_name'], userinfo_json['picture'],
+                      str(get_user_id()) ]);
+    else:
+        # TODO - merge the two sessions
+        pass;
+
+
