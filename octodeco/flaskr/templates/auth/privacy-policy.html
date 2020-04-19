@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy Policy{% endblock %}
+
+{% block sidebaritems %}
+{% endblock %}
+
+{% block content %}
+    <header><h2>Privacy Policy</h2></header>
+    <div>
+        Only your e-mail address will be stored, in order to persistently store your data and serve your data
+        back to you in the future. Via <a href="{{url_for('user.info')}}">the user info page</a> you can always
+        reset your profile and purge the data stored about you.
+    </div>
+{% endblock %}
