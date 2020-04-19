@@ -11,7 +11,8 @@ CREATE TABLE dives (
   dive_desc TEXT,
   user_id INTEGER NOT NULL,
   is_demo BOOL,
-  dive BLOB NOT NULL
+  dive BLOB NOT NULL,
+  last_update DATETIME
 );
 /* create sessions table */
 CREATE TABLE sessions (
@@ -32,8 +33,8 @@ CREATE TABLE users (
    have logins it will be filled */
 
 /* fill new dives table */
-insert into dives(dive_id, dive_desc, user_id, is_demo, dive)
-SELECT d.dive_id, d.dive_desc, s.user_id, 0, d.dive
+insert into dives(dive_id, dive_desc, user_id, is_demo, dive, last_update)
+SELECT d.dive_id, d.dive_desc, s.user_id, 0, d.dive, datetime('now')
 FROM dives_old d LEFT JOIN sessions s
 on d.user_id=s.session_id;
 /* drop old dives table */

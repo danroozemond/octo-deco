@@ -3,7 +3,8 @@ CREATE TABLE dives (
   dive_desc TEXT,
   user_id INTEGER NOT NULL,
   is_demo BOOL,
-  dive BLOB NOT NULL
+  dive BLOB NOT NULL,
+  last_update DATETIME
 );
 CREATE TABLE users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT,

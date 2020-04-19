@@ -155,7 +155,7 @@ def store_dive_update(diveprofile):
     cur = db.get_db().cursor();
     cur.execute('''
         UPDATE dives
-        SET dive = ?, dive_desc = ?, is_demo = ?
+        SET dive = ?, dive_desc = ?, is_demo = ?, last_update = datetime('now')
         WHERE dive_id = ? AND user_id = ?;
         ''', [ pickle.dumps(diveprofile), diveprofile.description(), is_demo,
                dive_id, get_user_id() ]
