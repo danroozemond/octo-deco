@@ -23,13 +23,14 @@ GOOGLE_CLIENT_SECRET = d['web']['client_secret'];
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 );
+# Not ideal, but soit: extract hostname from GOOGLE_OAUTH_JSON
+URL_ROOT = [ uri.replace('/auth/redirected','')
+             for uri in d['web']['redirect_uris']
+             if '/auth/redirected' in uri ][0];
 
-# TODO FIX
-URL_ROOT = 'http://localhost:5000'
-print('URL_ROOT=', URL_ROOT);
-print('google_outh_json contents:', d);
 
 def get_google_provider_cfg():
+    print('Running get_google_provider_cfg');
     return requests.get(GOOGLE_DISCOVERY_URL).json();
 
 
