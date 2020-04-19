@@ -1,5 +1,5 @@
 # Please see LICENSE.md
-import os, json;
+import os, json, time;
 from flask import (
     Blueprint, request, render_template, redirect, flash, url_for, abort
 )
@@ -30,11 +30,11 @@ URL_ROOT = [ uri.replace('/auth/redirected','')
 
 
 def get_google_provider_cfg():
-    print('Running get_google_provider_cfg');
     return requests.get(GOOGLE_DISCOVERY_URL).json();
 
 
-def get_google_request_uri():
+def construct_google_request_uri():
+    print('Constructing google_request_uri');
     # Get google's config for Google login
     google_provider_cfg = get_google_provider_cfg();
 
@@ -47,6 +47,19 @@ def get_google_request_uri():
         scope=["openid", "email", "profile"]
     )
     return request_uri;
+
+
+# This will be requested often; so (poor man's) cache it
+_google_request_uri = None;
+_google_request_uri_age = 0;
+def get_google_request_uri():
+    global _google_request_uri, _google_request_uri_age;
+    t = time.perf_counter();
+    print('age is %s' % (t - _google_request_uri_age));
+    if _google_request_uri is None or (t - _google_request_uri_age) > 3600:
+        _google_request_uri = construct_google_request_uri();
+        _google_request_uri_age = t;
+    return _google_request_uri;
 
 
 # Static route for privacy policy
@@ -92,17 +105,16 @@ def redirected():
         urj = userinfo_response.json();
         db_user.process_valid_google_login(urj);
         flash("User %s authenticated succesfully" % urj['email']);
-        return redirect(url_for('auth.login_show'));
     else:
         flash("User email not available or not verified by Google.");
-        return redirect(url_for('auth.login_show'));
+    return redirect(url_for('user.info'));
 
 
 @bp.route('/login', methods = [ 'GET' ])
 def login_show():
     return render_template('auth/login.html',
-                           user_details = db_user.get_user_details(),
-                           request_uri = get_google_request_uri() );
+                           user_details = db_user.get_db_user_details(),
+                           request_uri = get_google_request_uri());
 
 
 

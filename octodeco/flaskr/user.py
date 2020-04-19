@@ -1,11 +1,41 @@
 # Please see LICENSE.md
 from flask import (
-    Blueprint, request, render_template, redirect, flash, url_for, abort
+    Blueprint, request, render_template, redirect, flash, url_for, abort, g
 )
 
-from . import db_dive, db_user;
+from . import db_dive, db_user, auth;
 
 bp = Blueprint('user', __name__, url_prefix='/user')
+
+
+#
+# Convenience class for user info
+#
+class UserDetails(dict):
+    def __init__(self,*args,**kwargs) :
+        dict.__init__(self,*args,**kwargs);
+
+    def __repr__(self):
+        return dict.__repr__(self);
+
+    def is_logged_in(self):
+        return self['google_sub'] != '';
+
+    @property
+    def login_link(self):
+        return auth.get_google_request_uri();
+
+    @property
+    def logout_link(self):
+        return url_for('user.logout');
+
+
+def get_user_details():
+    if 'user_details' not in g:
+        g.user_details = UserDetails(db_user.get_db_user_details());
+    return g.user_details;
+
+
 
 
 @bp.route('/')
@@ -14,8 +44,8 @@ def info():
     return render_template('user/info.html',
                            divecount = db_dive.get_dive_count(),
                            diveinfos = db_dive.get_all_dives(),
-                           allsessions = db_user.get_all_sessions_for_user(),
-                           user_details = db_user.get_user_details());
+                           allsessions = db_user.get_all_sessions_for_user()
+                           );
 
 
 @bp.route('/update', methods = [ 'POST' ])
@@ -31,6 +61,7 @@ def update():
         return redirect(url_for('user.info'));
     else:
         abort(405);
+
 
 @bp.route('/logout')
 def logout():

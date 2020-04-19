@@ -37,6 +37,9 @@
     -ms-border-radius: 50%;
     -o-border-radius: 50%;
     border-radius: 50%;  ">-->
+						{{ g.user_details['session_id'] }}
+						<a href="{{ g.user_details.login_link }}">login</a>
+						<a href="{{ g.user_details.logout_link }}">logout</a>
 					</div>
 
 					<!-- Logo -->

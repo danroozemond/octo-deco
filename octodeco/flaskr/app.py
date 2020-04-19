@@ -4,6 +4,7 @@ from datetime import timedelta
 import click;
 import flask;
 from flask import Flask, session;
+from . import user;
 
 
 # Define navigation row
@@ -62,6 +63,7 @@ app.cli.add_command(migrate_db_command);
 def before_request():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=365);
+    user.get_user_details();
 
 
 # Blueprints
