@@ -19,7 +19,7 @@ class UserDetails(dict):
         return dict.__repr__(self);
 
     def is_logged_in(self):
-        return self['google_sub'] != '';
+        return self['google_sub'] is not None and self['google_sub'] != '';
 
     @property
     def login_link(self):
