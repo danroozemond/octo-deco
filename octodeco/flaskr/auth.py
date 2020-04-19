@@ -109,12 +109,3 @@ def redirected():
         flash("User email not available or not verified by Google.");
     return redirect(url_for('user.info'));
 
-
-@bp.route('/login', methods = [ 'GET' ])
-def login_show():
-    return render_template('auth/login.html',
-                           user_details = db_user.get_db_user_details(),
-                           request_uri = get_google_request_uri());
-
-
-
