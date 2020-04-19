@@ -15,6 +15,7 @@ def get_nav_items():
 
 # Get settings
 assert os.environ.get('FLASK_SECRET_KEY') is not None; # Won't store in version control
+assert os.environ.get('GOOGLE_OAUTH_JSON') is not None; # Won't store in version control
 setting_secret_key = os.environ.get('FLASK_SECRET_KEY');
 setting_instance_path = os.environ.get('FLASK_INSTANCE_PATH');
 

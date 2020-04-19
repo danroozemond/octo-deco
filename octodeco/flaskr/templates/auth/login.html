@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Auth - Login{% endblock %}
+
+{% block sidebaritems %}
+{% endblock %}
+
+{% block content %}
+    <header><h2>Login</h2></header>
+    <div>
+        Via Google: <a href="{{request_uri}}">Go</a>.
+    </div>
+    <div>
+    User details: {{ user_details }}
+    </div>
+{% endblock %}
