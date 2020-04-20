@@ -31,9 +31,9 @@ CREATE TABLE users (
   google_given_name TEXT,
   google_picture TEXT
 );
-/* no need to fill users table; once we
-   have logins it will be filled */
-
+/* also need to fill users table */
+insert into users(user_id)
+select distinct user_id from sessions;
 /* fill new dives table */
 insert into dives(dive_id, dive_desc, user_id, is_demo, dive, last_update)
 SELECT d.dive_id, d.dive_desc, s.user_id, 0, d.dive, datetime('now')
