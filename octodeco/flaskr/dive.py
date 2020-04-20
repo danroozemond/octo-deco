@@ -16,15 +16,21 @@ bp = Blueprint('dive', __name__, url_prefix='/dive')
 def show_any():
     dive_id = db_dive.get_any_dive_id();
     if dive_id is None:
-        return new_demo();
+        return redirect(url_for('dive.show_none'));
     else:
         return redirect(url_for('dive.show', id = dive_id))
+
+
+@bp.route('/show/none')
+def show_none():
+    return render_template('dive/show_none.html');
 
 
 @bp.route('/show/<int:id>', methods = ['GET'])
 def show(id):
     dp = db_dive.get_one_dive(id);
     if dp is None:
+        flash('Dive not found [%i]' % id)
         return redirect(url_for('dive.show_any'));
 
     alldives = db_dive.get_all_dives();
