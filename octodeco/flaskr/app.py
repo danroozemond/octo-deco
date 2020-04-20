@@ -4,6 +4,7 @@ from datetime import timedelta
 import click;
 import flask;
 from flask import Flask, session;
+from . import user;
 
 
 # Define navigation row
@@ -15,6 +16,7 @@ def get_nav_items():
 
 # Get settings
 assert os.environ.get('FLASK_SECRET_KEY') is not None; # Won't store in version control
+assert os.environ.get('GOOGLE_OAUTH_JSON') is not None; # Won't store in version control
 setting_secret_key = os.environ.get('FLASK_SECRET_KEY');
 setting_instance_path = os.environ.get('FLASK_INSTANCE_PATH');
 
@@ -32,7 +34,7 @@ except OSError:
 
 
 #
-# Database init
+# Database manipulations
 #
 @click.command('init-db')
 @flask.cli.with_appcontext
@@ -41,7 +43,19 @@ def init_db_command():
     from . import db;
     db.init_db()
     click.echo('Initialized the database in %s' % app.config['DATABASE'])
+
+@click.command('migrate-db')
+@click.argument('frv')
+@click.argument('tov')
+@flask.cli.with_appcontext
+def migrate_db_command(frv, tov):
+    """Migrate from one data version to another"""
+    from . import db;
+    db.migrate_db(frv,tov)
+    click.echo('Migrated the database in %s' % app.config['DATABASE'])
+
 app.cli.add_command(init_db_command);
+app.cli.add_command(migrate_db_command);
 
 
 # Session data
@@ -49,6 +63,7 @@ app.cli.add_command(init_db_command);
 def before_request():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=365);
+    user.get_user_details();
 
 
 # Blueprints
@@ -56,6 +71,8 @@ from . import dive;
 app.register_blueprint(dive.bp);
 from . import user;
 app.register_blueprint(user.bp);
+from . import auth;
+app.register_blueprint(auth.bp);
 
 
 #

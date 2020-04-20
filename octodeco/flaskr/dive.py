@@ -5,7 +5,7 @@ from flask import (
 )
 import sys;
 
-from . import data;
+from . import db_dive;
 from . import plots;
 from octodeco.deco import CreateDive;
 
@@ -14,7 +14,7 @@ bp = Blueprint('dive', __name__, url_prefix='/dive')
 
 @bp.route('/show/', methods = [ 'GET'])
 def show_any():
-    dive_id = data.get_any_dive_id();
+    dive_id = db_dive.get_any_dive_id();
     if dive_id is None:
         return new_demo();
     else:
@@ -23,11 +23,11 @@ def show_any():
 
 @bp.route('/show/<int:id>', methods = ['GET'])
 def show(id):
-    dp = data.get_one_dive(id);
+    dp = db_dive.get_one_dive(id);
     if dp is None:
         return redirect(url_for('dive.show_any'));
 
-    alldives = data.get_all_dives();
+    alldives = db_dive.get_all_dives();
     dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
     return render_template('dive/show.html',
                            dive = dp,
@@ -47,7 +47,7 @@ def show_post():
 
 @bp.route('/csv/<int:id>')
 def csv(id):
-    dp = data.get_one_dive(id);
+    dp = db_dive.get_one_dive(id);
     if dp is None:
         abort(405);
     r = Response(dp.dataframe().to_csv(),
@@ -62,7 +62,7 @@ def update(id):
     action = request.form.get('action');
     if action is None:
         action = 'Update Display GF';
-    dp = data.get_one_dive(id);
+    dp = db_dive.get_one_dive(id);
     olddecotime = dp.decotime();
     if dp is None:
         abort(405);
@@ -73,7 +73,7 @@ def update(id):
         if action == 'Update Stops':
             dp.update_stops();
             flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
-        data.store_dive(dp);
+        db_dive.store_dive(dp);
         return redirect(url_for('dive.show', id=id));
     else:
         abort(405);
@@ -81,7 +81,7 @@ def update(id):
 
 @bp.route('/delete/<int:id>', methods = [ 'POST' ])
 def delete(id):
-    aff = data.delete_dive(id);
+    aff = db_dive.delete_dive(id);
     if aff == 0:
         abort(405);
     flash('Dive %i is now history' % id);
@@ -106,14 +106,14 @@ def new_do():
         # out here, we're not too worried about being nice about it.
         abort(405);
     # Store, return result.
-    data.store_dive(result);
+    db_dive.store_dive(result);
     return redirect(url_for('dive.show', id=result.dive_id));
 
 
 @bp.route('/new/demo', methods = [ 'POST' ])
 def new_demo():
     dp = CreateDive.create_demo_dive();
-    data.store_dive_new(dp);
+    db_dive.store_dive_new(dp);
     dive_id = dp.dive_id;
     flash('Generated demo dive [%i]' % dive_id);
     return redirect(url_for('dive.show', id = dive_id))
@@ -143,7 +143,7 @@ def new_shearwater_csv():
         flash( 'Error parsing CSV: %s' % err.args );
         return redirect(url_for('dive.new_show'));
     # Store the dive
-    data.store_dive_new(dp);
+    db_dive.store_dive_new(dp);
     dive_id = dp.dive_id;
     flash('Import successful - %s' % dp.description());
     # Done.

@@ -119,4 +119,34 @@ div.depth_times
 }
 
 
+/* Login box */
+div.login_info
+{
+    float:right;
+    padding:5px;
+    text-align:center;
+}
+img.profile_pic
+{
+    display: block;
+    width: 50px;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    border-radius: 50%;
+}
+img.google_signin
+{
+
+}
+div.login_info a {
+    color:white;
+    font-weight: bold;
+    text-decoration:none;
+}
+div.login_info a:hover {
+    text-decoration:underline;
+}
+
 

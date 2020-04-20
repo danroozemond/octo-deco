@@ -1,2 +1,5 @@
 flask_settings.sh
+client_secret.json
+client_secret.json.prod
+client_secret.json.local
 

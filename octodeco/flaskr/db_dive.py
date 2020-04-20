@@ -1,30 +1,8 @@
+# Please see LICENSE.md
 import pickle;
-import uuid;
-
-from flask import session;
 
 from . import db;
-
-
-#
-# User
-#
-def get_user():
-    if session.get('user_id', None) is None:
-        session[ 'user_id' ] = uuid.uuid4();
-    return session.get('user_id');
-
-
-def user_reset_profile():
-    cur = db.get_db().cursor();
-    cur.execute('''
-        DELETE
-        FROM dives
-        WHERE user_id = ?
-        ''', [ str(get_user()) ]
-                );
-    session['user_id'] = None;
-    return cur.rowcount;
+from .db_user import get_user_id;
 
 
 #
@@ -37,7 +15,7 @@ def get_dive_count():
         SELECT COUNT(*)
         FROM dives
         WHERE user_id = ?
-        ''', [ str(get_user()) ]
+        ''', [ get_user_id() ]
                 );
     return cur.fetchone()[0];
 
@@ -48,7 +26,7 @@ def get_all_dives():
         SELECT dive_id, dive_desc
         FROM dives
         WHERE user_id = ?
-        ''', [ str(get_user()) ]
+        ''', [ get_user_id() ]
                 );
     rows = cur.fetchall();
     return rows;
@@ -60,7 +38,7 @@ def get_any_dive_id():
         SELECT MIN(dive_id)
         FROM dives
         WHERE user_id = ?
-        ''', [ str(get_user()) ]
+        ''', [ get_user_id() ]
                 );
     row = cur.fetchone();
     if row is None:
@@ -71,48 +49,47 @@ def get_any_dive_id():
 def construct_dive_from_row(row):
     if row is None:
         return None;
-    assert row['user_id'] == str(get_user());
+    assert row['user_id'] == get_user_id();
     diveprofile = pickle.loads(row['dive']);
     diveprofile.dive_id = row['dive_id'];
     return diveprofile;
 
 
 def get_one_dive(dive_id:int):
-    current_user_id = str(get_user());
     cur = db.get_db().cursor();
     cur.execute('''
         SELECT user_id, dive_id, dive
         FROM dives
         WHERE user_id = ? and dive_id = ?
-        ''', [ current_user_id, dive_id ]
+        ''', [ get_user_id(), dive_id ]
                       );
     return construct_dive_from_row(cur.fetchone());
-
-
-def store_dive_new(diveprofile):
-    cur = db.get_db().cursor();
-    cur.execute('''
-        INSERT INTO dives(user_id, dive, dive_desc)
-        VALUES (?, ?, ?);
-        ''', [ str(get_user()), pickle.dumps(diveprofile), diveprofile.description() ]
-               );
-    diveprofile.dive_id = cur.lastrowid;
-    cur.close();
 
 
 def store_dive_update(diveprofile):
     dive_id = int(diveprofile.dive_id);
     if dive_id is None:
         raise AttributeError();
+    is_demo = getattr(diveprofile, 'is_demo_dive', False);
     cur = db.get_db().cursor();
     cur.execute('''
         UPDATE dives
-        SET dive = ?, dive_desc = ?
+        SET dive = ?, dive_desc = ?, is_demo = ?, last_update = datetime('now')
         WHERE dive_id = ? AND user_id = ?;
-        ''', [ pickle.dumps(diveprofile), diveprofile.description(),
-               dive_id, str(get_user()) ]
+        ''', [ pickle.dumps(diveprofile), diveprofile.description(), is_demo,
+               dive_id, get_user_id() ]
                );
     assert cur.rowcount == 1;
+
+
+def store_dive_new(diveprofile):
+    cur = db.get_db().cursor();
+    cur.execute('''
+        INSERT INTO dives(user_id, dive)
+        VALUES (?, 'xx');
+        ''', [ get_user_id() ] );
+    diveprofile.dive_id = cur.lastrowid;
+    return store_dive_update(diveprofile);
 
 
 def store_dive(diveprofile):
@@ -123,12 +100,11 @@ def store_dive(diveprofile):
 
 
 def delete_dive(dive_id:int):
-    current_user_id = str(get_user());
     cur = db.get_db().cursor();
     cur.execute('''
         DELETE
         FROM dives
         WHERE user_id = ? and dive_id = ?
-        ''', [ current_user_id, dive_id ]
+        ''', [ get_user_id(), dive_id ]
                       );
     return cur.rowcount;

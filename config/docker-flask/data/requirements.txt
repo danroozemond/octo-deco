@@ -4,3 +4,5 @@ plotly
 flask
 click
 uwsgi
+oauthlib
+requests

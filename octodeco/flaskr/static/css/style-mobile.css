@@ -156,7 +156,7 @@
 
 	#header
 	{
-		padding: 8em 0em 4em 0em;
+		padding: 2em 0em 2em 0em;
 		text-align: center;
 	}
 
@@ -166,7 +166,7 @@
 
 	#logo
 	{
-		margin-bottom: 3em;
+		margin-bottom: 1em;
 	}
 	
 		#logo h1
@@ -197,7 +197,10 @@
 	
 	#nav
 	{
-		display: none;
+		margin:0px;    
+	}
+	#nav li {
+		display:inline;
 	}
 	
 /*********************************************************************************/
