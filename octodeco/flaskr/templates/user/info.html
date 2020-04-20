@@ -8,13 +8,19 @@
 {% block content %}
     <header><h2>User info</h2></header>
     <p>session_id: {{ session['session_id'] }} </p>
-    <p>user details: {{ user_details }} </p>
-    <p>Env: {{ request.environ }}</p>
-    <p>Nr dives stored: {{ divecount }} </p>
+    <p>user details: {{ g.user_details }} </p>
 
     <form method="post" action="{{url_for('user.update')}}">
-        <input type="submit" name="action" value="Reset profile" onclick="return confirm('Sure?');">
+        <input type="submit" name="action" value="Destroy session" onclick="return confirm('Sure?');">
+        <input type="submit" name="action" value="Destroy entire profile" onclick="return confirm('Sure? You will lose stuff!');">
     </form>
+
+    <h2>Sessions</h2>
+    <ul>
+        {% for sid in allsessions %}
+        <li>{{ sid }}</li>
+        {% endfor %}
+    </ul>
 
     <h2>Dives</h2>
     <ul>

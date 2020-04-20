@@ -8,7 +8,9 @@ CREATE TABLE dives (
 );
 CREATE TABLE users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  google_email TEXT
+  google_sub TEXT,
+  google_given_name TEXT,
+  google_picture TEXT
 );
 CREATE TABLE sessions (
   session_id TEXT NOT NULL,

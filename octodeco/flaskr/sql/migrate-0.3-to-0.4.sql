@@ -27,7 +27,9 @@ UPDATE sessions SET user_id=rowid;
 /* create users table */
 CREATE TABLE users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  google_email TEXT
+  google_sub TEXT,
+  google_given_name TEXT,
+  google_picture TEXT
 );
 /* no need to fill users table; once we
    have logins it will be filled */
