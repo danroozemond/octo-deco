@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}No dives{% endblock %}
+
+{% block sidebaritems %}
+    <li><span class="fa fa-play"></span><a href="{{url_for('dive.new_show')}}">New dive..</a></li>
+{% endblock %}
+
+{% block content %}
+    <h2>No dives yet</h2>
+    <form method="post" action="{{url_for('dive.new_demo')}}">
+        <input type="submit" value="Create demo dive">
+    </form>
+{% endblock %}
+

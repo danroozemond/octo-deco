@@ -34,7 +34,6 @@ def get_google_provider_cfg():
 
 
 def construct_google_request_uri():
-    print('Constructing google_request_uri');
     # Get google's config for Google login
     google_provider_cfg = get_google_provider_cfg();
 
@@ -55,7 +54,6 @@ _google_request_uri_age = 0;
 def get_google_request_uri():
     global _google_request_uri, _google_request_uri_age;
     t = time.perf_counter();
-    print('age is %s' % (t - _google_request_uri_age));
     if _google_request_uri is None or (t - _google_request_uri_age) > 3600:
         _google_request_uri = construct_google_request_uri();
         _google_request_uri_age = t;
