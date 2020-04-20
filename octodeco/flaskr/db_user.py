@@ -30,7 +30,7 @@ def get_db_user_details():
         cur = db.get_db().cursor();
         selectquery = '''
             SELECT u.*
-            FROM sessions s LEFT JOIN users u
+            FROM sessions s INNER JOIN users u
             ON s.user_id = u.user_id
             WHERE s.session_id = ?
             ''';
