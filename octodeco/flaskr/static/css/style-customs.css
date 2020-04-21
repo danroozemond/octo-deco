@@ -119,6 +119,12 @@ div.depth_times
 }
 
 
+div.new_by_upload input[type="submit"]:disabled
+{
+    color:#909090;
+}
+
+
 /* Login box */
 div.login_info
 {
