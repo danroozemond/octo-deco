@@ -95,13 +95,15 @@
     </form>
     </div>
 
-    <header><h2>Upload Shearwater CSV file</h2></header>
-    <div>Upload CSV file exported from Shearwater. Only time, depth, and gas are used; all other data (like GF, tissue
-        loading) is recomputed.</div>
+    <header><h2>Upload CSV file</h2></header>
+    <div>Upload CSV file from a Shearwater dive computer. Only time, depth, and gas are used; all other data
+        (like tissue loading) is recomputed.
     <form method="post" action="{{url_for('dive.new_shearwater_csv')}}" enctype="multipart/form-data">
+        Shearwater CSV:
         <input type="file" id="ipt_csv" name="ipt_csv">
         <input type="submit" value="Go :)" onclick="if(document.getElementById('ipt_csv').files.length == 0) { return false; }">
     </form>
+    </div>
 
 
     <header><h2>..or just recreate the demo dive:</h2></header>
