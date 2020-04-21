@@ -45,7 +45,8 @@ class DiveProfile:
         return self._points;
 
     def dataframe(self):
-        return pd.DataFrame([ p.repr_for_dataframe() for p in self._points ],
+        return pd.DataFrame([ p.repr_for_dataframe(deco_model = self._deco_model)
+                              for p in self._points ],
                             columns = DivePoint.dataframe_columns());
 
     def deco_model(self):

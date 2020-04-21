@@ -23,15 +23,20 @@ class DivePoint:
 
     @staticmethod
     def dataframe_columns():
-        return [ 'time', 'depth', 'gas', 'ppO2' ] \
+        return [ 'time', 'depth', 'gas', 'ppO2' ]         \
                 + DivePoint.dataframe_columns_deco_info() \
-                + [ 'Stops' ];
+                + [ 'Stops' ]                             \
+                + [ 'IsDecoStop', 'IsInterpolated', 'DiveGFLow', 'DiveGFHigh'];
 
-    def repr_for_dataframe(self):
+    def repr_for_dataframe(self, deco_model = None):
         r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * self.p_amb ];
         if self.deco_info is not None:
             r += [ self.deco_info[n] for n in DivePoint.dataframe_columns_deco_info() ];
-            r += [ Util.stops_to_string( self.deco_info['Stops'] ) ];
+            r += [ Util.stops_to_string( self.deco_info['Stops'] ) ]
+        else:
+            r += [ '' for i in range( len(DivePoint.dataframe_columns_deco_info()) + 1) ];
+        r += [ self.is_deco_stop, self.is_interpolated_point ];
+        r += [ deco_model.gf_low, deco_model.gf_high] if deco_model is not None else [0,0];
         return r;
 
     def duration(self):
