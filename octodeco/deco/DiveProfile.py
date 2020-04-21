@@ -27,11 +27,11 @@ class DiveProfile:
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;
         self._desc_deco_model_display = '';
-        self.gf_low_display = 0;
-        self.gf_high_display = 0;
+        self.gf_low_display = gf_low;
+        self.gf_high_display = gf_high;
         self._desc_deco_model_profile = '';
-        self.gf_low_profile = 0;
-        self.gf_high_profile = 0;
+        self.gf_low_profile = gf_low;
+        self.gf_high_profile = gf_high;
         self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
 
         if deco_model is not None:
@@ -45,7 +45,7 @@ class DiveProfile:
         return self._points;
 
     def dataframe(self):
-        return pd.DataFrame([ p.repr_for_dataframe(deco_model = self._deco_model)
+        return pd.DataFrame([ p.repr_for_dataframe(diveprofile = self)
                               for p in self._points ],
                             columns = DivePoint.dataframe_columns());
 

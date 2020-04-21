@@ -85,7 +85,7 @@ def update(id):
         abort(405);
 
 
-@bp.route('/delete/<int:id>', methods = [ 'POST' ])
+@bp.route('/delete/<int:id>', methods = [ 'GET', 'POST' ])
 def delete(id):
     aff = db_dive.delete_dive(id);
     if aff == 0:
@@ -124,9 +124,7 @@ def new_demo():
     flash('Generated demo dive [%i]' % dive_id);
     return redirect(url_for('dive.show', id = dive_id))
 
-
-@bp.route('/new/csv', methods = [ 'POST' ])
-def new_shearwater_csv():
+def new_csv( create_csv_func ):
     CHARSET='utf-8';
     # Get the object
     if 'ipt_csv' not in request.files:
@@ -144,7 +142,7 @@ def new_shearwater_csv():
             return redirect(url_for('dive.new_show'));
     # Create the diveprofile object
     try:
-        dp = CreateDive.create_from_shearwater_csv( lines );
+        dp = create_csv_func( lines );
     except CreateDive.ParseError as err:
         flash( 'Error parsing CSV: %s' % err.args );
         return redirect(url_for('dive.new_show'));
@@ -154,3 +152,13 @@ def new_shearwater_csv():
     flash('Import successful - %s' % dp.description());
     # Done.
     return redirect(url_for('dive.show', id = dive_id))
+
+
+@bp.route('/new/sw_csv', methods = [ 'POST' ])
+def new_shearwater_csv():
+    return new_csv( CreateDive.create_from_shearwater_csv );
+
+
+@bp.route('/new/od_csv', methods = [ 'POST' ])
+def new_octodeco_csv():
+    return new_csv( CreateDive.create_from_octodeco_csv );
