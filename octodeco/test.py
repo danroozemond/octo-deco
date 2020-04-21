@@ -1,7 +1,8 @@
 # Please see LICENSE.md
-
+import time,sys;
 from octodeco.deco import Gas, Util, CreateDive;
 from octodeco.deco.DiveProfile import DiveProfile;
+
 
 dp = DiveProfile();
 dp.append_section(50, 50, gas = Gas.Trimix(11,40));

@@ -63,24 +63,22 @@ class ParseError(Exception):
     """to raise & catch unexpected CSV format"""
     pass
 
-class CSVGasParser:
-    def __init__(self):
-        self.lastfo2 = None;
-        self.lastfhe = None;
-        self.laststr = None;
-        self.gas = None;
 
-    def next_by_floats(self, ipt_fo2, ipt_fhe):
-        fo2 = float(ipt_fo2);
-        fhe = float(ipt_fhe);
-        if self.lastfo2 != fo2 or self.lastfhe != fhe:
-            gas = Gas.Trimix(100*fo2, 100*fhe);
-            self.lastfo2 = fo2;
-            self.lastfhe = fhe;
-            self.gas = gas;
-            return gas;
+class QNDCache:
+    def __init__(self, fun):
+        self.lastargs = None;
+        self.lastres = None;
+        self.fun = fun;
+
+    def __call__(self, *args):
+        # Returns False, None if same as last time
+        # Returns True, f(ipt) if new
+        if args != self.lastargs:
+            self.lastargs = args;
+            self.lastres = self.fun(args);
+            return True, self.lastres;
         else:
-            return self.gas;
+            return False, self.lastres;
 
 
 def create_from_shearwater_csv(lines):
@@ -100,7 +98,7 @@ def create_from_shearwater_csv(lines):
     # (Using DictReader is probably not the most efficient, but soit)
     del lines[ 0:2 ];
     reader = csv.DictReader(lines);
-    cgp = CSVGasParser();
+    cc = QNDCache( lambda p : Gas.Trimix(100.0*p[0], 100.0*p[1]));
     for row in reader:
         # Extract info
         try:
@@ -111,8 +109,9 @@ def create_from_shearwater_csv(lines):
         except KeyError as err:
             raise ParseError('Could not parse dive point (%s)' % err.args);
         # Gas
-        gas = cgp.next_by_floats(fo2, fhe);
-        result.add_gas(gas);
+        nw, gas = cc(fo2, fhe);
+        if nw:
+            result.add_gas(gas);
         # Point
         result._append_point_abstime(t, d, gas);
     # Wrap up
