@@ -63,6 +63,25 @@ class ParseError(Exception):
     """to raise & catch unexpected CSV format"""
     pass
 
+class CSVGasParser:
+    def __init__(self):
+        self.lastfo2 = None;
+        self.lastfhe = None;
+        self.laststr = None;
+        self.gas = None;
+
+    def next_by_floats(self, ipt_fo2, ipt_fhe):
+        fo2 = float(ipt_fo2);
+        fhe = float(ipt_fhe);
+        if self.lastfo2 != fo2 or self.lastfhe != fhe:
+            gas = Gas.Trimix(100*fo2, 100*fhe);
+            self.lastfo2 = fo2;
+            self.lastfhe = fhe;
+            self.gas = gas;
+            return gas;
+        else:
+            return self.gas;
+
 
 def create_from_shearwater_csv(lines):
     # First two lines contain details about settings etc
@@ -81,7 +100,7 @@ def create_from_shearwater_csv(lines):
     # (Using DictReader is probably not the most efficient, but soit)
     del lines[ 0:2 ];
     reader = csv.DictReader(lines);
-    lastfo2 = None; lastfhe = None; gas = None;
+    cgp = CSVGasParser();
     for row in reader:
         # Extract info
         try:
@@ -91,11 +110,10 @@ def create_from_shearwater_csv(lines):
             fhe = float(row[ 'Fraction He' ]);
         except KeyError as err:
             raise ParseError('Could not parse dive point (%s)' % err.args);
-        # Create gas; for efficiency reasons check whether it's different from last time
-        if lastfo2 != fo2 or lastfhe != fhe:
-            gas = Gas.Trimix(100*fo2, 100*fhe);
-            result.add_gas(gas);
-        # Append the point
+        # Gas
+        gas = cgp.next_by_floats(fo2, fhe);
+        result.add_gas(gas);
+        # Point
         result._append_point_abstime(t, d, gas);
     # Wrap up
     result.add_stops_to_surface();
@@ -104,8 +122,8 @@ def create_from_shearwater_csv(lines):
     return result;
 
 
-def create_from_shearwater_csv_file(filename):
+def create_from_csv_file(filename, func):
     lines = [ ];
     for line in open(filename, 'r'):
         lines.append(line);
-    return create_from_shearwater_csv(lines);
+    return func(lines);
