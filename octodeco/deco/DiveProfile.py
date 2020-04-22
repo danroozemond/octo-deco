@@ -27,11 +27,11 @@ class DiveProfile:
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;
         self._desc_deco_model_display = '';
-        self.gf_low_display = 0;
-        self.gf_high_display = 0;
+        self.gf_low_display = gf_low;
+        self.gf_high_display = gf_high;
         self._desc_deco_model_profile = '';
-        self.gf_low_profile = 0;
-        self.gf_high_profile = 0;
+        self.gf_low_profile = gf_low;
+        self.gf_high_profile = gf_high;
         self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
 
         if deco_model is not None:
@@ -45,7 +45,8 @@ class DiveProfile:
         return self._points;
 
     def dataframe(self):
-        return pd.DataFrame([ p.repr_for_dataframe() for p in self._points ],
+        return pd.DataFrame([ p.repr_for_dataframe(diveprofile = self)
+                              for p in self._points ],
                             columns = DivePoint.dataframe_columns());
 
     def deco_model(self):
@@ -180,13 +181,6 @@ class DiveProfile:
         self._points = new_points;
         self.update_deco_info();
 
-    def _fix_all_points_prev(self):
-        for i in range(1, len(self._points)):
-            self._points[i].prev = self._points[i-1];
-
-    def uninterpolate_points(self):
-        self._points = [ p for p in self._points if not p.is_interpolated_point ];
-        self._fix_all_points_prev();
 
     '''
     Deco model info
@@ -277,18 +271,29 @@ class DiveProfile:
             begintime = p.time;
         return endtime-begintime;
 
+    def remove_points(self, remove_filter, fix_durations, update_deco_info = True):
+        new_points = []; removed_duration = 0.0;
+        for p in self._points:
+            d = p.duration();
+            if remove_filter(p):
+                if fix_durations:
+                    removed_duration += d;
+            else:
+                p.time -= removed_duration;
+                p.prev = new_points[-1] if len(new_points) > 0 else None;
+                new_points.append(p);
+        self._points = new_points;
+        if update_deco_info:
+            self.update_deco_info();
+
     def update_stops( self ):
         # Remove surface time
         surfacetime = self.remove_surface_at_end();
-        # Remove deco stops
-        self._points = [ p for p in self._points if not p.is_deco_stop ];
-        self._fix_all_points_prev();
-        # Remove interpolated points
-        self.uninterpolate_points();
+        # Remove deco stops & interpolated points
+        self.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = False)
+        self.remove_points(lambda x: x.is_deco_stop, fix_durations = True, update_deco_info = False)
         # Bring back stops, surface section, interpolated points
         self.append_surfacing(transit = False);
         self.add_stops();
         self.append_section(0, surfacetime);
         self.interpolate_points();
-
-

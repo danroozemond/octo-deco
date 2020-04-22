@@ -64,6 +64,23 @@ class ParseError(Exception):
     pass
 
 
+class QNDCache:
+    def __init__(self, fun):
+        self.lastargs = None;
+        self.lastres = None;
+        self.fun = fun;
+
+    def __call__(self, *args):
+        # Returns False, None if same as last time
+        # Returns True, f(ipt) if new
+        if args != self.lastargs:
+            self.lastargs = args;
+            self.lastres = self.fun(args);
+            return True, self.lastres;
+        else:
+            return False, self.lastres;
+
+
 def create_from_shearwater_csv(lines):
     # First two lines contain details about settings etc
     hlines = lines[ 0:2 ];
@@ -81,7 +98,8 @@ def create_from_shearwater_csv(lines):
     # (Using DictReader is probably not the most efficient, but soit)
     del lines[ 0:2 ];
     reader = csv.DictReader(lines);
-    lastfo2 = None; lastfhe = None; gas = None;
+    gas = Gas.Air();
+    cc = QNDCache( lambda p : Gas.Trimix(100.0*p[0], 100.0*p[1]));
     for row in reader:
         # Extract info
         try:
@@ -91,21 +109,58 @@ def create_from_shearwater_csv(lines):
             fhe = float(row[ 'Fraction He' ]);
         except KeyError as err:
             raise ParseError('Could not parse dive point (%s)' % err.args);
-        # Create gas; for efficiency reasons check whether it's different from last time
-        if lastfo2 != fo2 or lastfhe != fhe:
-            gas = Gas.Trimix(100*fo2, 100*fhe);
-            result.add_gas(gas);
-        # Append the point
+        # Gas
+        if d > 0.0:
+            nw, gas = cc(fo2, fhe);
+            if nw:
+                result.add_gas(gas);
+        # Point
         result._append_point_abstime(t, d, gas);
     # Wrap up
-    result.add_stops_to_surface();
-    result.append_section(0, 30);
-    result.interpolate_points();
+    result.update_deco_info();
+    result.update_deco_model_info(update_profile = True);
     return result;
 
 
-def create_from_shearwater_csv_file(filename):
+def create_from_octodeco_csv(lines):
+    result = None;
+    reader = csv.DictReader(lines);
+    gas = Gas.Air();
+    cc = QNDCache( lambda args : Gas.from_string(args[0]));
+    for row in reader:
+        # Extract info
+        try:
+            t = float(row[ 'time' ]);
+            d = float(row[ 'depth' ]);
+            g = str(row['gas']);
+            ids = ( int(row['IsDecoStop']) == 1 );
+            iip = ( int(row['IsInterpolated']) == 1 );
+            if result is None:
+                dgflow = int(row[ 'DiveGFLow' ]);
+                dgfhigh = int(row[ 'DiveGFHigh' ]);
+        except KeyError as err:
+            raise ParseError('Could not parse dive point (%s)' % err.args);
+        # First line:
+        if result is None:
+            result = DiveProfile( gf_low = dgflow, gf_high = dgfhigh );
+        # Gas
+        if d > 0.0:
+            nw, gas = cc(g);
+            if nw:
+                result.add_gas(gas);
+        # Point
+        p = result._append_point_abstime(t, d, gas);
+        p.is_deco_stop = ids;
+        p.is_interpolated_point = iip;
+    # Wrap up
+    result.add_custom_desc = 'CSV';
+    result.update_deco_info();
+    result.update_deco_model_info( update_profile = True );
+    return result;
+
+
+def create_from_csv_file(filename, func):
     lines = [ ];
     for line in open(filename, 'r'):
         lines.append(line);
-    return create_from_shearwater_csv(lines);
+    return func(lines);
