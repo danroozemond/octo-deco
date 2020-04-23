@@ -108,6 +108,23 @@ class DiveProfile:
         new_time = self._points[ -1 ].time + time_diff;
         return self._append_point_abstime(new_time, new_depth, gas);
 
+    def _append_point_fix_ascent(self, new_duration, new_depth, gas):
+        # Returns new point, and whether or not one was added
+        have_point_added = False;
+        time_needed = ( self._points[-1].depth - new_depth ) / self._ascent_speed;
+        if time_needed > new_duration:
+            # Add deco point
+            transit_point_duration = time_needed - new_duration;
+            transit_point_depth = self._points[-1].depth - self._ascent_speed*transit_point_duration;
+            tp = self._append_point( transit_point_duration, transit_point_depth, gas );
+            tp.is_deco_stop = True;
+
+            have_point_added = True;
+        # Add the original point
+        p = self._append_point(new_duration, new_depth, gas);
+        return p, have_point_added;
+
+
     def _append_transit(self, new_depth, gas, round_to_mins = False):
         current_depth = self._points[ -1 ].depth;
         depth_diff = current_depth - new_depth;
@@ -215,10 +232,13 @@ class DiveProfile:
         i = 1;
         while i < len(old_points):
             op = old_points[i];
-            p = self._append_point( op.duration(), op.depth, op.gas );
+            oldlen = len(self._points);
+            # Potentially prepend extra point to cover ascent speed; append original point
+            p, extra_added = self._append_point_fix_ascent( op.duration(), op.depth, op.gas );
             # Update tissues, based on last point considered
-            p.set_updated_tissue_state( deco_model );
-            p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
+            for i in range(oldlen, len(self._points)):
+                self._points[i].set_updated_tissue_state( deco_model );
+                self._points[i].set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = p.deco_info['amb_to_gf'];
             gf_now = amb_to_gf(p.p_amb);
             # Are we in violation?
@@ -236,6 +256,8 @@ class DiveProfile:
                     continue;
                 # Undo adding this point, then attempt to readd in next iteration
                 self._points.pop();
+                if extra_added:
+                    self._points.pop();
                 # Do not forget to update tissue state and deco info
                 for s in stops:
                     np = len(self._points);

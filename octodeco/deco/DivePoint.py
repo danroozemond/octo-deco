@@ -44,6 +44,13 @@ class DivePoint:
             return 0.0;
         return self.time - self.prev.time;
 
+    def ascent_speed(self):
+        d = self.duration();
+        if d == 0.0:
+            return 0.0;
+        assert self.prev is not None;
+        return (self.prev.depth - self.depth)/d;
+
     def set_cleared_tissue_state(self, deco_model):
         self.tissue_state = deco_model.cleared_tissue_state();
 
