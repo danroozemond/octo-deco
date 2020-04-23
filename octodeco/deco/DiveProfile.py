@@ -195,7 +195,8 @@ class DiveProfile:
             orig_point.prev = new_points[-1] if len(new_points) > 0 else None;
             if orig_point.prev is None \
                 or orig_point.time != orig_point.prev.time or orig_point.depth != orig_point.prev.depth \
-                or orig_point.prev.is_deco_stop or orig_point.prev.is_interpolated_point :
+                or ( orig_point.prev.is_deco_stop or orig_point.prev.is_interpolated_point
+                    and not ( orig_point.is_deco_stop or orig_point.is_interpolated_point)):
                 new_points.append(orig_point);
                 prev_point = orig_point;
         self._points = new_points;
