@@ -156,7 +156,8 @@ class Buhlmann:
 
         def max_over_supersat(t):
             ts2 = self.updated_tissue_state(tissue_state, t, p_amb, gas);
-            gf99_at_surface = self._GF99_new(ts2, 1.0);
+            ts3 = self._update_tissue_state_travel(ts2, p_amb, 1.0, gas);
+            gf99_at_surface = self._GF99_new(ts3, 1.0);
             x = [ p - self.gf_high for p in gf99_at_surface ];
             return max(x);
 
