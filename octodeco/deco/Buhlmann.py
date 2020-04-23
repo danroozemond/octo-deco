@@ -296,7 +296,7 @@ class Buhlmann:
         stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, gases_carried, amb_to_gf = amb_to_gf);
         result[ 'Ceil' ] = Util.Pamb_to_depth(p_ceiling);
         result[ 'Stops' ] = stops;
-        nontrivialstops = [ s for s in stops if round(s[ 1 ]) >= 1 ];
+        nontrivialstops = [ s for s in stops if s[ 1 ] >= .1 ];
         result[ 'FirstStop' ] = nontrivialstops[ 0 ][ 0 ] if len(nontrivialstops) > 0 else 0;
         result[ 'amb_to_gf' ] = amb_to_gf;
         result[ 'GFLimitNow' ] = amb_to_gf(p_amb) if amb_to_gf is not None else 0.0;
