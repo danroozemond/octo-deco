@@ -109,16 +109,40 @@ def delete(id):
 def modify(id):
     if request.form.get('action_delete', '') != '':
         return delete(id);
-    elif request.form.get('action_surface_section', '') != '':
+    elif request.form.get('action_update', '') != '':
+        # Some input sanitation
+        ipt_surface_section = min(120, int(request.form.get('ipt_surface_section')));
+        ipt_description = request.form.get('ipt_description')[:100];
+        ipt_public = ( request.form.get('ipt_public', 'off').lower() == 'on')
         dp = db_dive.get_one_dive(id);
         dp.remove_surface_at_end();
-        dp.append_section(0, 30);
+        if ipt_surface_section > 0:
+            flash("Added {} mins surface section".format(ipt_surface_section));
+            dp.append_section(0, ipt_surface_section);
         dp.interpolate_points();
+        if ipt_description != dp.description():
+            flash('Modified description');
+            if ipt_description.strip() != '':
+                dp.custom_desc = ipt_description;
+            else:
+                dp.custom_desc = None;
+        if ipt_public != dp.public:
+            flash('Made dive {}'.format( 'public' if ipt_public else 'private'));
+            dp.public = ipt_public;
         db_dive.store_dive(dp);
-        flash("Added surface section");
         return redirect(url_for('dive.show', id=id));
     else:
         abort(405);
+
+# /*
+#         <input type="text" value="30" name="ipt_surface_section" id="ipt_surface_section">
+#         <br/>
+#         <label for="ipt_description">Modify description:</label>
+#         <input type="text" value="{{dive.description()}}" name="ipt_description" id="ipt_description">
+#         <br/>
+#         <label for="ipt_public">Public:</label>
+#         <input type="checkbox" {% if dive.public %}checked{%endif%} name="ipt_public" id="ipt_public">
+# */
 
 
 @bp.route('/new', methods = [ 'GET' ])

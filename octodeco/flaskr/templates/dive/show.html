@@ -156,11 +156,19 @@
     <h2>Modify dive
     <div class="viztoggle" onclick="togglediv('modifydive', this)">[show]</div>
     </h2>
-    <div id="modifydive" style="display:none">
+    <div id="modifydive" class="modifydive" style="display:none">
     <form method="POST" action="{{url_for('dive.modify',id=dive.dive_id)}}">
-        <label for="subm_surface_section">Add surface section to end of dive:</label>
-        <input type="submit" name="action_surface_section" id="subm_surface_section"
-               value="Add 30 mins surface">
+        <label for="ipt_surface_section">Add surface section to end of dive:</label>
+        <input type="text" value="{{dive.length_of_surface_section()}}" name="ipt_surface_section" id="ipt_surface_section">
+        <br/>
+        <label for="ipt_description">Modify description:</label>
+        <input type="text" value="{{dive.description()}}" name="ipt_description" id="ipt_description">
+        <br/>
+        <label for="ipt_public">Public:</label>
+        <input type="checkbox" {% if dive.public %}checked{%endif%} name="ipt_public" id="ipt_public">
+        <br/>
+        <label for="action_update"></label>
+        <input type="submit" name="action_update" id="action_update">
         <br/>
         <label for="subm_delete">Delete:</label>
         <input type="submit" name="action_delete" id="subm_delete" value="Delete this dive" onclick="return confirm('Sure?');">
