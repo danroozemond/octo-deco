@@ -10,7 +10,7 @@ CURRENT_VERSION = 1;
 #
 # Actual migration
 #
-def _migrate_up_to_1(from_version, diveprofile):
+def _migrate_up_to_current(from_version, diveprofile):
     if not hasattr(diveprofile, 'created'):
         diveprofile.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
 
@@ -28,8 +28,7 @@ def _loads_only(blob):
 def _migrate(diveprofile):
     version = getattr(diveprofile, 'db_version', 0);
     if version != CURRENT_VERSION:
-        _migrate_up_to_1(version, diveprofile);
-
+        _migrate_up_to_current(version, diveprofile);
 
 
 def loads(blob):
