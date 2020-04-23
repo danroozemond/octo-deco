@@ -4,21 +4,26 @@ from octodeco.deco import Gas, Util, CreateDive;
 from octodeco.deco.DiveProfile import DiveProfile;
 
 
-dp = DiveProfile();
+dp = DiveProfile(gf_low=35, gf_high=70);
 dp.append_section(50, 50, gas = Gas.Trimix(11,40));
 dp.append_section(30, 50, gas = Gas.Trimix(21,35));
 dp.add_gas(Gas.Nitrox(50));
 dp.add_gas(Gas.Nitrox(99));
 dp.add_stops_to_surface();
-dp.interpolate_points();
-
-for p in dp._points:
-    if p.time >= 50 and p.time <= 60:
-        print(p.time, p.depth, p.is_deco_stop, p.is_interpolated_point, p.deco_info['SurfaceGF'])
-
-dp.set_gf(60,100);
+dp.append_section(0,10);
 dp.update_stops();
-print('\nwith 60/100');
-for p in dp._points:
-    if p.time >= 50 and p.time <= 60:
-        print(p.time, p.depth, p.deco_info['SurfaceGF'])
+# dp.interpolate_points();
+
+for i in range(len(dp._points)):
+    p = dp._points[i];
+    if 107 < p.time < 130:
+        pp = dp._points[i-1];
+        # p.set_updated_deco_info(dp.deco_model(), dp._gases_carried, pp.deco_info['amb_to_gf']);
+        print('{}{} T {:5.1f}  D {:5.1f}  FS {:5.1f}  C {:5.1f}   GF {:4.1f}/{:4.1f}   SGF {:4.1f}  ' \
+              .format('I' if p.is_interpolated_point else ' ',\
+                      'D' if p.is_deco_stop else ' ',\
+                        p.time, p.depth, p.deco_info['FirstStop'],p.deco_info['Ceil'],
+                        p.deco_info['GF99'], p.deco_info['amb_to_gf'](p.p_amb),
+                        p.deco_info['SurfaceGF']),
+              Util.stops_to_string_precise(p.deco_info['Stops']));
+

@@ -1,9 +1,8 @@
 # Please see LICENSE.md
-import pickle;
-
 from . import db;
 from .db_user import get_user_id;
 
+from octodeco.deco import DiveProfileSer;
 
 #
 # Dive
@@ -50,7 +49,7 @@ def construct_dive_from_row(row):
     if row is None:
         return None;
     assert row['user_id'] == get_user_id();
-    diveprofile = pickle.loads(row['dive']);
+    diveprofile = DiveProfileSer.loads(row['dive']);
     diveprofile.dive_id = row['dive_id'];
     return diveprofile;
 
@@ -76,7 +75,7 @@ def store_dive_update(diveprofile):
         UPDATE dives
         SET dive = ?, dive_desc = ?, is_demo = ?, last_update = datetime('now')
         WHERE dive_id = ? AND user_id = ?;
-        ''', [ pickle.dumps(diveprofile), diveprofile.description(), is_demo,
+        ''', [ DiveProfileSer.dumps(diveprofile), diveprofile.description(), is_demo,
                dive_id, get_user_id() ]
                );
     assert cur.rowcount == 1;
