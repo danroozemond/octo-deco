@@ -34,6 +34,9 @@ class DiveProfile:
         self.gf_high_profile = gf_high;
         self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
 
+        # NOTE - If you add attributes here, also add migration code to DiveProfile code
+        #
+
         if deco_model is not None:
             self._deco_model = deco_model;
         else:
@@ -75,11 +78,9 @@ class DiveProfile:
 
     def description(self):
         maxdepth = max(map( lambda p : p.depth, self._points ));
-        if not hasattr(self, 'created'):
-            self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
         dtc = self.created.strftime('%d-%b-%Y %H:%M');
         r = '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
-        if hasattr(self, 'add_custom_desc'):
+        if hasattr(self, 'add_custom_desc') and self.add_custom_desc != '':
             r = '%s: %s' % (self.add_custom_desc, r);
         return r;
 
@@ -118,12 +119,10 @@ class DiveProfile:
             transit_point_depth = self._points[-1].depth - self._ascent_speed*transit_point_duration;
             tp = self._append_point( transit_point_duration, transit_point_depth, gas );
             tp.is_deco_stop = True;
-
             have_point_added = True;
         # Add the original point
         p = self._append_point(new_duration, new_depth, gas);
         return p, have_point_added;
-
 
     def _append_transit(self, new_depth, gas, round_to_mins = False):
         current_depth = self._points[ -1 ].depth;

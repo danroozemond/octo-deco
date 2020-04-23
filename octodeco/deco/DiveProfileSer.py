@@ -2,10 +2,43 @@
 # Serializing / deserializing DiveProfiles. Taking into account that data coming out of
 #   database may be older than current version.
 import pickle;
+import datetime, pytz;
 
-from . import DiveProfile;
+CURRENT_VERSION = 1;
 
 
-# pickle.loads & pickle.dumps
+#
+# Actual migration
+#
+def _migrate_up_to_1(from_version, diveprofile):
+    if not hasattr(diveprofile, 'created'):
+        diveprofile.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
 
-class DiveProfileSer():
+    # Note that we upgraded
+    diveprofile.db_version = CURRENT_VERSION;
+
+
+#
+# Interface functions
+#
+def _loads_only(blob):
+    return pickle.loads(blob);
+
+
+def _migrate(diveprofile):
+    version = getattr(diveprofile, 'db_version', 0);
+    if version != CURRENT_VERSION:
+        _migrate_up_to_1(version, diveprofile);
+
+
+
+def loads(blob):
+    # .. = load and migrate
+    dp = _loads_only(blob);
+    _migrate(dp);
+    return dp;
+
+
+def dumps(diveprofile):
+    return pickle.dumps(diveprofile);
+
