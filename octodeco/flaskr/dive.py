@@ -12,26 +12,28 @@ from octodeco.deco import CreateDive;
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
 
-@bp.route('/show/', methods = [ 'GET'])
-def show_any():
-    dive_id = db_dive.get_any_dive_id();
-    if dive_id is None:
-        return redirect(url_for('dive.show_none'));
-    else:
-        return redirect(url_for('dive.show', id = dive_id))
-
-
 @bp.route('/show/none')
 def show_none():
     return render_template('dive/show_none.html');
 
 
-@bp.route('/show/<int:id>', methods = ['GET'])
-def show(id):
-    dp = db_dive.get_one_dive(id);
+@bp.route('/show/get')
+def show_get():
+    dive_id = int(request.args.get("dive_id", 0));
+    return redirect(url_for('dive.show', dive_id=dive_id));
+
+
+@bp.route('/show/<int:dive_id>', methods = ['GET'])
+def show(dive_id):
+    dp = db_dive.get_one_dive(dive_id);
     if dp is None:
-        flash('Dive not found [%i]' % id)
+        flash('Dive not found [%i]' % dive_id)
         return redirect(url_for('dive.show_any'));
+
+    gflow = int( request.args.get('gflow',  dp.gf_low_display ) );
+    gfhigh = int( request.args.get('gfhigh', dp.gf_high_display ) );
+    if ( gflow, gfhigh ) != ( dp.gf_low_display, dp.gf_high_display ):
+        dp.set_gf( gflow, gfhigh );
 
     alldives = db_dive.get_all_dives();
     dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
@@ -45,7 +47,6 @@ def show(id):
     except TypeError:
         heatmap_plot_json = {};
 
-
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
@@ -53,70 +54,83 @@ def show(id):
                            dive_profile_plot_json = dive_profile_plot_json,
                            heatmap_plot_json = heatmap_plot_json,
                            fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true"),
+                           modify_allowed = db_dive.is_modify_allowed(dp)
                            );
 
 
-@bp.route('/show/', methods = [ 'POST' ] )
-def show_post():
-    dive_id = int(request.form.get('dive_id'));
-    return redirect(url_for('dive.show', id=dive_id));
+@bp.route('/show/any', methods = [ 'GET'])
+def show_any():
+    dive_id = db_dive.get_any_dive_id();
+    if dive_id is None:
+        return redirect(url_for('dive.show_none'));
+    else:
+        return redirect(url_for('dive.show', dive_id = dive_id))
 
 
-@bp.route('/csv/<int:id>')
-def csv(id):
-    dp = db_dive.get_one_dive(id);
+@bp.route('/csv/<int:dive_id>')
+def csv(dive_id):
+    dp = db_dive.get_one_dive(dive_id);
     if dp is None:
         abort(405);
     r = Response(dp.dataframe().to_csv(),
                  mimetype = "text/csv",
-                 headers = { "Content-disposition" : "attachment; filename=dive_%i.csv" % id }
+                 headers = { "Content-disposition" : "attachment; filename=dive_%i.csv" % dive_id }
     );
     return r;
 
 
-@bp.route('/update/<int:id>', methods = [ 'POST' ])
-def update(id):
+@bp.route('/update/<int:dive_id>', methods = [ 'POST' ])
+def update(dive_id):
     action = request.form.get('action');
-    if action is None:
-        action = 'Update Display GF';
-    dp = db_dive.get_one_dive(id);
-    olddecotime = dp.decotime();
+    gflow = int(request.form.get('gflow', 100));
+    gfhigh = int(request.form.get('gfhigh', 100));
+    dp = db_dive.get_one_dive(dive_id);
     if dp is None:
         abort(405);
-    if action == 'Update Display GF' or action == 'Update Stops':
-        gflow = int(request.form.get('gflow', 0));
-        gfhigh = int(request.form.get('gfhigh', 0));
+    if action == 'Update Stops':
+        olddecotime = dp.decotime();
         dp.set_gf(gflow, gfhigh);
-        if action == 'Update Stops':
-            dp.update_stops();
-            flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
+        dp.update_stops();
+        flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
         db_dive.store_dive(dp);
-        return redirect(url_for('dive.show', id=id));
+        return redirect(url_for('dive.show', dive_id=dive_id));
     else:
         abort(405);
 
 
-@bp.route('/delete/<int:id>', methods = [ 'GET', 'POST' ])
-def delete(id):
-    aff = db_dive.delete_dive(id);
+@bp.route('/delete/<int:dive_id>', methods = [ 'GET', 'DELETE' ])
+def delete(dive_id):
+    aff = db_dive.delete_dive(dive_id);
     if aff == 0:
         abort(405);
-    flash('Dive %i is now history' % id);
+    flash('Dive %i is now history' % dive_id);
     return redirect(url_for('dive.show_any'));
 
 
-@bp.route('/modify/<int:id>', methods = [ 'POST' ])
-def modify(id):
-    if request.form.get('action_delete', '') != '':
-        return delete(id);
-    elif request.form.get('action_surface_section', '') != '':
-        dp = db_dive.get_one_dive(id);
+@bp.route('/modify/<int:dive_id>', methods = [ 'POST' ])
+def modify(dive_id):
+    if request.form.get('action_update', '') != '':
+        # Some input sanitation
+        ipt_surface_section = min(120, int(request.form.get('ipt_surface_section')));
+        ipt_description = request.form.get('ipt_description')[:100];
+        ipt_public = ( request.form.get('ipt_public', 'off').lower() == 'on')
+        dp = db_dive.get_one_dive(dive_id);
         dp.remove_surface_at_end();
-        dp.append_section(0, 30);
+        if ipt_surface_section > 0:
+            flash("Added {} mins surface section".format(ipt_surface_section));
+            dp.append_section(0, ipt_surface_section);
         dp.interpolate_points();
+        if ipt_description != dp.description():
+            flash('Modified description');
+            if ipt_description.strip() != '':
+                dp.custom_desc = ipt_description;
+            else:
+                dp.custom_desc = None;
+        if ipt_public != dp.is_public:
+            flash('Made dive {}'.format( 'public' if ipt_public else 'private'));
+            dp.is_public = ipt_public;
         db_dive.store_dive(dp);
-        flash("Added surface section");
-        return redirect(url_for('dive.show', id=id));
+        return redirect(url_for('dive.show', dive_id=dive_id));
     else:
         abort(405);
 
@@ -140,7 +154,7 @@ def new_do():
         abort(405);
     # Store, return result.
     db_dive.store_dive(result);
-    return redirect(url_for('dive.show', id=result.dive_id));
+    return redirect(url_for('dive.show', dive_id=result.dive_id));
 
 
 @bp.route('/new/demo', methods = [ 'POST' ])
@@ -149,7 +163,8 @@ def new_demo():
     db_dive.store_dive_new(dp);
     dive_id = dp.dive_id;
     flash('Generated demo dive [%i]' % dive_id);
-    return redirect(url_for('dive.show', id = dive_id))
+    return redirect(url_for('dive.show', dive_id = dive_id))
+
 
 def new_csv( create_csv_func ):
     CHARSET='utf-8';
@@ -178,7 +193,7 @@ def new_csv( create_csv_func ):
     dive_id = dp.dive_id;
     flash('Import successful - %s' % dp.description());
     # Done.
-    return redirect(url_for('dive.show', id = dive_id))
+    return redirect(url_for('dive.show', dive_id = dive_id))
 
 
 @bp.route('/new/sw_csv', methods = [ 'POST' ])

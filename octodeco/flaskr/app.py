@@ -9,8 +9,8 @@ from . import user;
 
 # Define navigation row
 def get_nav_items():
-    return [ ('dive.show_any', 'Dive'),
-             ('user.info', 'User')
+    return [ ('dive.show_any', '/dive/', 'Dive'),
+             ('user.info', '/user/', 'User')
             ];
 
 

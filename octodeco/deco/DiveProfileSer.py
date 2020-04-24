@@ -4,7 +4,7 @@
 import pickle;
 import datetime, pytz;
 
-CURRENT_VERSION = 1;
+CURRENT_VERSION = 4;
 
 
 #
@@ -13,6 +13,16 @@ CURRENT_VERSION = 1;
 def _migrate_up_to_current(from_version, diveprofile):
     if not hasattr(diveprofile, 'created'):
         diveprofile.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
+
+    # None
+    for attrname in [ 'custom_desc', 'add_custom_desc' ]:
+        if not hasattr(diveprofile, attrname):
+            setattr(diveprofile, attrname, None);
+
+    # Bool
+    for attrname in [ 'is_demo_dive', 'is_public'  ]:
+        if not hasattr(diveprofile, attrname):
+            setattr(diveprofile, attrname, False);
 
     # Note that we upgraded
     diveprofile.db_version = CURRENT_VERSION;

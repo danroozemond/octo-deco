@@ -45,10 +45,10 @@
 					<nav id="nav">
 						<ul>
 							{% for x in config['NAV_ITEMS'] %}
-								{% if request.path.startswith(url_for(x[0])) %}
-								<li class="active"><a href="{{ url_for(x[0]) }}">{{x[1]}}</a></li>
+								{% if request.path.startswith(x[1]) %}
+								<li class="active"><a href="{{ url_for(x[0]) }}">{{x[2]}}</a></li>
 								{% else %}
-								<li><a href="{{ url_for(x[0]) }}">{{x[1]}}</a></li>
+								<li><a href="{{ url_for(x[0]) }}">{{x[2]}}</a></li>
 								{% endif %}
 							{% endfor %}
 						</ul>
@@ -74,7 +74,10 @@
 						<div class="9u skel-cell-important">
 							<section id="content" >
 							{% for message in get_flashed_messages() %}
-								<div class="flash">{{ message }}</div>
+								<div class="flash">
+									{{ message }}
+									<div class="close"><a href="#" onclick="this.parentElement.parentElement.style.display='none';">X</a></div>
+								</div>
 							{% endfor %}
 
 							{% block content %}{% endblock %}

@@ -9,14 +9,13 @@
 
 {% block sidebarheader %}
     <div class="diveselect">
-        <form method="post" action="{{url_for('dive.show_post')}}">
+        <form method="get" action="{{url_for('dive.show_get')}}">
         <label for="dives" style="display:none">Display:</label>
-        <select id="dives" name="dive_id" onchange="this.form.submit()">
-            {% for x in alldives %}
-              <option value="{{x['dive_id']}}"
-              {% if x['dive_id'] == dive.dive_id %} selected {% endif %}
-              >{{x['dive_desc']}}</option>
-            {% endfor %}
+        <select id="dives" name="dive_id" onchange="this.form.submit()">{%
+            for x in alldives %}
+              <option value="{{x['dive_id']}}"{%
+              if x['dive_id'] == dive.dive_id %} selected {% endif
+              %}>{{x['dive_desc']}}</option>{% endfor %}
         </select>
         </form>
     </div>
@@ -29,7 +28,9 @@
     <li><span class="fa fa-chevron-circle-right"></span><a href="#divesummary">Dive summary</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#aheatmap">Heatmap</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#afulldata">Full dive data</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#amodifydive">Modify</a></li>
+    {% if modify_allowed %}
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#amodifydive">Modify</a></li>f
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -41,12 +42,15 @@
         </script>
     </div>
 
-    <form method="POST" id="form_update" action="{{url_for('dive.update', id=dive.dive_id)}}">
+    <form method="POST" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
         <script>
         function autosubmitGF()
         {
             document.getElementById('spinner').style.display = "inline";
-            document.getElementById('form_update').submit();
+            eltform = document.getElementById('form_update');
+            eltform.method = "get";
+            eltform.action = "{{ url_for('dive.show', dive_id=dive.dive_id)}}";
+            eltform.submit();
         }
         </script>
         <div class="adjust">
@@ -89,10 +93,11 @@
             <img id="spinner" style="display:none"
                  src="{{ url_for('static', filename='images/spinner-51px.gif') }}">
         </div>
+        {% if modify_allowed %}
         <div>
-            <!-- <input type="submit" name="action" value="Update Display GF"> -->
             <input type="submit" name="action" value="Update Stops">
         </div>
+        {% endif %}
     </form>
 
     <a name="divesummary"></a>
@@ -146,25 +151,36 @@
     <a name="afulldata"></a>
     <h2>Full dive data
         <div class="viztoggle" onclick="togglediv('fulldata', this)">[show]</div>
-        <div class="viztoggle"><a href="{{url_for('dive.csv',id=dive.dive_id)}}">[csv]</a></div>
+        <div class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></div>
     </h2>
     <div id="fulldata" class="bigtable" style="display: none">
         {{ fulldata_table|safe }}
     </div>
 
+    {% if modify_allowed %}
     <a name="amodifydive"></a>
     <h2>Modify dive
     <div class="viztoggle" onclick="togglediv('modifydive', this)">[show]</div>
     </h2>
-    <div id="modifydive" style="display:none">
-    <form method="POST" action="{{url_for('dive.modify',id=dive.dive_id)}}">
-        <label for="subm_surface_section">Add surface section to end of dive:</label>
-        <input type="submit" name="action_surface_section" id="subm_surface_section"
-               value="Add 30 mins surface">
+    <div id="modifydive" class="modifydive" style="display:none">
+    <form method="POST" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
+        <label for="ipt_surface_section">Add surface section to end of dive:</label>
+        <input type="text" value="{{dive.length_of_surface_section()}}" name="ipt_surface_section" id="ipt_surface_section">
         <br/>
+        <label for="ipt_description">Modify description:</label>
+        <input type="text" value="{{dive.description()}}" name="ipt_description" id="ipt_description">
+        <br/>
+        <label for="ipt_public">Public:</label>
+        <input type="checkbox" {% if dive.is_public %}checked{%endif%} name="ipt_public" id="ipt_public">
+        <br/>
+        <label for="action_update"></label>
+        <input type="submit" name="action_update" id="action_update" value="Update">
+    </form>
+    <form method="DELETE" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
         <label for="subm_delete">Delete:</label>
         <input type="submit" name="action_delete" id="subm_delete" value="Delete this dive" onclick="return confirm('Sure?');">
     </form>
     </div>
+    {% endif %}
 {% endblock %}
 

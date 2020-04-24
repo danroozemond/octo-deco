@@ -9,6 +9,7 @@
     <header><h2>User info</h2></header>
     <p>session_id: {{ session['session_id'] }} </p>
     <p>user details: {{ g.user_details }} </p>
+    <p>env: {# request.environ #}</p>
 
     <form method="post" action="{{url_for('user.update')}}">
         <input type="submit" name="action" value="Destroy session" onclick="return confirm('Sure?');">
@@ -25,7 +26,11 @@
     <h2>Dives</h2>
     <ul>
         {% for row in diveinfos %}
-        <li>{{ row['dive_id'] }} : {{ row['dive_desc'] }}</li>
+        <li>
+            {{ row['dive_id'] }} :
+            <a href="{{url_for('dive.show', dive_id=row['dive_id'])}}">{{ row['dive_desc'] }}</a>
+            {% if row['is_public'] %}(Public){% endif %}
+        </li>
         {% endfor %}
     </ul>
 {% endblock %}

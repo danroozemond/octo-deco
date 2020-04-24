@@ -33,6 +33,10 @@ class DiveProfile:
         self.gf_low_profile = gf_low;
         self.gf_high_profile = gf_high;
         self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
+        self.add_custom_desc = None;
+        self.custom_desc = None;
+        self.is_demo_dive = False;
+        self.is_public = False;
 
         # NOTE - If you add attributes here, also add migration code to DiveProfile code
         #
@@ -77,10 +81,13 @@ class DiveProfile:
         return sum([ p.duration() for p in self._points if p.depth > 0 ]);
 
     def description(self):
+        if self.custom_desc is not None:
+            return self.custom_desc;
+
         maxdepth = max(map( lambda p : p.depth, self._points ));
         dtc = self.created.strftime('%d-%b-%Y %H:%M');
         r = '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
-        if hasattr(self, 'add_custom_desc') and self.add_custom_desc != '':
+        if self.add_custom_desc is not None and self.add_custom_desc != '':
             r = '%s: %s' % (self.add_custom_desc, r);
         return r;
 
@@ -287,6 +294,15 @@ class DiveProfile:
     def set_gf( self, gf_low, gf_high ):
         self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high, self._descent_speed, self._ascent_speed);
         self.update_deco_info();
+
+    def length_of_surface_section(self):
+        i = -1;
+        endtime = self._points[i].time;
+        begintime = endtime;
+        while -i < len(self._points) and self._points[i].depth == 0:
+            begintime = self._points[i].time;
+            i -= 1;
+        return round(endtime-begintime);
 
     def remove_surface_at_end(self):
         # Removes surface section at end, returns amt of time removed

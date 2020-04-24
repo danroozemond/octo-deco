@@ -1,0 +1,1 @@
+ALTER TABLE dives ADD COLUMN is_public BOOL DEFAULT 0;

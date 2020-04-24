@@ -4,7 +4,8 @@ CREATE TABLE dives (
   user_id INTEGER NOT NULL,
   is_demo BOOL,
   dive BLOB NOT NULL,
-  last_update DATETIME
+  last_update DATETIME,
+  is_public BOOL
 );
 CREATE TABLE users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT,
