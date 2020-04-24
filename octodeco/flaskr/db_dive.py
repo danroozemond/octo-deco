@@ -22,7 +22,7 @@ def get_dive_count():
 def get_all_dives():
     cur = db.get_db().cursor();
     cur.execute('''
-        SELECT dive_id, dive_desc
+        SELECT dive_id, dive_desc, is_public
         FROM dives
         WHERE user_id = ?
         ''', [ get_user_id() ]
