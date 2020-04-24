@@ -1,19 +1,29 @@
 # Please see LICENSE.md
+import time,sys;
+from octodeco.deco import Gas, Util, CreateDive;
+from octodeco.deco.DiveProfile import DiveProfile;
 
-from deco import Gas, Util, CreateDive;
-from deco.DiveProfile import DiveProfile;
 
-# dp = DiveProfile();
-# dp.append_section(40, 35, gas = Gas.Air());
-# dp.append_section(30, 20);
-# dp.append_surfacing();
-# dp.add_stops();
+dp = DiveProfile(gf_low=35, gf_high=70);
+dp.append_section(50, 50, gas = Gas.Trimix(11,40));
+dp.append_section(30, 50, gas = Gas.Trimix(21,35));
+dp.add_gas(Gas.Nitrox(50));
+dp.add_gas(Gas.Nitrox(99));
+dp.add_stops_to_surface();
+dp.append_section(0,10);
+dp.update_stops();
 # dp.interpolate_points();
-# dp.update_deco_info();
-# print(dp.dataframe());
 
-dp = CreateDive.create_from_shearwater_csv_file("C:/Users/Dan Roozemond/Desktop/30189285#219_2020-01-05.csv");
-print(dp.description());
+for i in range(len(dp._points)):
+    p = dp._points[i];
+    if 107 < p.time < 130:
+        pp = dp._points[i-1];
+        # p.set_updated_deco_info(dp.deco_model(), dp._gases_carried, pp.deco_info['amb_to_gf']);
+        print('{}{} T {:5.1f}  D {:5.1f}  FS {:5.1f}  C {:5.1f}   GF {:4.1f}/{:4.1f}   SGF {:4.1f}  ' \
+              .format('I' if p.is_interpolated_point else ' ',\
+                      'D' if p.is_deco_stop else ' ',\
+                        p.time, p.depth, p.deco_info['FirstStop'],p.deco_info['Ceil'],
+                        p.deco_info['GF99'], p.deco_info['amb_to_gf'](p.p_amb),
+                        p.deco_info['SurfaceGF']),
+              Util.stops_to_string_precise(p.deco_info['Stops']));
 
-for p in dp._points:
-    print(p.time, p.depth, p.deco_info['SurfaceGF'])

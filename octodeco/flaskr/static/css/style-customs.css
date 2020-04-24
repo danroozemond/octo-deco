@@ -119,6 +119,12 @@ div.depth_times
 }
 
 
+div.new_by_upload input[type="submit"]:disabled
+{
+    color:#909090;
+}
+
+
 /* Login box */
 div.login_info
 {
@@ -149,4 +155,17 @@ div.login_info a:hover {
     text-decoration:underline;
 }
 
+
+div.modifydive input {
+    width: 12em;
+    padding-left:3px;
+    padding-right: 3px;
+    text-align:left;
+}
+div.modifydive label
+{
+    width: 20em;
+    display: inline-block;
+    text-align: right;
+}
 

@@ -17,6 +17,10 @@
             <input id="btnadd" type="button" onclick="add_depth_time();" value="Add section">
             </div>
         </div>
+        <div>
+        <label for="ipt_deco_gas">Additional gases (eg. &lsquo;Nx99, Nx50&rsquo;):</label>
+        <input type="text" id="ipt_deco_gas" name="deco_gas">
+        </div>
         <script>
         	/* Adding inputs */
             cnt = -1;
@@ -24,15 +28,15 @@
             {
                 cnt += 1;
                 var newdiv = document.createElement("span");
-                newdiv.innerHTML =  '<br/>At <input type="text" name="depth['+cnt+']" id="depth['+cnt+']">';
-                newdiv.innerHTML += ' m for <input type="text" name="time['+cnt+']" id="time['+cnt+']"> mins';
-                newdiv.innerHTML += ' on <input type="text" name="gas['+cnt+']" id="gas['+cnt+']" value="Air">.';
+                newdiv.innerHTML =  '<br/>At <input type="text" name="depth['+cnt+']" id="depth['+cnt+']" onchange="check_all()">';
+                newdiv.innerHTML += ' m for <input type="text" name="time['+cnt+']" id="time['+cnt+']" onchange="check_all()"> mins';
+                newdiv.innerHTML += ' on <input type="text" name="gas['+cnt+']" id="gas['+cnt+']" value="Air" onchange="check_all()">.';
                 newdiv.class = 'depth_times_inputs';
                 document.getElementById('div_depth_times').appendChild(newdiv);
 
                 if (cnt > 9) document.getElementById('btnadd').style.display = 'none';
+                check_all();
             }
-            add_depth_time();
 
             /* Checking inputs */
             function check_input_nr(s, minval, maxval, emptyok)
@@ -83,25 +87,34 @@
                 ok = ok && ok5;
 				return ok;
             }
+
+            /* On load: */
+            add_depth_time();
+            check_all();
         </script>
         <div>
-        <label for="ipt_deco_gas">Additional gases (eg. &lsquo;Nx99, Nx50&rsquo;):</label>
-        <input type="text" id="ipt_deco_gas" name="deco_gas">
-        </div>
-        <div>
-		<input type="button" id="btncheck" value="Check inputs" onclick="return check_all();">
+		<!--<input type="button" id="btncheck" value="Check inputs" onclick="return check_all();">-->
         <input type="submit" id="btnsubmit" value="Create!" onclick="return check_all();">
         </div>
     </form>
     </div>
 
-    <header><h2>Upload Shearwater CSV file</h2></header>
-    <div>Upload CSV file exported from Shearwater. Only time, depth, and gas are used; all other data (like GF, tissue
-        loading) is recomputed.</div>
+    <header><h2>Upload CSV file</h2></header>
+    <div class="new_by_upload">
+    <div>Upload CSV file from a Shearwater dive computer, or one exported from here.
+        Only time, depth, and gas are used; all other data (like tissue loading) is recomputed.
+    </div>
     <form method="post" action="{{url_for('dive.new_shearwater_csv')}}" enctype="multipart/form-data">
-        <input type="file" id="ipt_csv" name="ipt_csv">
-        <input type="submit" value="Go :)" onclick="if(document.getElementById('ipt_csv').files.length == 0) { return false; }">
+        Shearwater CSV:
+        <input type="file" id="ipt_sw_csv" name="ipt_csv" onchange="document.getElementById('submit_sw_csv').disabled = (document.getElementById('ipt_sw_csv').files.length == 0) ">
+        <input type="submit" id="submit_sw_csv" value="Go :)" disabled="true" onclick="if(document.getElementById('ipt_sw_csv').files.length == 0) { return false; }">
     </form>
+    <form method="post" action="{{url_for('dive.new_octodeco_csv')}}" enctype="multipart/form-data">
+        Octo-Deco CSV:
+        <input type="file" id="ipt_od_csv" name="ipt_csv"  onchange="document.getElementById('submit_od_csv').disabled = (document.getElementById('ipt_od_csv').files.length == 0) ">
+        <input type="submit" id="submit_od_csv" value="Go :)" disabled="true" onclick="if(document.getElementById('ipt_od_csv').files.length == 0) { return false; }">
+    </form>
+    </div>
 
 
     <header><h2>..or just recreate the demo dive:</h2></header>

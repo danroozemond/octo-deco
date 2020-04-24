@@ -156,7 +156,8 @@ class Buhlmann:
 
         def max_over_supersat(t):
             ts2 = self.updated_tissue_state(tissue_state, t, p_amb, gas);
-            gf99_at_surface = self._GF99_new(ts2, 1.0);
+            ts3 = self._update_tissue_state_travel(ts2, p_amb, 1.0, gas);
+            gf99_at_surface = self._GF99_new(ts3, 1.0);
             x = [ p - self.gf_high for p in gf99_at_surface ];
             return max(x);
 
@@ -242,16 +243,15 @@ class Buhlmann:
     def _update_tissue_state_travel(self, state, p_amb, p_new_amb, gas):
         time = 0.0;
         if p_amb > p_new_amb:
-            time = (p_amb - p_new_amb) / self.ascent_speed;
+            time = (p_amb - p_new_amb) / (self.ascent_speed/10);
         elif p_amb < p_new_amb:
-            time = (p_new_amb - p_amb) / self.descent_speed;
+            time = (p_new_amb - p_amb) / (self.descent_speed/10);
         if time == 0.0:
             return state;
         else:
             assert time > 0.0;
             p_avg = (p_amb + p_new_amb)/2.0;
             return self.updated_tissue_state(state, time, p_avg, gas);
-
 
     def compute_deco_profile(self, tissue_state, p_amb, gases, p_target = 1.0, amb_to_gf = None):
         # Returns triples depth, length, gas
@@ -261,7 +261,7 @@ class Buhlmann:
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
         # Travel to first stop
         gas = self._best_deco_gas(p_amb, gases);
-        state = self._update_tissue_state_travel(tissue_state, p_amb, p_first_stop, gas);
+        tissue_state = self._update_tissue_state_travel(tissue_state, p_amb, p_first_stop, gas);
         # 'Walk' up
         result = [ ];
         p_now = p_first_stop;
@@ -271,7 +271,8 @@ class Buhlmann:
             p_amb_next_stop = Util.next_stop_Pamb(p_now);
             stoplength, tissue_state = self._time_to_stay_at_stop(p_now, p_amb_next_stop, tissue_state, gas, amb_to_gf);
             result.append((Util.Pamb_to_depth(p_now), stoplength, gas));
-            p_now = Util.next_stop_Pamb(p_now);
+            tissue_state = self._update_tissue_state_travel(tissue_state, p_now, p_amb_next_stop, gas);
+            p_now = p_amb_next_stop;
         return result, p_ceiling, amb_to_gf;
 
     def deco_info(self, tissue_state, depth, gas, gases_carried, amb_to_gf = None):
@@ -293,10 +294,11 @@ class Buhlmann:
                   };
 
         # Below is about computing the decompression profile
-        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, gases_carried, amb_to_gf = amb_to_gf);
+        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, gases_carried,
+                                                                amb_to_gf = amb_to_gf);
         result[ 'Ceil' ] = Util.Pamb_to_depth(p_ceiling);
         result[ 'Stops' ] = stops;
-        nontrivialstops = [ s for s in stops if round(s[ 1 ]) >= 1 ];
+        nontrivialstops = [ s for s in stops if s[ 1 ] >= .1 ];
         result[ 'FirstStop' ] = nontrivialstops[ 0 ][ 0 ] if len(nontrivialstops) > 0 else 0;
         result[ 'amb_to_gf' ] = amb_to_gf;
         result[ 'GFLimitNow' ] = amb_to_gf(p_amb) if amb_to_gf is not None else 0.0;
