@@ -9,7 +9,7 @@
 
 {% block sidebarheader %}
     <div class="diveselect">
-        <form method="post" action="{{url_for('dive.show_post')}}">
+        <form method="get" action="{{url_for('dive.show_get')}}">
         <label for="dives" style="display:none">Display:</label>
         <select id="dives" name="dive_id" onchange="this.form.submit()">{%
             for x in alldives %}
@@ -40,14 +40,14 @@
         </script>
     </div>
 
-    <form method="POST" id="form_update" action="{{url_for('dive.update', id=dive.dive_id)}}">
+    <form method="PATCH" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
         <script>
         function autosubmitGF()
         {
             document.getElementById('spinner').style.display = "inline";
             eltform = document.getElementById('form_update');
             eltform.method = "get";
-            eltform.action = "{{ url_for('dive.show', id=dive.dive_id)}}";
+            eltform.action = "{{ url_for('dive.show', dive_id=dive.dive_id)}}";
             eltform.submit();
         }
         </script>
@@ -148,7 +148,7 @@
     <a name="afulldata"></a>
     <h2>Full dive data
         <div class="viztoggle" onclick="togglediv('fulldata', this)">[show]</div>
-        <div class="viztoggle"><a href="{{url_for('dive.csv',id=dive.dive_id)}}">[csv]</a></div>
+        <div class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></div>
     </h2>
     <div id="fulldata" class="bigtable" style="display: none">
         {{ fulldata_table|safe }}
@@ -159,7 +159,7 @@
     <div class="viztoggle" onclick="togglediv('modifydive', this)">[show]</div>
     </h2>
     <div id="modifydive" class="modifydive" style="display:none">
-    <form method="POST" action="{{url_for('dive.modify',id=dive.dive_id)}}">
+    <form method="PATCH" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
         <label for="ipt_surface_section">Add surface section to end of dive:</label>
         <input type="text" value="{{dive.length_of_surface_section()}}" name="ipt_surface_section" id="ipt_surface_section">
         <br/>
@@ -171,7 +171,8 @@
         <br/>
         <label for="action_update"></label>
         <input type="submit" name="action_update" id="action_update">
-        <br/>
+    </form>
+    <form method="DELETE" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
         <label for="subm_delete">Delete:</label>
         <input type="submit" name="action_delete" id="subm_delete" value="Delete this dive" onclick="return confirm('Sure?');">
     </form>
