@@ -78,7 +78,7 @@ def csv(dive_id):
     return r;
 
 
-@bp.route('/update/<int:dive_id>', methods = [ 'PATCH' ])
+@bp.route('/update/<int:dive_id>', methods = [ 'POST' ])
 def update(dive_id):
     action = request.form.get('action');
     gflow = int(request.form.get('gflow', 100));
@@ -106,7 +106,7 @@ def delete(dive_id):
     return redirect(url_for('dive.show_any'));
 
 
-@bp.route('/modify/<int:dive_id>', methods = [ 'PATCH' ])
+@bp.route('/modify/<int:dive_id>', methods = [ 'POST' ])
 def modify(dive_id):
     if request.form.get('action_update', '') != '':
         # Some input sanitation

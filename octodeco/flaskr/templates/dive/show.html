@@ -40,7 +40,7 @@
         </script>
     </div>
 
-    <form method="PATCH" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
+    <form method="POST" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
         <script>
         function autosubmitGF()
         {
@@ -159,7 +159,7 @@
     <div class="viztoggle" onclick="togglediv('modifydive', this)">[show]</div>
     </h2>
     <div id="modifydive" class="modifydive" style="display:none">
-    <form method="PATCH" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
+    <form method="POST" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
         <label for="ipt_surface_section">Add surface section to end of dive:</label>
         <input type="text" value="{{dive.length_of_surface_section()}}" name="ipt_surface_section" id="ipt_surface_section">
         <br/>
@@ -170,7 +170,7 @@
         <input type="checkbox" {% if dive.is_public %}checked{%endif%} name="ipt_public" id="ipt_public">
         <br/>
         <label for="action_update"></label>
-        <input type="submit" name="action_update" id="action_update">
+        <input type="submit" name="action_update" id="action_update" value="Update">
     </form>
     <form method="DELETE" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
         <label for="subm_delete">Delete:</label>
