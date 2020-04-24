@@ -115,3 +115,8 @@ def delete_dive(dive_id:int):
         ''', [ get_user_id(), dive_id ]
                       );
     return cur.rowcount;
+
+
+def is_modify_allowed(diveprofile):
+    dpu = getattr(diveprofile, 'user_id', None);
+    return dpu == get_user_id();

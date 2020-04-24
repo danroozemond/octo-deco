@@ -54,6 +54,7 @@ def show(dive_id):
                            dive_profile_plot_json = dive_profile_plot_json,
                            heatmap_plot_json = heatmap_plot_json,
                            fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true"),
+                           modify_allowed = db_dive.is_modify_allowed(dp)
                            );
 
 

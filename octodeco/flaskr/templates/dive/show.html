@@ -28,7 +28,9 @@
     <li><span class="fa fa-chevron-circle-right"></span><a href="#divesummary">Dive summary</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#aheatmap">Heatmap</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#afulldata">Full dive data</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#amodifydive">Modify</a></li>
+    {% if modify_allowed %}
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#amodifydive">Modify</a></li>f
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -91,10 +93,11 @@
             <img id="spinner" style="display:none"
                  src="{{ url_for('static', filename='images/spinner-51px.gif') }}">
         </div>
+        {% if modify_allowed %}
         <div>
-            <!-- <input type="submit" name="action" value="Update Display GF"> -->
             <input type="submit" name="action" value="Update Stops">
         </div>
+        {% endif %}
     </form>
 
     <a name="divesummary"></a>
@@ -154,6 +157,7 @@
         {{ fulldata_table|safe }}
     </div>
 
+    {% if modify_allowed %}
     <a name="amodifydive"></a>
     <h2>Modify dive
     <div class="viztoggle" onclick="togglediv('modifydive', this)">[show]</div>
@@ -177,5 +181,6 @@
         <input type="submit" name="action_delete" id="subm_delete" value="Delete this dive" onclick="return confirm('Sure?');">
     </form>
     </div>
+    {% endif %}
 {% endblock %}
 
