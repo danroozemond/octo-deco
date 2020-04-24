@@ -74,7 +74,10 @@
 						<div class="9u skel-cell-important">
 							<section id="content" >
 							{% for message in get_flashed_messages() %}
-								<div class="flash">{{ message }}</div>
+								<div class="flash">
+									{{ message }}
+									<div class="close"><a href="#" onclick="this.parentElement.parentElement.style.display='none';">X</a></div>
+								</div>
 							{% endfor %}
 
 							{% block content %}{% endblock %}
