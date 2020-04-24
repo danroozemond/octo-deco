@@ -35,7 +35,8 @@ class DiveProfile:
         self.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
         self.add_custom_desc = None;
         self.custom_desc = None;
-        self.public = False;
+        self.is_demo_dive = False;
+        self.is_public = False;
 
         # NOTE - If you add attributes here, also add migration code to DiveProfile code
         #

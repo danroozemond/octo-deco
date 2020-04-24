@@ -46,6 +46,7 @@
         function autosubmitGF()
         {
             document.getElementById('spinner').style.display = "inline";
+            document.getElementById('form_update').method = "get";
             document.getElementById('form_update').submit();
         }
         </script>
@@ -165,7 +166,7 @@
         <input type="text" value="{{dive.description()}}" name="ipt_description" id="ipt_description">
         <br/>
         <label for="ipt_public">Public:</label>
-        <input type="checkbox" {% if dive.public %}checked{%endif%} name="ipt_public" id="ipt_public">
+        <input type="checkbox" {% if dive.is_public %}checked{%endif%} name="ipt_public" id="ipt_public">
         <br/>
         <label for="action_update"></label>
         <input type="submit" name="action_update" id="action_update">

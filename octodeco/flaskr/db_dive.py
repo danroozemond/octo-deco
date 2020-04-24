@@ -69,13 +69,13 @@ def store_dive_update(diveprofile):
     dive_id = int(diveprofile.dive_id);
     if dive_id is None:
         raise AttributeError();
-    is_demo = getattr(diveprofile, 'is_demo_dive', False);
     cur = db.get_db().cursor();
     cur.execute('''
         UPDATE dives
-        SET dive = ?, dive_desc = ?, is_demo = ?, last_update = datetime('now')
+        SET dive = ?, dive_desc = ?, is_demo = ?, last_update = datetime('now'), is_public = ?
         WHERE dive_id = ? AND user_id = ?;
-        ''', [ DiveProfileSer.dumps(diveprofile), diveprofile.description(), is_demo,
+        ''', [ DiveProfileSer.dumps(diveprofile), diveprofile.description(),
+               diveprofile.is_demo_dive, diveprofile.is_public,
                dive_id, get_user_id() ]
                );
     assert cur.rowcount == 1;

@@ -11,6 +11,7 @@ CREATE TABLE dives (
   dive_desc TEXT,
   user_id INTEGER NOT NULL,
   is_demo BOOL,
+  is_public BOOL DEFAULT 0,
   dive BLOB NOT NULL,
   last_update DATETIME
 );

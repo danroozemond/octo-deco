@@ -4,7 +4,7 @@
 import pickle;
 import datetime, pytz;
 
-CURRENT_VERSION = 3;
+CURRENT_VERSION = 4;
 
 
 #
@@ -20,7 +20,7 @@ def _migrate_up_to_current(from_version, diveprofile):
             setattr(diveprofile, attrname, None);
 
     # Bool
-    for attrname in [ 'public' ]:
+    for attrname in [ 'is_demo_dive', 'is_public'  ]:
         if not hasattr(diveprofile, attrname):
             setattr(diveprofile, attrname, False);
 

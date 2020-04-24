@@ -45,7 +45,6 @@ def show(id):
     except TypeError:
         heatmap_plot_json = {};
 
-
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
@@ -54,6 +53,7 @@ def show(id):
                            heatmap_plot_json = heatmap_plot_json,
                            fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true"),
                            );
+
 
 
 @bp.route('/show/', methods = [ 'POST' ] )
@@ -74,24 +74,30 @@ def csv(id):
     return r;
 
 
-@bp.route('/update/<int:id>', methods = [ 'POST' ])
+@bp.route('/update/<int:id>', methods = [ 'GET', 'POST' ])
 def update(id):
     action = request.form.get('action');
     if action is None:
         action = 'Update Display GF';
+    gflow = int( request.args.get('gflow', request.form.get('gflow', 100)));
+    gfhigh = int(request.args.get('gfhigh', request.form.get('gfhigh', 100)));
     dp = db_dive.get_one_dive(id);
     olddecotime = dp.decotime();
     if dp is None:
         abort(405);
     if action == 'Update Display GF' or action == 'Update Stops':
-        gflow = int(request.form.get('gflow', 0));
-        gfhigh = int(request.form.get('gfhigh', 0));
         dp.set_gf(gflow, gfhigh);
         if action == 'Update Stops':
             dp.update_stops();
             flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
-        db_dive.store_dive(dp);
-        return redirect(url_for('dive.show', id=id));
+            db_dive.store_dive(dp);
+            return redirect(url_for('dive.show', id=id));
+        else:
+            ## TODO - this is not ideal, URL should also change.
+            ## TODO Probably put all this under /show -> /show supports the "GET" with args
+            ## TODO   and /show does the set_gf
+            ## TODO Then update can go back to being POST only
+            return do_show(dp);
     else:
         abort(405);
 
@@ -126,14 +132,15 @@ def modify(id):
                 dp.custom_desc = ipt_description;
             else:
                 dp.custom_desc = None;
-        if ipt_public != dp.public:
+        if ipt_public != dp.is_public:
             flash('Made dive {}'.format( 'public' if ipt_public else 'private'));
-            dp.public = ipt_public;
+            dp.is_public = ipt_public;
         db_dive.store_dive(dp);
         return redirect(url_for('dive.show', id=id));
     else:
         abort(405);
 
+# TODO REMOVE
 # /*
 #         <input type="text" value="30" name="ipt_surface_section" id="ipt_surface_section">
 #         <br/>
