@@ -11,12 +11,11 @@
     <div class="diveselect">
         <form method="post" action="{{url_for('dive.show_post')}}">
         <label for="dives" style="display:none">Display:</label>
-        <select id="dives" name="dive_id" onchange="this.form.submit()">
-            {% for x in alldives %}
-              <option value="{{x['dive_id']}}"
-              {% if x['dive_id'] == dive.dive_id %} selected {% endif %}
-              >{{x['dive_desc']}}</option>
-            {% endfor %}
+        <select id="dives" name="dive_id" onchange="this.form.submit()">{%
+            for x in alldives %}
+              <option value="{{x['dive_id']}}"{%
+              if x['dive_id'] == dive.dive_id %} selected {% endif
+              %}>{{x['dive_desc']}}</option>{% endfor %}
         </select>
         </form>
     </div>
@@ -46,8 +45,10 @@
         function autosubmitGF()
         {
             document.getElementById('spinner').style.display = "inline";
-            document.getElementById('form_update').method = "get";
-            document.getElementById('form_update').submit();
+            eltform = document.getElementById('form_update');
+            eltform.method = "get";
+            eltform.action = "{{ url_for('dive.show', id=dive.dive_id)}}";
+            eltform.submit();
         }
         </script>
         <div class="adjust">

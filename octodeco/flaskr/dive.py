@@ -33,6 +33,11 @@ def show(id):
         flash('Dive not found [%i]' % id)
         return redirect(url_for('dive.show_any'));
 
+    gflow =  int( request.args.get('gflow',  dp.gf_low_display ) );
+    gfhigh = int( request.args.get('gfhigh', dp.gf_high_display ) );
+    if ( gflow, gfhigh ) != ( dp.gf_low_display, dp.gf_high_display ):
+        dp.set_gf( gflow, gfhigh );
+
     alldives = db_dive.get_all_dives();
     dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
 
@@ -55,7 +60,6 @@ def show(id):
                            );
 
 
-
 @bp.route('/show/', methods = [ 'POST' ] )
 def show_post():
     dive_id = int(request.form.get('dive_id'));
@@ -74,30 +78,21 @@ def csv(id):
     return r;
 
 
-@bp.route('/update/<int:id>', methods = [ 'GET', 'POST' ])
+@bp.route('/update/<int:id>', methods = [ 'POST' ])
 def update(id):
     action = request.form.get('action');
-    if action is None:
-        action = 'Update Display GF';
-    gflow = int( request.args.get('gflow', request.form.get('gflow', 100)));
-    gfhigh = int(request.args.get('gfhigh', request.form.get('gfhigh', 100)));
+    gflow = int(request.form.get('gflow', 100));
+    gfhigh = int(request.form.get('gfhigh', 100));
     dp = db_dive.get_one_dive(id);
-    olddecotime = dp.decotime();
     if dp is None:
         abort(405);
-    if action == 'Update Display GF' or action == 'Update Stops':
+    if action == 'Update Stops':
+        olddecotime = dp.decotime();
         dp.set_gf(gflow, gfhigh);
-        if action == 'Update Stops':
-            dp.update_stops();
-            flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
-            db_dive.store_dive(dp);
-            return redirect(url_for('dive.show', id=id));
-        else:
-            ## TODO - this is not ideal, URL should also change.
-            ## TODO Probably put all this under /show -> /show supports the "GET" with args
-            ## TODO   and /show does the set_gf
-            ## TODO Then update can go back to being POST only
-            return do_show(dp);
+        dp.update_stops();
+        flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
+        db_dive.store_dive(dp);
+        return redirect(url_for('dive.show', id=id));
     else:
         abort(405);
 
@@ -140,17 +135,6 @@ def modify(id):
     else:
         abort(405);
 
-# TODO REMOVE
-# /*
-#         <input type="text" value="30" name="ipt_surface_section" id="ipt_surface_section">
-#         <br/>
-#         <label for="ipt_description">Modify description:</label>
-#         <input type="text" value="{{dive.description()}}" name="ipt_description" id="ipt_description">
-#         <br/>
-#         <label for="ipt_public">Public:</label>
-#         <input type="checkbox" {% if dive.public %}checked{%endif%} name="ipt_public" id="ipt_public">
-# */
-
 
 @bp.route('/new', methods = [ 'GET' ])
 def new_show():
@@ -181,6 +165,7 @@ def new_demo():
     dive_id = dp.dive_id;
     flash('Generated demo dive [%i]' % dive_id);
     return redirect(url_for('dive.show', id = dive_id))
+
 
 def new_csv( create_csv_func ):
     CHARSET='utf-8';
