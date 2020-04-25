@@ -34,19 +34,49 @@
 {% endblock %}
 
 {% block content %}
+    <script>
+    function get_gf_url_params() {
+        r =  $('#form_update').serialize();
+        if (r == undefined || r == '')
+        {
+            r = $.param({gflow:{{dive.gf_low_display}}, gfhigh:{{dive.gf_high_display}}})
+        }
+        return r;
+    }
+    </script>
+
     <a name="diveprofile"></a>
-    <div class="chart" id="chart_diveprofile">
-        <script>
-            var graphs = {{dive_profile_plot_json | safe}};
-            Plotly.plot('chart_diveprofile',graphs,{});
-        </script>
+    <div class="chart" id="chart_diveprofile" style="display:none;">
     </div>
+    <div class="chart placeholder" id="chart_diveprofile_plh" style="display:block;">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+    </div>
+    <script>
+      // Fetch the diveprofile plot
+      function load_plot_diveprofile()
+      {
+          $('#chart_diveprofile').hide();
+          $('#chart_diveprofile_plh').show();
+          $.getJSON({
+            url: "{{url_for('dive.show_elt_plot_profile', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+            success: function(result) {
+                $('#chart_diveprofile').show();
+                $('#chart_diveprofile_plh').hide();
+                Plotly.plot('chart_diveprofile',JSON.parse(result),{});
+            }
+          });
+      }
+      $( document ).ready(load_plot_diveprofile());
+    </script>
 
     <form method="POST" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
         <script>
         function autosubmitGF()
         {
             document.getElementById('spinner').style.display = "inline";
+            get_gf_url_params();
+            return false;
+
             eltform = document.getElementById('form_update');
             eltform.method = "get";
             eltform.action = "{{ url_for('dive.show', dive_id=dive.dive_id)}}";
@@ -67,6 +97,7 @@
               <option value="90"></option>
               <option value="100" label="99"></option>
             </datalist>
+            <!-- RESET -->
             <a href="#" onclick="
                 document.getElementById('show_gfhigh').innerHTML
                     = document.getElementById('ipt_gfhigh').value
@@ -76,6 +107,7 @@
                     = {{dive.gf_low_profile}};
                 autosubmitGF();
                 return false;">[reset]</a>
+            <!-- SLIDERS -->
             GF
             <label for="ipt_gflow">low</label>
             <input type="range" min=0 max=100 value={{dive.gf_low_display}} class="slider" list="tickmarks"

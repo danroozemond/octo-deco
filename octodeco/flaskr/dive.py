@@ -1,7 +1,7 @@
 # Please see LICENSE.md
 import pandas;
 from flask import (
-    Blueprint, render_template, Response, flash, redirect, url_for, request, abort
+    Blueprint, render_template, Response, flash, redirect, url_for, request, abort, jsonify
 )
 import sys;
 
@@ -18,6 +18,40 @@ def load_user_details():
     user.get_user_details();
 
 
+#
+#
+#
+def get_diveprofile_for_display(dive_id:int):
+    dp = db_dive.get_one_dive(dive_id);
+    if dp is None:
+        abort(405);
+    if not db_dive.is_display_allowed(dp):
+        abort(403);
+    gflow = request.args.get('gflow',  dp.gf_low_display, type=int);
+    gfhigh = request.args.get('gfhigh', dp.gf_high_display, type=int);
+    if ( gflow, gfhigh ) != ( dp.gf_low_display, dp.gf_high_display ):
+        dp.set_gf( gflow, gfhigh );
+    print('diveprofile id: {}; gfs: {}/{}'.format(dive_id, gflow, gfhigh));
+    return dp;
+
+
+#
+# Showing the dive: separate elements
+#
+@bp.route('/show/<int:dive_id>/plot/profile', methods = ['GET'])
+def show_elt_plot_profile(dive_id):
+    print('show_elt_plot_profile')
+    dp = get_diveprofile_for_display(dive_id);
+    try:
+        dive_profile_plot_json = plots.show_diveprofile(dp);
+    except TypeError:
+        dive_profile_plot_json = {};
+    return jsonify(dive_profile_plot_json);
+
+
+#
+# Showing a dive: none, any, get, overview page
+#
 @bp.route('/show/none')
 def show_none():
     return render_template('dive/show_none.html');
@@ -42,12 +76,12 @@ def show(dive_id):
         dp.set_gf( gflow, gfhigh );
 
     alldives = db_dive.get_all_dives();
-    dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
 
-    try:
-        dive_profile_plot_json = plots.show_diveprofile(dp);
-    except TypeError:
-        dive_profile_plot_json = {};
+    dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
+    dsdf_table = dsdf.to_html(classes="smalltable", header="true");
+
+    fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
+
     try:
         heatmap_plot_json = plots.show_heatmap(dp);
     except TypeError:
@@ -56,10 +90,9 @@ def show(dive_id):
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
-                           summary_table = dsdf.to_html(classes="smalltable", header="true"),
-                           dive_profile_plot_json = dive_profile_plot_json,
+                           summary_table = dsdf_table,
                            heatmap_plot_json = heatmap_plot_json,
-                           fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true"),
+                           fulldata_table = fulldata_table,
                            modify_allowed = db_dive.is_modify_allowed(dp)
                            );
 
@@ -73,6 +106,9 @@ def show_any():
         return redirect(url_for('dive.show', dive_id = dive_id))
 
 
+#
+# Downloading CSV
+#
 @bp.route('/csv/<int:dive_id>')
 def csv(dive_id):
     dp = db_dive.get_one_dive(dive_id);
@@ -85,6 +121,9 @@ def csv(dive_id):
     return r;
 
 
+#
+# Update (GF), delete, modify
+#
 @bp.route('/update/<int:dive_id>', methods = [ 'POST' ])
 def update(dive_id):
     action = request.form.get('action');
@@ -141,6 +180,9 @@ def modify(dive_id):
         abort(405);
 
 
+#
+# New (show the page, new from spec, new demo, new from
+#
 @bp.route('/new', methods = [ 'GET' ])
 def new_show():
     return render_template('dive/new.html');
