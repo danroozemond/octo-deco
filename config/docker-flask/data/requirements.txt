@@ -6,3 +6,4 @@ click
 uwsgi
 oauthlib
 requests
+Flask-Caching

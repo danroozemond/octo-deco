@@ -8,6 +8,7 @@ import sys;
 from . import db_dive;
 from . import plots;
 from . import user;
+from .app import cache;
 from octodeco.deco import CreateDive;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
@@ -19,19 +20,35 @@ def load_user_details():
 
 
 #
+# Getting info
 #
-#
-def get_diveprofile_for_display(dive_id:int):
+def get_gf_args_from_get():
+    gflow = request.args.get('gflow', 101, type=int);
+    gfhigh = request.args.get('gfhigh', 101, type=int);
+    return gflow, gfhigh;
+
+@cache.memoize(50)
+def get_diveprofile(dive_id:int, gflow:int, gfhigh:int):
+    print('Actually getting it from DB / updating GF\'s');
+    # TODO make sure stuff is secure
+    # TODO make sure stuff is up to date (ie., invalidate cache on update/delete)
     dp = db_dive.get_one_dive(dive_id);
+    if dp is None:
+        return None;
+    if (gflow,gfhigh) == (101,101):
+        gflow, gfhigh = dp.gf_low_display, dp.gf_high_display;
+    if ( gflow, gfhigh ) != ( dp.gf_low_display, dp.gf_high_display ):
+        dp.set_gf( gflow, gfhigh );
+    return dp;
+
+
+def get_diveprofile_for_display(dive_id:int):
+    gflow, gfhigh = get_gf_args_from_get();
+    dp = get_diveprofile(dive_id, gflow, gfhigh);
     if dp is None:
         abort(405);
     if not db_dive.is_display_allowed(dp):
         abort(403);
-    gflow = request.args.get('gflow',  dp.gf_low_display, type=int);
-    gfhigh = request.args.get('gfhigh', dp.gf_high_display, type=int);
-    if ( gflow, gfhigh ) != ( dp.gf_low_display, dp.gf_high_display ):
-        dp.set_gf( gflow, gfhigh );
-    print('diveprofile id: {}; gfs: {}/{}'.format(dive_id, gflow, gfhigh));
     return dp;
 
 
@@ -40,7 +57,6 @@ def get_diveprofile_for_display(dive_id:int):
 #
 @bp.route('/show/<int:dive_id>/plot/profile', methods = ['GET'])
 def show_elt_plot_profile(dive_id):
-    print('show_elt_plot_profile')
     dp = get_diveprofile_for_display(dive_id);
     try:
         dive_profile_plot_json = plots.show_diveprofile(dp);
@@ -65,15 +81,10 @@ def show_get():
 
 @bp.route('/show/<int:dive_id>', methods = ['GET'])
 def show(dive_id):
-    dp = db_dive.get_one_dive(dive_id);
+    dp = get_diveprofile_for_display(dive_id);
     if dp is None:
         flash('Dive not found [%i]' % dive_id)
         return redirect(url_for('dive.show_any'));
-
-    gflow = request.args.get('gflow',  dp.gf_low_display, type=int);
-    gfhigh = request.args.get('gfhigh', dp.gf_high_display, type=int);
-    if ( gflow, gfhigh ) != ( dp.gf_low_display, dp.gf_high_display ):
-        dp.set_gf( gflow, gfhigh );
 
     alldives = db_dive.get_all_dives();
 

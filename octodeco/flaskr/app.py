@@ -4,6 +4,7 @@ from datetime import timedelta
 import click;
 import flask;
 from flask import Flask, session, url_for;
+from flask_caching import Cache
 from . import db;
 
 
@@ -25,8 +26,12 @@ app = Flask(__name__, instance_relative_config=True, instance_path = setting_ins
 app.config.from_mapping(
     SECRET_KEY = setting_secret_key,
     DATABASE = os.path.join(app.instance_path, 'flaskr.sqlite'),
-    NAV_ITEMS = get_nav_items()
+    NAV_ITEMS = get_nav_items(),
+    CACHE_TYPE = "simple",  # Flask-Caching related configs
+    CACHE_DEFAULT_TIMEOUT = 300
 );
+cache = Cache(app);
+
 try:
     os.makedirs(app.instance_path)
 except OSError:
