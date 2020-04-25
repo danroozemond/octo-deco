@@ -32,6 +32,7 @@ class UserDetails(dict):
 
 def get_user_details():
     if 'user_details' not in g:
+        print('Initializing user details'); # TODO REMOVE
         g.user_details = UserDetails(db_user.get_db_user_details());
     return g.user_details;
 

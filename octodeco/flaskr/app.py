@@ -4,7 +4,7 @@ from datetime import timedelta
 import click;
 import flask;
 from flask import Flask, session;
-from . import user;
+from . import db;
 
 
 # Define navigation row
@@ -40,7 +40,6 @@ except OSError:
 @flask.cli.with_appcontext
 def init_db_command():
     """Clear the existing data and create new tables."""
-    from . import db;
     db.init_db()
     click.echo('Initialized the database in %s' % app.config['DATABASE'])
 
@@ -50,7 +49,6 @@ def init_db_command():
 @flask.cli.with_appcontext
 def migrate_db_command(frv, tov):
     """Migrate from one data version to another"""
-    from . import db;
     db.migrate_db(frv,tov)
     click.echo('Migrated the database in %s' % app.config['DATABASE'])
 
@@ -60,10 +58,15 @@ app.cli.add_command(migrate_db_command);
 
 # Session data
 @app.before_request
-def before_request():
+def init_session():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=365);
     user.get_user_details();
+
+
+@app.teardown_appcontext
+def close_db(exception):
+    db.close_db();
 
 
 # Blueprints
