@@ -27,7 +27,8 @@ def get_gf_args_from_get():
     gfhigh = request.args.get('gfhigh', 101, type=int);
     return gflow, gfhigh;
 
-@cache.memoize(50)
+
+@cache.memoize()
 def get_diveprofile(dive_id:int, gflow:int, gfhigh:int):
     print('Actually getting it from DB / updating GF\'s');
     # TODO make sure stuff is secure

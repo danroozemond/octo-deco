@@ -7,6 +7,7 @@ import requests;
 from oauthlib.oauth2 import WebApplicationClient;
 
 from . import db_user, user;
+from .app import cache;
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -33,7 +34,9 @@ def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json();
 
 
-def construct_google_request_uri():
+@cache.memoize()
+def get_google_request_uri():
+    print('construct_google_request_uri actually executing');
     # Get google's config for Google login
     google_provider_cfg = get_google_provider_cfg();
 
@@ -46,18 +49,6 @@ def construct_google_request_uri():
         scope=["openid", "email", "profile"]
     )
     return request_uri;
-
-
-# This will be requested often; so (poor man's) cache it
-_google_request_uri = None;
-_google_request_uri_age = 0;
-def get_google_request_uri():
-    global _google_request_uri, _google_request_uri_age;
-    t = time.perf_counter();
-    if _google_request_uri is None or (t - _google_request_uri_age) > 3600:
-        _google_request_uri = construct_google_request_uri();
-        _google_request_uri_age = t;
-    return _google_request_uri;
 
 
 # Static route for privacy policy
