@@ -25,7 +25,7 @@ def show_none():
 
 @bp.route('/show/get')
 def show_get():
-    dive_id = int(request.args.get("dive_id", 0));
+    dive_id = request.args.get("dive_id", 0, type=int);
     return redirect(url_for('dive.show', dive_id=dive_id));
 
 
@@ -36,8 +36,8 @@ def show(dive_id):
         flash('Dive not found [%i]' % dive_id)
         return redirect(url_for('dive.show_any'));
 
-    gflow = int( request.args.get('gflow',  dp.gf_low_display ) );
-    gfhigh = int( request.args.get('gfhigh', dp.gf_high_display ) );
+    gflow = request.args.get('gflow',  dp.gf_low_display, type=int);
+    gfhigh = request.args.get('gfhigh', dp.gf_high_display, type=int);
     if ( gflow, gfhigh ) != ( dp.gf_low_display, dp.gf_high_display ):
         dp.set_gf( gflow, gfhigh );
 
@@ -88,8 +88,8 @@ def csv(dive_id):
 @bp.route('/update/<int:dive_id>', methods = [ 'POST' ])
 def update(dive_id):
     action = request.form.get('action');
-    gflow = int(request.form.get('gflow', 100));
-    gfhigh = int(request.form.get('gfhigh', 100));
+    gflow = request.form.get('gflow', 100, type=int);
+    gfhigh = request.form.get('gfhigh', 100, type=int);
     dp = db_dive.get_one_dive(dive_id);
     if dp is None:
         abort(405);
@@ -117,7 +117,7 @@ def delete(dive_id):
 def modify(dive_id):
     if request.form.get('action_update', '') != '':
         # Some input sanitation
-        ipt_surface_section = min(120, int(request.form.get('ipt_surface_section')));
+        ipt_surface_section = min(120, request.form.get('ipt_surface_section', 0, type=int));
         ipt_description = request.form.get('ipt_description')[:100];
         ipt_public = ( request.form.get('ipt_public', 'off').lower() == 'on')
         dp = db_dive.get_one_dive(dive_id);
