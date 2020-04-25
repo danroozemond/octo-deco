@@ -28,6 +28,15 @@ div.flash div.close a {
     text-decoration: none;
 }
 
+/* transition: property duration timing-function delay*/
+div.flash.hiding {
+    opacity: 0;
+    transition: opacity 1s linear 0s;
+}
+div.flash.hidden {
+    display:none;
+}
+
 /*
  * Sidebar items
  */

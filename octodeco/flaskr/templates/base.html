@@ -71,12 +71,23 @@
 						</div>
 						
 						
+						<script>
+						function hide_flash_start(elt)
+						{
+							elt.parentElement.parentElement.classList.add('hiding');
+							setTimeout(hide_flash_final, 1000, elt);
+						}
+						function hide_flash_final(elt)
+						{
+							elt.parentElement.parentElement.classList.add('hidden');
+						}
+						</script>
 						<div class="9u skel-cell-important">
 							<section id="content" >
 							{% for message in get_flashed_messages() %}
 								<div class="flash">
 									{{ message }}
-									<div class="close"><a href="#" onclick="this.parentElement.parentElement.style.display='none';">X</a></div>
+									<div class="close"><a href="#" onclick="hide_flash_start(this)">X</a></div>
 								</div>
 							{% endfor %}
 
