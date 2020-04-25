@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import click;
 import flask;
-from flask import Flask, session;
+from flask import Flask, session, url_for;
 from . import db;
 
 
@@ -83,3 +83,8 @@ app.register_blueprint(auth.bp);
 @app.route('/')
 def index():
     return flask.redirect( flask.url_for('dive.show_any') );
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return flask.redirect(url_for('static', filename='images/favicon/favicon.ico'));
