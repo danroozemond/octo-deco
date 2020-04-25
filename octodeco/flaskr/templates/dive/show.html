@@ -74,9 +74,6 @@
         function autosubmitGF()
         {
             document.getElementById('spinner').style.display = "inline";
-            get_gf_url_params();
-            return false;
-
             eltform = document.getElementById('form_update');
             eltform.method = "get";
             eltform.action = "{{ url_for('dive.show', dive_id=dive.dive_id)}}";
