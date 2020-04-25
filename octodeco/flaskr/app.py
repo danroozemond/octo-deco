@@ -61,7 +61,6 @@ app.cli.add_command(migrate_db_command);
 def init_session():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=365);
-    user.get_user_details();
 
 
 @app.teardown_appcontext

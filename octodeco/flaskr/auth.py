@@ -6,7 +6,7 @@ from flask import (
 import requests;
 from oauthlib.oauth2 import WebApplicationClient;
 
-from . import db_user;
+from . import db_user, user;
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -64,6 +64,11 @@ def get_google_request_uri():
 @bp.route('/privacy-policy/')
 def privacy_policy():
     return render_template('auth/privacy-policy.html');
+
+
+@bp.before_request
+def load_user_details():
+    user.get_user_details();
 
 
 # Login callback

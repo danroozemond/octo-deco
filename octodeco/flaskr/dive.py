@@ -7,9 +7,15 @@ import sys;
 
 from . import db_dive;
 from . import plots;
+from . import user;
 from octodeco.deco import CreateDive;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
+
+
+@bp.before_request
+def load_user_details():
+    user.get_user_details();
 
 
 @bp.route('/show/none')

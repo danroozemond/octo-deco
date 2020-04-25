@@ -19,7 +19,6 @@ def close_db():
     db = g.pop('db', None)
 
     if db is not None:
-        print('Closing DB'); # TODO REMOVE
         db.close();
 
 
