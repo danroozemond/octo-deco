@@ -31,7 +31,7 @@ div.flash div.close a {
 /* transition: property duration timing-function delay*/
 div.flash.hiding {
     opacity: 0;
-    transition: opacity 1s linear 0s;
+    transition: opacity 0.5s linear 0s;
 }
 div.flash.hidden {
     display:none;
@@ -90,6 +90,18 @@ div.chart {
     width: 100%;
     margin-left: 0px;
     margin-right: 0px;
+}
+
+div.placeholder
+{
+    height: 220px;
+    margin: 3em;
+    background-color:#eaeaea;
+    text-align:center;
+}
+div.chart.placeholder img
+{
+    vertical-align:middle;
 }
 
 div.viztoggle {
