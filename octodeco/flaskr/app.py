@@ -16,10 +16,11 @@ def get_nav_items():
 
 
 # Get settings
-assert os.environ.get('FLASK_SECRET_KEY') is not None; # Won't store in version control
-assert os.environ.get('GOOGLE_OAUTH_JSON') is not None; # Won't store in version control
+assert os.environ.get('FLASK_SECRET_KEY') is not None;
+assert os.environ.get('GOOGLE_OAUTH_JSON') is not None;
 setting_secret_key = os.environ.get('FLASK_SECRET_KEY');
 setting_instance_path = os.environ.get('FLASK_INSTANCE_PATH');
+cache_dir = os.environ.get('FLASK_CACHE_DIR');
 
 # create and configure the app
 app = Flask(__name__, instance_relative_config=True, instance_path = setting_instance_path)
@@ -27,7 +28,9 @@ app.config.from_mapping(
     SECRET_KEY = setting_secret_key,
     DATABASE = os.path.join(app.instance_path, 'flaskr.sqlite'),
     NAV_ITEMS = get_nav_items(),
-    CACHE_TYPE = "simple",  # Flask-Caching related configs
+    CACHE_TYPE = "filesystem",  # Flask-Caching related configs
+    CACHE_DIR = cache_dir,
+    CACHE_THRESHOLD = 10000,
     CACHE_DEFAULT_TIMEOUT = 300
 );
 cache = Cache(app);
