@@ -62,7 +62,7 @@
             success: function(result) {
                 $('#chart_diveprofile').show();
                 $('#chart_diveprofile_plh').hide();
-                Plotly.plot('chart_diveprofile',JSON.parse(result),{});
+                Plotly.newPlot('chart_diveprofile',JSON.parse(result),{});
             }
           });
       }
@@ -75,8 +75,8 @@
         {
             load_plot_diveprofile();
             load_summary_table();
-            if ($('#chart_heatmap').is(':visible')) load_plot_heatmap(); else unload_plot_heatmap();
             if ($('#table_full').is(':visible')) load_full_table(); else unload_full_table();
+            // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
         }
         </script>
         <div class="adjust">
@@ -161,11 +161,11 @@
           $('#chart_heatmap').hide();
           $('#chart_heatmap_plh').show();
           $.getJSON({
-            url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+            url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}",
             success: function(result) {
                 $('#chart_heatmap').show();
                 $('#chart_heatmap_plh').hide();
-                Plotly.plot('chart_heatmap',JSON.parse(result),{});
+                Plotly.newPlot('chart_heatmap',JSON.parse(result),{});
                 plot_heatmap_loaded = true;
             }
           });
@@ -265,7 +265,6 @@
             {
                 elt.style.display="block";
                 toggle_elt.innerHTML = "[hide]";
-                if (!full_table_loaded) load_full_table();
             }
         }
     </script>

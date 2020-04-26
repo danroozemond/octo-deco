@@ -31,7 +31,7 @@ div.flash div.close a {
 /* transition: property duration timing-function delay*/
 div.flash.hiding {
     opacity: 0;
-    transition: opacity 1s linear 0s;
+    transition: opacity 0.5s linear 0s;
 }
 div.flash.hidden {
     display:none;

@@ -73,8 +73,8 @@ class CachedDiveProfile:
         return jsonify(jp);
 
     @cache.memoize()
-    def plot_heatmap(self, gflow, gfhigh):
-        dp = self.profile_gf(gflow, gfhigh);
+    def plot_heatmap(self):
+        dp = self.profile_base();
         try:
             jp = plots.show_heatmap(dp);
         except TypeError:
@@ -127,8 +127,7 @@ def show_elt_plot_profile(dive_id):
 @bp.route('/show/<int:dive_id>/plot/heatmap', methods = ['GET'])
 def show_elt_plot_heatmap(dive_id):
     cdp = get_cached_dive(dive_id);
-    gflow, gfhigh = get_gf_args_from_request();
-    return cdp.plot_heatmap(gflow, gfhigh);
+    return cdp.plot_heatmap();
 
 
 @bp.route('/show/<int:dive_id>/summary', methods = ['GET'])
