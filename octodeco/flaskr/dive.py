@@ -137,7 +137,7 @@ def show_elt_summary_table(dive_id):
     return cdp.summary_table(gflow, gfhigh);
 
 
-@bp.route('/show/<int:dive_id>/full', methods = ['GET'])
+@bp.route('/show/<int:dive_id>/fulldata', methods = ['GET'])
 def show_elt_full_table(dive_id):
     cdp = get_cached_dive(dive_id);
     gflow, gfhigh = get_gf_args_from_request();
