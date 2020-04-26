@@ -135,6 +135,21 @@
 
 
     <script>
+        var plot_heatmap_loaded = false;
+        function load_plot_heatmap()
+        {
+          $('#chart_heatmap').hide();
+          $('#chart_heatmap_plh').show();
+          $.getJSON({
+            url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+            success: function(result) {
+                $('#chart_heatmap').show();
+                $('#chart_heatmap_plh').hide();
+                Plotly.plot('chart_heatmap',JSON.parse(result),{});
+                plot_heatmap_loaded = true;
+            }
+          });
+        }
         function toggleHeatmap(toggle_elt)
         {
             var elt = document.getElementById("heatmap");
@@ -147,16 +162,19 @@
             {
                 elt.style.display="block";
                 toggle_elt.innerHTML = "[hide]";
-                var graphs = {{heatmap_plot_json | safe}};
-                Plotly.plot('chart_heatmap',graphs,{});
+                if (!plot_heatmap_loaded) load_plot_heatmap();
             }
         }
     </script>
     <a name="aheatmap"></a>
     <h2>Tissue heatmap<div class="viztoggle" onclick="toggleHeatmap(this)">[show]</div></h2>
+
     <div id="heatmap" style="display: none">
         <p>Displays (scaled) compartment pressure (actually: GF99)</p>
-        <div class="chart" id="chart_heatmap">
+        <div class="chart" id="chart_heatmap" style="display:none;">
+        </div>
+        <div class="chart placeholder" id="chart_heatmap_plh" style="display:block;">
+            <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
         </div>
     </div>
 

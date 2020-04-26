@@ -86,6 +86,16 @@ def show_elt_plot_profile(dive_id):
     return jsonify(dive_profile_plot_json);
 
 
+@bp.route('/show/<int:dive_id>/plot/heatmap', methods = ['GET'])
+def show_elt_plot_heatmap(dive_id):
+    dp = get_diveprofile_for_display(dive_id);
+    try:
+        heatmap_plot_json = plots.show_heatmap(dp);
+    except TypeError:
+        heatmap_plot_json = {};
+    return jsonify(heatmap_plot_json);
+
+
 #
 # Showing a dive: none, any, get, overview page
 #
@@ -114,16 +124,10 @@ def show(dive_id):
 
     fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
 
-    try:
-        heatmap_plot_json = plots.show_heatmap(dp);
-    except TypeError:
-        heatmap_plot_json = {};
-
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
                            summary_table = dsdf_table,
-                           heatmap_plot_json = heatmap_plot_json,
                            fulldata_table = fulldata_table,
                            modify_allowed = db_dive.is_modify_allowed(dp)
                            );
