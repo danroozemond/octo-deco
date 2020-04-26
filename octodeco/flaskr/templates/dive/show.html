@@ -73,11 +73,10 @@
         <script>
         function autosubmitGF()
         {
-            document.getElementById('spinner').style.display = "inline";
-            eltform = document.getElementById('form_update');
-            eltform.method = "get";
-            eltform.action = "{{ url_for('dive.show', dive_id=dive.dive_id)}}";
-            eltform.submit();
+            load_plot_diveprofile();
+            load_summary_table();
+            if ($('#chart_heatmap').is(':visible')) load_plot_heatmap(); else unload_plot_heatmap();
+            if ($('#table_full').is(':visible')) load_full_table(); else unload_full_table();
         }
         </script>
         <div class="adjust">
@@ -171,6 +170,10 @@
             }
           });
         }
+        function unload_plot_heatmap()
+        {
+            plot_heatmap_loaded = false;
+        }
         function toggleHeatmap(toggle_elt)
         {
             var elt = document.getElementById("heatmap");
@@ -215,6 +218,10 @@
                 full_table_loaded = true;
             }
           });
+        }
+        function unload_full_table()
+        {
+            full_table_loaded=false;
         }
         function toggledivfulldata(toggle_elt)
         {
