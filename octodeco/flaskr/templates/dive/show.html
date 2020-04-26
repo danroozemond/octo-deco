@@ -62,7 +62,7 @@
             success: function(result) {
                 $('#chart_diveprofile').show();
                 $('#chart_diveprofile_plh').hide();
-                Plotly.newPlot('chart_diveprofile',JSON.parse(result),{});
+                Plotly.react('chart_diveprofile',JSON.parse(result),{});
             }
           });
       }
@@ -165,7 +165,7 @@
             success: function(result) {
                 $('#chart_heatmap').show();
                 $('#chart_heatmap_plh').hide();
-                Plotly.newPlot('chart_heatmap',JSON.parse(result),{});
+                Plotly.react('chart_heatmap',JSON.parse(result),{});
                 plot_heatmap_loaded = true;
             }
           });
