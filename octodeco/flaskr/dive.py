@@ -88,6 +88,12 @@ class CachedDiveProfile:
         dsdf_table = dsdf.to_html(classes="smalltable", header="true");
         return dsdf_table;
 
+    @cache.memoize()
+    def full_table(self, gflow, gfhigh):
+        dp = self.profile_gf(gflow, gfhigh);
+        fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
+        return fulldata_table;
+
 
 @cache.memoize()
 def get_cached_dive(dive_id: int):
@@ -132,6 +138,13 @@ def show_elt_summary_table(dive_id):
     return cdp.summary_table(gflow, gfhigh);
 
 
+@bp.route('/show/<int:dive_id>/full', methods = ['GET'])
+def show_elt_full_table(dive_id):
+    cdp = get_cached_dive(dive_id);
+    gflow, gfhigh = get_gf_args_from_request();
+    return cdp.full_table(gflow, gfhigh);
+
+
 #
 # Showing a dive: none, any, get, overview page
 #
@@ -155,16 +168,9 @@ def show(dive_id):
 
     alldives = db_dive.get_all_dives();
 
-    dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
-    dsdf_table = dsdf.to_html(classes="smalltable", header="true");
-
-    fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
-
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
-                           summary_table = dsdf_table,
-                           fulldata_table = fulldata_table,
                            modify_allowed = db_dive.is_modify_allowed(dp)
                            );
 

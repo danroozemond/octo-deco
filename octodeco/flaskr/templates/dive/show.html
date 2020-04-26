@@ -201,9 +201,24 @@
 
 
     <script>
-        function togglediv(divname, toggle_elt)
+        var full_table_loaded=false;
+        function load_full_table()
         {
-            var elt = document.getElementById(divname);
+          $('#table_full').hide();
+          $('#table_full_plh').show();
+          $.ajax({
+            url: "{{url_for('dive.show_elt_full_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+            success: function(result) {
+                $('#table_full').html(result);
+                $('#table_full').show();
+                $('#table_full_plh').hide();
+                full_table_loaded = true;
+            }
+          });
+        }
+        function toggledivfulldata(toggle_elt)
+        {
+            var elt = document.getElementById('table_full');
             if ( elt.style.display == "block" )
             {
                 elt.style.display="none";
@@ -213,22 +228,42 @@
             {
                 elt.style.display="block";
                 toggle_elt.innerHTML = "[hide]";
+                if (!full_table_loaded) load_full_table();
             }
         }
     </script>
     <a name="afulldata"></a>
     <h2>Full dive data
-        <div class="viztoggle" onclick="togglediv('fulldata', this)">[show]</div>
+        <div class="viztoggle" onclick="toggledivfulldata(this)">[show]</div>
         <div class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></div>
     </h2>
-    <div id="fulldata" class="bigtable" style="display: none">
-        {{ fulldata_table|safe }}
+    <div id="table_full" class="bigtable" style="display: none">
+    </div>
+    <div id="table_full_plh" class="bigtable placeholder" style="display: none">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
     </div>
 
     {% if modify_allowed %}
     <a name="amodifydive"></a>
+    <script>
+        function toggledivmodify(toggle_elt)
+        {
+            var elt = document.getElementById('modifydive');
+            if ( elt.style.display == "block" )
+            {
+                elt.style.display="none";
+                toggle_elt.innerHTML = "[show]";
+            }
+            else
+            {
+                elt.style.display="block";
+                toggle_elt.innerHTML = "[hide]";
+                if (!full_table_loaded) load_full_table();
+            }
+        }
+    </script>
     <h2>Modify dive
-    <div class="viztoggle" onclick="togglediv('modifydive', this)">[show]</div>
+    <div class="viztoggle" onclick="toggledivmodify(this)">[show]</div>
     </h2>
     <div id="modifydive" class="modifydive" style="display:none">
     <form method="POST" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
