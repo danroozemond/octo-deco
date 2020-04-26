@@ -131,7 +131,28 @@
 
     <a name="divesummary"></a>
     <h2>Dive summary</h2>
-    {{ summary_table|safe }}
+    <div id="table_summary" style="display:none;">
+    </div>
+    <div class="placeholder" id="table_summary_plh" style="display:block;">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+    </div>
+    <script>
+      function load_summary_table()
+      {
+          $('#table_summary').hide();
+          $('#table_summary_plh').show();
+          $.ajax({
+            url: "{{url_for('dive.show_elt_summary_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+            success: function(result) {
+                $('#table_summary').html(result);
+                $('#table_summary').show();
+                $('#table_summary_plh').hide();
+            }
+          });
+      }
+      $( document ).ready(load_summary_table());
+    </script>
+
 
 
     <script>

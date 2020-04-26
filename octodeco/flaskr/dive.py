@@ -81,6 +81,14 @@ class CachedDiveProfile:
             jp = {};
         return jsonify(jp);
 
+    @cache.memoize()
+    def summary_table(self, gflow, gfhigh):
+        dp = self.profile_gf(gflow, gfhigh);
+        dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
+        dsdf_table = dsdf.to_html(classes="smalltable", header="true");
+        return dsdf_table;
+
+
 @cache.memoize()
 def get_cached_dive(dive_id: int):
     cdp = CachedDiveProfile(dive_id);
@@ -115,6 +123,13 @@ def show_elt_plot_heatmap(dive_id):
     cdp = get_cached_dive(dive_id);
     gflow, gfhigh = get_gf_args_from_request();
     return cdp.plot_heatmap(gflow, gfhigh);
+
+
+@bp.route('/show/<int:dive_id>/summary', methods = ['GET'])
+def show_elt_summary_table(dive_id):
+    cdp = get_cached_dive(dive_id);
+    gflow, gfhigh = get_gf_args_from_request();
+    return cdp.summary_table(gflow, gfhigh);
 
 
 #
