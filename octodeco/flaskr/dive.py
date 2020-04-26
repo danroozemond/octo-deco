@@ -41,7 +41,6 @@ class CachedDiveProfile:
 
     @cache.memoize()
     def profile_base(self):
-        print('Actually getting it from DB / updating GF\'s for {} [base]'.format(self));
         dp = db_dive.get_one_dive(self.dive_id);
         if dp is None:
             return None;
@@ -49,7 +48,6 @@ class CachedDiveProfile:
 
     @cache.memoize()
     def profile_gf(self, gflow, gfhigh):
-        print('Actually getting it from DB / updating GF\'s for {} {}/{}'.format(self, gflow, gfhigh));
         dp = self.profile_base();
         if dp is None:
             return None;
@@ -98,6 +96,7 @@ class CachedDiveProfile:
 @cache.memoize()
 def get_cached_dive(dive_id: int):
     cdp = CachedDiveProfile(dive_id);
+    print('Constructed CDP: {}'.format(cdp));
     if cdp is None:
         abort(405);
     if not db_dive.is_display_allowed(cdp.profile_base()):
