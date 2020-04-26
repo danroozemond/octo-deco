@@ -40,37 +40,64 @@ class CachedDiveProfile:
         return 'CDP-{}-{}'.format(self.dive_id, self.lastupdate);
 
     @cache.memoize()
-    def __call__(self, gflow, gfhigh):
-        print('Actually getting it from DB / updating GF\'s for {} {}/{}'.format(self, gflow, gfhigh));
+    def profile_base(self):
+        print('Actually getting it from DB / updating GF\'s for {} [base]'.format(self));
         dp = db_dive.get_one_dive(self.dive_id);
         if dp is None:
             return None;
-        if not db_dive.is_display_allowed(dp):
-            abort(403);
+        return dp;
+
+    @cache.memoize()
+    def profile_gf(self, gflow, gfhigh):
+        print('Actually getting it from DB / updating GF\'s for {} {}/{}'.format(self, gflow, gfhigh));
+        dp = self.profile_base();
+        if dp is None:
+            return None;
         if (gflow, gfhigh) == (101, 101):
             gflow, gfhigh = dp.gf_low_display, dp.gf_high_display;
         if (gflow, gfhigh) != (dp.gf_low_display, dp.gf_high_display):
             dp.set_gf(gflow, gfhigh);
         return dp;
 
+    @cache.memoize()
+    def user_id(self):
+        return self.profile_base().user_id;
+
+    @cache.memoize()
+    def plot_profile(self, gflow, gfhigh):
+        dp = self.profile_gf(gflow, gfhigh);
+        try:
+            jp = plots.show_diveprofile(dp);
+        except TypeError:
+            jp = {};
+        return jsonify(jp);
+
+    @cache.memoize()
+    def plot_heatmap(self, gflow, gfhigh):
+        dp = self.profile_gf(gflow, gfhigh);
+        try:
+            jp = plots.show_heatmap(dp);
+        except TypeError:
+            jp = {};
+        return jsonify(jp);
 
 @cache.memoize()
-def _get_cached_dive(dive_id: int):
-    return CachedDiveProfile(dive_id);
+def get_cached_dive(dive_id: int):
+    cdp = CachedDiveProfile(dive_id);
+    if cdp is None:
+        abort(405);
+    if not db_dive.is_display_allowed(cdp.profile_base()):
+        abort(403);
+    return cdp;
 
 
 def _invalidate_cached_dive(dive_id: int):
-    cache.delete_memoized(_get_cached_dive, dive_id);
+    cache.delete_memoized(get_cached_dive, dive_id);
 
 
 def get_diveprofile_for_display(dive_id: int):
     gflow, gfhigh = get_gf_args_from_request();
-    dp = (_get_cached_dive(dive_id))(gflow, gfhigh);
-    if dp is None:
-        abort(405);
-    if not db_dive.is_display_allowed(dp):
-        abort(403);
-    return dp;
+    return get_cached_dive(dive_id).profile_gf(gflow, gfhigh);
 
 
 #
@@ -78,22 +105,16 @@ def get_diveprofile_for_display(dive_id: int):
 #
 @bp.route('/show/<int:dive_id>/plot/profile', methods = ['GET'])
 def show_elt_plot_profile(dive_id):
-    dp = get_diveprofile_for_display(dive_id);
-    try:
-        dive_profile_plot_json = plots.show_diveprofile(dp);
-    except TypeError:
-        dive_profile_plot_json = {};
-    return jsonify(dive_profile_plot_json);
+    cdp = get_cached_dive(dive_id);
+    gflow, gfhigh = get_gf_args_from_request();
+    return cdp.plot_profile(gflow, gfhigh);
 
 
 @bp.route('/show/<int:dive_id>/plot/heatmap', methods = ['GET'])
 def show_elt_plot_heatmap(dive_id):
-    dp = get_diveprofile_for_display(dive_id);
-    try:
-        heatmap_plot_json = plots.show_heatmap(dp);
-    except TypeError:
-        heatmap_plot_json = {};
-    return jsonify(heatmap_plot_json);
+    cdp = get_cached_dive(dive_id);
+    gflow, gfhigh = get_gf_args_from_request();
+    return cdp.plot_heatmap(gflow, gfhigh);
 
 
 #
