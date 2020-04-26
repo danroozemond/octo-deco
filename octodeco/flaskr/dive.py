@@ -1,15 +1,17 @@
 # Please see LICENSE.md
+import sys;
+import time;
+
 import pandas;
 from flask import (
     Blueprint, render_template, Response, flash, redirect, url_for, request, abort, jsonify
 )
-import sys;
 
+from octodeco.deco import CreateDive;
 from . import db_dive;
 from . import plots;
 from . import user;
 from .app import cache;
-from octodeco.deco import CreateDive;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
@@ -22,30 +24,48 @@ def load_user_details():
 #
 # Getting info
 #
-def get_gf_args_from_get():
-    gflow = request.args.get('gflow', 101, type=int);
-    gfhigh = request.args.get('gfhigh', 101, type=int);
+def get_gf_args_from_request():
+    gflow = request.args.get('gflow', request.form.get('gflow', 101, type=int), type=int);
+    gfhigh = request.args.get('gfhigh', request.form.get('gfhigh', 101, type=int), type=int);
     return gflow, gfhigh;
 
 
+# Using this pattern as it enables invalidation of dive cache as a whole
+class CachedDiveProfile:
+    def __init__(self, dive_id):
+        self.dive_id = dive_id;
+        self.lastupdate = time.monotonic();
+
+    def __repr__(self):
+        return 'CDP-{}-{}'.format(self.dive_id, self.lastupdate);
+
+    @cache.memoize()
+    def __call__(self, gflow, gfhigh):
+        print('Actually getting it from DB / updating GF\'s for {} {}/{}'.format(self, gflow, gfhigh));
+        dp = db_dive.get_one_dive(self.dive_id);
+        if dp is None:
+            return None;
+        if not db_dive.is_display_allowed(dp):
+            abort(403);
+        if (gflow, gfhigh) == (101, 101):
+            gflow, gfhigh = dp.gf_low_display, dp.gf_high_display;
+        if (gflow, gfhigh) != (dp.gf_low_display, dp.gf_high_display):
+            dp.set_gf(gflow, gfhigh);
+        return dp;
+
+
 @cache.memoize()
-def get_diveprofile(dive_id:int, gflow:int, gfhigh:int):
-    print('Actually getting it from DB / updating GF\'s');
-    # TODO make sure stuff is secure
-    # TODO make sure stuff is up to date (ie., invalidate cache on update/delete)
-    dp = db_dive.get_one_dive(dive_id);
-    if dp is None:
-        return None;
-    if (gflow,gfhigh) == (101,101):
-        gflow, gfhigh = dp.gf_low_display, dp.gf_high_display;
-    if ( gflow, gfhigh ) != ( dp.gf_low_display, dp.gf_high_display ):
-        dp.set_gf( gflow, gfhigh );
-    return dp;
+def _get_cached_dive(dive_id: int):
+    return CachedDiveProfile(dive_id);
 
 
-def get_diveprofile_for_display(dive_id:int):
-    gflow, gfhigh = get_gf_args_from_get();
-    dp = get_diveprofile(dive_id, gflow, gfhigh);
+def _invalidate_cached_dive(dive_id: int):
+    cache.delete_memoized(_get_cached_dive, dive_id);
+
+
+def get_diveprofile_for_display(dive_id: int):
+    gflow, gfhigh = get_gf_args_from_request();
+    dp = (_get_cached_dive(dive_id))(gflow, gfhigh);
     if dp is None:
         abort(405);
     if not db_dive.is_display_allowed(dp):
@@ -123,13 +143,13 @@ def show_any():
 #
 @bp.route('/csv/<int:dive_id>')
 def csv(dive_id):
-    dp = db_dive.get_one_dive(dive_id);
+    dp = get_diveprofile_for_display(dive_id);
     if dp is None:
         abort(405);
     r = Response(dp.dataframe().to_csv(),
                  mimetype = "text/csv",
-                 headers = { "Content-disposition" : "attachment; filename=dive_%i.csv" % dive_id }
-    );
+                 headers = { "Content-disposition": "attachment; filename=dive_%i.csv" % dive_id }
+                 );
     return r;
 
 
@@ -139,9 +159,8 @@ def csv(dive_id):
 @bp.route('/update/<int:dive_id>', methods = [ 'POST' ])
 def update(dive_id):
     action = request.form.get('action');
-    gflow = request.form.get('gflow', 100, type=int);
-    gfhigh = request.form.get('gfhigh', 100, type=int);
-    dp = db_dive.get_one_dive(dive_id);
+    gflow, gfhigh = get_gf_args_from_request();
+    dp = get_diveprofile_for_display(dive_id);
     if dp is None:
         abort(405);
     if action == 'Update Stops':
@@ -150,6 +169,7 @@ def update(dive_id):
         dp.update_stops();
         flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
         db_dive.store_dive(dp);
+        _invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     else:
         abort(405);
@@ -161,6 +181,7 @@ def delete(dive_id):
     if aff == 0:
         abort(405);
     flash('Dive %i is now history' % dive_id);
+    _invalidate_cached_dive(dive_id);
     return redirect(url_for('dive.show_any'));
 
 
@@ -171,7 +192,7 @@ def modify(dive_id):
         ipt_surface_section = min(120, request.form.get('ipt_surface_section', 0, type=int));
         ipt_description = request.form.get('ipt_description')[:100];
         ipt_public = ( request.form.get('ipt_public', 'off').lower() == 'on')
-        dp = db_dive.get_one_dive(dive_id);
+        dp = get_diveprofile_for_display(dive_id);
         dp.remove_surface_at_end();
         if ipt_surface_section > 0:
             flash("Added {} mins surface section".format(ipt_surface_section));
@@ -187,6 +208,7 @@ def modify(dive_id):
             flash('Made dive {}'.format( 'public' if ipt_public else 'private'));
             dp.is_public = ipt_public;
         db_dive.store_dive(dp);
+        _invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     else:
         abort(405);
@@ -227,7 +249,6 @@ def new_demo():
 
 
 def new_csv( create_csv_func ):
-    CHARSET='utf-8';
     # Get the object
     if 'ipt_csv' not in request.files:
         flash('No file provided');
@@ -237,7 +258,7 @@ def new_csv( create_csv_func ):
     lines = [];
     sizeseen = 0;
     for line in file:
-        lines.append(line.decode(CHARSET));
+        lines.append(line.decode('utf-8'));
         sizeseen += sys.getsizeof(line);
         if sizeseen > 5e9:
             flash('File too big');
