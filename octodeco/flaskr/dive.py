@@ -96,7 +96,6 @@ class CachedDiveProfile:
 @cache.memoize()
 def get_cached_dive(dive_id: int):
     cdp = CachedDiveProfile(dive_id);
-    print('Constructed CDP: {}'.format(cdp));
     if cdp is None:
         abort(405);
     if not db_dive.is_display_allowed(cdp.profile_base()):
