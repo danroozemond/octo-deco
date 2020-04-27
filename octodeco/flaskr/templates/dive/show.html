@@ -130,7 +130,7 @@
     {
         var was_vis = $(idstr).is(':visible');
         if (was_vis) { $(idstr).hide(ANIMATION_SPEED); }
-        else         { $(idstr).show(ANIMATION_SPEED); on_show_fn(); }
+        else         { $(idstr).show(ANIMATION_SPEED, on_show_fn); }
         $(idstr + '_toggle').html(( was_vis ? '[show]' : '[hide]'));
     }
     function toggle_div_heatmap() {
