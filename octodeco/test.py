@@ -1,20 +1,12 @@
 # Please see LICENSE.md
-import sys;
 
-from octodeco.deco import BuhlmannConstants, TissueStateClassic;
-
-ts = TissueStateClassic.TissueState( BuhlmannConstants.ZHL_16C_1a);
-
-ts2 = ts.copy();
-ts2._state = [0];
-
-print(ts, ts2);
-
-sys.exit(0);
+from octodeco.deco import Gas;
+from octodeco.deco.DiveProfile import DiveProfile;
 
 dp = DiveProfile(gf_low=35, gf_high=70);
-dp.append_section(50, 50, gas = Gas.Trimix(11,40));
-dp.append_section(30, 50, gas = Gas.Trimix(21,35));
+dp.append_section(30, 20, gas = Gas.Trimix(21,35));
+dp.append_section(5, 5, gas = Gas.Air());
+dp.append_section(50, 30, gas = Gas.Trimix(15,40));
 dp.add_gas(Gas.Nitrox(50));
 dp.add_gas(Gas.Nitrox(99));
 dp.add_stops_to_surface();
