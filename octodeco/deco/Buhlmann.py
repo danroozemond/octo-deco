@@ -71,11 +71,9 @@ class Buhlmann:
         #   max_over_supersat(t1) > 0
 
         def max_over_supersat(t):
-            ts2 = self.updated_tissue_state(tissue_state, t, p_amb, gas);
+            ts2 = tissue_state.updated_state(t, p_amb, gas);
             ts3 = self._update_tissue_state_travel(ts2, p_amb, 1.0, gas);
-            gf99_at_surface = self._GF99_new(ts3, 1.0);
-            x = [ p - self.gf_high for p in gf99_at_surface ];
-            return max(x);
+            return ts3.GF99(1.0) - self.gf_high;
 
         t0 = 0.0;
         t1 = 1440.0;
@@ -111,10 +109,8 @@ class Buhlmann:
         gf99allowed_next = amb_to_gf(p_amb_next_stop);
 
         def max_over_supersat(t):
-            ts2 = self.updated_tissue_state(tissue_state, t, p_amb, gas);
-            gf99attained_next = self._GF99_new(ts2, p_amb_next_stop);
-            x = [ p - gf99allowed_next for p in gf99attained_next ];
-            return max(x);
+            ts2 = tissue_state.updated_state(t, p_amb, gas);
+            return ts2.GF99(p_amb_next_stop) - gf99allowed_next;
 
         # Binary search:
         #   t0 <= t <= t1, max_over_supersat(t) = 0.
@@ -132,18 +128,18 @@ class Buhlmann:
             else:
                 t1 = h;
         stop_length = t1;
-        tissue_state_after_stop = self.updated_tissue_state(tissue_state, stop_length, p_amb, gas);
+        tissue_state_after_stop = tissue_state.updated_state( stop_length, p_amb, gas );
         return stop_length, tissue_state_after_stop;
 
     def _get_ambtogf(self, tissue_state, p_amb, p_target, amb_to_gf = None):
         # Allowed to pass in amb_to_gf in case we recompute part of the deco after it has already started
         # Determine ceiling, and allowed supersaturation at the various levels
         if amb_to_gf is None:
-            p_ceiling = self.p_ceiling_for_gf_now(tissue_state, self.gf_low);
+            p_ceiling = tissue_state.p_ceiling_for_gf_now(self.gf_low);
             amb_to_gf = AmbientToGF(p_ceiling, p_target, self.gf_low, self.gf_high);
             return amb_to_gf;
         else:
-            p_ceiling = self.p_ceiling_for_amb_to_gf(tissue_state, amb_to_gf);
+            p_ceiling = tissue_state.p_ceiling_for_amb_to_gf(amb_to_gf);
             # The original amb_to_gf should be considered void if the ceiling is now more than orig first stop
             if p_ceiling > amb_to_gf.p_first_stop:
                 return self._get_ambtogf(tissue_state, p_amb, p_target);
@@ -160,12 +156,12 @@ class Buhlmann:
         else:
             assert time > 0.0;
             p_avg = (p_amb + p_new_amb)/2.0;
-            return self.updated_tissue_state(state, time, p_avg, gas);
+            return state.updated_state(time, p_avg, gas);
 
     def compute_deco_profile(self, tissue_state, p_amb, gases, p_target = 1.0, amb_to_gf = None):
         # Returns triples depth, length, gas
         amb_to_gf = self._get_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
-        p_ceiling = self.p_ceiling_for_amb_to_gf(tissue_state, amb_to_gf);
+        p_ceiling = tissue_state.p_ceiling_for_amb_to_gf(amb_to_gf);
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
         # Travel to first stop
@@ -186,18 +182,17 @@ class Buhlmann:
 
     def deco_info(self, tissue_state, depth, gas, gases_carried, amb_to_gf = None):
         p_amb = Util.depth_to_Pamb(depth);
-        p_ceiling_99 = self.p_ceiling_for_gf_now(tissue_state, 99.0);
+        p_ceiling_99 = tissue_state.p_ceiling_for_gf_now(99.0);
         # GF99: how do compartment pressure, ambient pressure, tolerance compare
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
-        gf99s = self._GF99_new(tissue_state, p_amb);
+        gf99s = tissue_state.GF99s(p_amb);
         gf99 = max(gf99s);
         leading_tissue_i = gf99s.index(gf99);
-        surfacegfs = self._GF99_new(tissue_state, 1.0);
+        surfacegf = tissue_state.GF99(1.0);
         result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
                   'GF99': round(gf99, 1),
-                  'SurfaceGF': round(max(surfacegfs), 1),
-                  'SurfaceGFs': surfacegfs,
+                  'SurfaceGF': surfacegf,
                   'LeadingTissueIndex': leading_tissue_i,
                   'allGF99s': gf99s
                   };

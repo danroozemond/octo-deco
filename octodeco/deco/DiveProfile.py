@@ -84,7 +84,7 @@ class DiveProfile:
         if self.custom_desc is not None:
             return self.custom_desc;
 
-        maxdepth = max(map( lambda p : p.depth, self._points ));
+        maxdepth = max(map( lambda p: p.depth, self._points ));
         dtc = self.created.strftime('%d-%b-%Y %H:%M');
         r = '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
         if self.add_custom_desc is not None and self.add_custom_desc != '':
@@ -202,12 +202,11 @@ class DiveProfile:
             if orig_point.prev is None \
                 or orig_point.time != orig_point.prev.time or orig_point.depth != orig_point.prev.depth \
                 or ( orig_point.prev.is_deco_stop or orig_point.prev.is_interpolated_point
-                    and not ( orig_point.is_deco_stop or orig_point.is_interpolated_point)):
+                     and not ( orig_point.is_deco_stop or orig_point.is_interpolated_point)):
                 new_points.append(orig_point);
                 prev_point = orig_point;
         self._points = new_points;
         self.update_deco_info();
-
 
     '''
     Deco model info
@@ -216,7 +215,7 @@ class DiveProfile:
         assert self._points[0].time == 0.0;
         self._points[0].set_cleared_tissue_state( self._deco_model );
         for i in range(1, len(self._points)):
-            self._points[i].set_updated_tissue_state( self._deco_model );
+            self._points[i].set_updated_tissue_state( );
 
     def update_deco_info(self):
         t0 = time.perf_counter();
@@ -247,7 +246,7 @@ class DiveProfile:
             p, extra_added = self._append_point_fix_ascent( op.duration(), op.depth, op.gas );
             # Update tissues, based on last point considered
             for j in range(oldlen, len(self._points)):
-                self._points[j].set_updated_tissue_state( deco_model );
+                self._points[j].set_updated_tissue_state( );
                 self._points[j].set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
                 amb_to_gf = self._points[j].deco_info['amb_to_gf'];
             gf_now = amb_to_gf(p.p_amb);
@@ -277,7 +276,7 @@ class DiveProfile:
                     for j in range(np, len(self._points)):
                         p = self._points[ j ]
                         p.is_deco_stop = True;
-                        p.set_updated_tissue_state(deco_model);
+                        p.set_updated_tissue_state();
                         p.set_updated_deco_info(deco_model, self._gases_carried, amb_to_gf = amb_to_gf);
                         # assert p.depth >= p.deco_info['Ceil']-0.1;
             else:
@@ -285,7 +284,7 @@ class DiveProfile:
                 # Careful, there's another i += 1 in an exceptional case above.
                 i += 1;
         # Done!
-        self.update_deco_model_info(update_display = True, update_profile =  True)
+        self.update_deco_model_info(update_display = True, update_profile = True)
         self._deco_stops_computation_time = time.perf_counter() - t0;
 
     '''
@@ -314,7 +313,8 @@ class DiveProfile:
         return endtime-begintime;
 
     def remove_points(self, remove_filter, fix_durations, update_deco_info = True):
-        new_points = []; removed_duration = 0.0;
+        new_points = [];
+        removed_duration = 0.0;
         for p in self._points:
             d = p.duration();
             if remove_filter(p):

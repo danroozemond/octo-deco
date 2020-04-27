@@ -28,7 +28,7 @@ class TissueState:
     def _updated_partial_pressure(pp_tissue, pp_alveolar, halftime, duration):
         return pp_tissue + (1 - pow(.5, duration / halftime)) * (pp_alveolar - pp_tissue);
 
-    def updated_tissue_state(self, duration, p_amb, gas):
+    def updated_state(self, duration, p_amb, gas):
         r = self.copy();
         pp_amb_n2 = p_amb * gas[ 'fN2' ];
         pp_amb_he = p_amb * gas[ 'fHe' ];
@@ -96,9 +96,7 @@ class TissueState:
         #   too_high_gf(p1) < 0
         def too_high_gf(p_amb):
             gf_now = amb_to_gf(p_amb);
-            x = [ p - gf_now for p in self.GF99(p_amb) ];
-            return max(x);
-
+            return self.GF99(p_amb) - gf_now;
         p0 = 1.0;
         p1 = 99.0;
         if too_high_gf(p0) < 0.0:
@@ -114,9 +112,11 @@ class TissueState:
     #
     # GF99
     #
-    def GF99(self, p_amb):
+    def GF99s(self, p_amb):
         def for_one(i):
             m0 = self._workmann_m0(p_amb, i);
             return 100.0 * (sum(self._state[ i ]) - p_amb) / (m0 - p_amb);
-
         return [ max(0.0, for_one(i)) for i in range(self._n_tissues) ];
+
+    def GF99(self, p_amb):
+        return max(0.0, max(self.GF99s(p_amb)));
