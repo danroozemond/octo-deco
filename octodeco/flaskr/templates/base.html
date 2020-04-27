@@ -89,12 +89,7 @@
 						<script>
 						function hide_flash_start(elt)
 						{
-							elt.parentElement.parentElement.classList.add('hiding');
-							setTimeout(hide_flash_final, 1000, elt);
-						}
-						function hide_flash_final(elt)
-						{
-							elt.parentElement.parentElement.classList.add('hidden');
+							$(elt).parent().parent().hide('slow');
 						}
 						</script>
 						<div class="9u skel-cell-important">
