@@ -35,6 +35,9 @@
 
 {% block content %}
     <script>
+    /*
+     * Utility functions
+     */
     function get_gf_url_params() {
         r =  $('#form_update').serialize();
         if (r == undefined || r == '')
@@ -43,42 +46,156 @@
         }
         return r;
     }
+
+    /*
+     * Functions to retrieve the page elements
+     */
+    function load_plot_diveprofile()
+    {
+      $('#chart_diveprofile').hide();
+      $('#chart_diveprofile_plh').show();
+      $.getJSON({
+        url: "{{url_for('dive.show_elt_plot_profile', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        success: function(result) {
+            $('#chart_diveprofile').show();
+            $('#chart_diveprofile_plh').hide();
+            Plotly.react('chart_diveprofile',JSON.parse(result),{});
+        }
+      });
+    }
+    function load_summary_table()
+    {
+      $('#table_summary').hide();
+      $('#table_summary_plh').show();
+      $.ajax({
+        url: "{{url_for('dive.show_elt_summary_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        success: function(result) {
+            $('#table_summary').html(result);
+            $('#table_summary').show();
+            $('#table_summary_plh').hide();
+        }
+      });
+    }
+    var plot_heatmap_loaded = false;
+    function load_plot_heatmap()
+    {
+      $('#chart_heatmap').hide();
+      $('#chart_heatmap_plh').show();
+      $.getJSON({
+        url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}",
+        success: function(result) {
+            $('#chart_heatmap').show();
+            $('#chart_heatmap_plh').hide();
+            Plotly.react('chart_heatmap',JSON.parse(result),{});
+            plot_heatmap_loaded = true;
+        }
+      });
+    }
+    function unload_plot_heatmap()
+    {
+        plot_heatmap_loaded = false;
+    }
+    var full_table_loaded=false;
+    function load_full_table()
+    {
+      $('#table_full').hide();
+      $('#table_full_plh').show();
+      $.ajax({
+        url: "{{url_for('dive.show_elt_full_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        success: function(result) {
+            $('#table_full').html(result);
+            $('#table_full').show();
+            $('#table_full_plh').hide();
+            full_table_loaded = true;
+        }
+      });
+    }
+    function unload_full_table()
+    {
+        full_table_loaded=false;
+    }
+
+
+    /*
+     * Showing / hiding page elements
+     */
+    function toggleHeatmap(toggle_elt)
+    {
+        var elt = document.getElementById("heatmap");
+        if ( elt.style.display == "block" )
+        {
+            elt.style.display="none";
+            toggle_elt.innerHTML = "[show]";
+        }
+        else
+        {
+            elt.style.display="block";
+            toggle_elt.innerHTML = "[hide]";
+            if (!plot_heatmap_loaded) load_plot_heatmap();
+        }
+    }
+    function toggledivfulldata(toggle_elt)
+    {
+        var elt = document.getElementById('table_full');
+        if ( elt.style.display == "block" )
+        {
+            elt.style.display="none";
+            toggle_elt.innerHTML = "[show]";
+        }
+        else
+        {
+            elt.style.display="block";
+            toggle_elt.innerHTML = "[hide]";
+            if (!full_table_loaded) load_full_table();
+        }
+    }
+    function toggledivmodify(toggle_elt)
+    {
+        var elt = document.getElementById('modifydive');
+        if ( elt.style.display == "block" )
+        {
+            elt.style.display="none";
+            toggle_elt.innerHTML = "[show]";
+        }
+        else
+        {
+            elt.style.display="block";
+            toggle_elt.innerHTML = "[hide]";
+        }
+    }
+
+    /*
+     * On load
+     */
+    $( document ).ready(load_plot_diveprofile()); /* TODO FIXME */
+    $( document ).ready(load_summary_table());
+
+    /*
+     * On change of the sliders
+     */
+    function autosubmitGF()
+    {
+        load_plot_diveprofile();
+        load_summary_table();
+        if ($('#table_full').is(':visible')) load_full_table(); else unload_full_table();
+        // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
+    }
     </script>
 
+    <!--
+      Diveprofile chart
+    -->
     <a name="diveprofile"></a>
     <div class="chart" id="chart_diveprofile" style="display:none;">
     </div>
     <div class="chart placeholder" id="chart_diveprofile_plh" style="display:block;">
         <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
     </div>
-    <script>
-      // Fetch the diveprofile plot
-      function load_plot_diveprofile()
-      {
-          $('#chart_diveprofile').hide();
-          $('#chart_diveprofile_plh').show();
-          $.getJSON({
-            url: "{{url_for('dive.show_elt_plot_profile', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
-            success: function(result) {
-                $('#chart_diveprofile').show();
-                $('#chart_diveprofile_plh').hide();
-                Plotly.react('chart_diveprofile',JSON.parse(result),{});
-            }
-          });
-      }
-      $( document ).ready(load_plot_diveprofile());
-    </script>
 
+    <!--
+      GF update sliders
+    -->
     <form method="POST" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
-        <script>
-        function autosubmitGF()
-        {
-            load_plot_diveprofile();
-            load_summary_table();
-            if ($('#table_full').is(':visible')) load_full_table(); else unload_full_table();
-            // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
-        }
-        </script>
         <div class="adjust">
             <datalist id="tickmarks">
               <option value="0" label="0"></option>
@@ -110,7 +227,6 @@
                    id="ipt_gflow" name="gflow"
                    onmousemove="document.getElementById('show_gflow').innerHTML=this.value;"
                    onchange="autosubmitGF();"/>
-
             /
             <label for="ipt_gfhigh">high</label>
             <input type="range" min=0 max=100 value={{dive.gf_high_display}} class="slider" list="tickmarks"
@@ -128,6 +244,9 @@
         {% endif %}
     </form>
 
+    <!--
+      Dive summary
+    -->
     <a name="divesummary"></a>
     <h2>Dive summary</h2>
     <div id="table_summary" style="display:none;">
@@ -135,61 +254,10 @@
     <div class="placeholder" id="table_summary_plh" style="display:block;">
         <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
     </div>
-    <script>
-      function load_summary_table()
-      {
-          $('#table_summary').hide();
-          $('#table_summary_plh').show();
-          $.ajax({
-            url: "{{url_for('dive.show_elt_summary_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
-            success: function(result) {
-                $('#table_summary').html(result);
-                $('#table_summary').show();
-                $('#table_summary_plh').hide();
-            }
-          });
-      }
-      $( document ).ready(load_summary_table());
-    </script>
 
-
-
-    <script>
-        var plot_heatmap_loaded = false;
-        function load_plot_heatmap()
-        {
-          $('#chart_heatmap').hide();
-          $('#chart_heatmap_plh').show();
-          $.getJSON({
-            url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}",
-            success: function(result) {
-                $('#chart_heatmap').show();
-                $('#chart_heatmap_plh').hide();
-                Plotly.react('chart_heatmap',JSON.parse(result),{});
-                plot_heatmap_loaded = true;
-            }
-          });
-        }
-        function unload_plot_heatmap()
-        {
-            plot_heatmap_loaded = false;
-        }
-        function toggleHeatmap(toggle_elt)
-        {
-            var elt = document.getElementById("heatmap");
-            if ( elt.style.display == "block" )
-            {
-                elt.style.display="none";
-                toggle_elt.innerHTML = "[show]";
-            }
-            else
-            {
-                elt.style.display="block";
-                toggle_elt.innerHTML = "[hide]";
-                if (!plot_heatmap_loaded) load_plot_heatmap();
-            }
-        }
-    </script>
+    <!--
+      Heatmap
+    -->
     <a name="aheatmap"></a>
     <h2>Tissue heatmap<div class="viztoggle" onclick="toggleHeatmap(this)">[show]</div></h2>
 
@@ -203,42 +271,9 @@
     </div>
 
 
-    <script>
-        var full_table_loaded=false;
-        function load_full_table()
-        {
-          $('#table_full').hide();
-          $('#table_full_plh').show();
-          $.ajax({
-            url: "{{url_for('dive.show_elt_full_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
-            success: function(result) {
-                $('#table_full').html(result);
-                $('#table_full').show();
-                $('#table_full_plh').hide();
-                full_table_loaded = true;
-            }
-          });
-        }
-        function unload_full_table()
-        {
-            full_table_loaded=false;
-        }
-        function toggledivfulldata(toggle_elt)
-        {
-            var elt = document.getElementById('table_full');
-            if ( elt.style.display == "block" )
-            {
-                elt.style.display="none";
-                toggle_elt.innerHTML = "[show]";
-            }
-            else
-            {
-                elt.style.display="block";
-                toggle_elt.innerHTML = "[hide]";
-                if (!full_table_loaded) load_full_table();
-            }
-        }
-    </script>
+    <!--
+      Full data table
+    -->
     <a name="afulldata"></a>
     <h2>Full dive data
         <div class="viztoggle" onclick="toggledivfulldata(this)">[show]</div>
@@ -250,24 +285,12 @@
         <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
     </div>
 
+
+    <!--
+      Modify block
+    -->
     {% if modify_allowed %}
     <a name="amodifydive"></a>
-    <script>
-        function toggledivmodify(toggle_elt)
-        {
-            var elt = document.getElementById('modifydive');
-            if ( elt.style.display == "block" )
-            {
-                elt.style.display="none";
-                toggle_elt.innerHTML = "[show]";
-            }
-            else
-            {
-                elt.style.display="block";
-                toggle_elt.innerHTML = "[hide]";
-            }
-        }
-    </script>
     <h2>Modify dive
     <div class="viztoggle" onclick="toggledivmodify(this)">[show]</div>
     </h2>
