@@ -119,7 +119,7 @@
     /*
      * Showing / hiding page elements
      */
-    function toggleHeatmap(toggle_elt)
+    function toggle_div_heatmap(toggle_elt)
     {
         var elt = document.getElementById("heatmap");
         if ( elt.style.display == "block" )
@@ -134,7 +134,7 @@
             if (!plot_heatmap_loaded) load_plot_heatmap();
         }
     }
-    function toggledivfulldata(toggle_elt)
+    function toggle_div_table_full(toggle_elt)
     {
         var elt = document.getElementById('table_full');
         if ( elt.style.display == "block" )
@@ -149,7 +149,7 @@
             if (!full_table_loaded) load_full_table();
         }
     }
-    function toggledivmodify(toggle_elt)
+    function toggle_div_modify_dive(toggle_elt)
     {
         var elt = document.getElementById('modifydive');
         if ( elt.style.display == "block" )
@@ -164,22 +164,22 @@
         }
     }
 
-    /*
-     * On load
-     */
-    $( document ).ready(load_plot_diveprofile()); /* TODO FIXME */
-    $( document ).ready(load_summary_table());
 
     /*
      * On change of the sliders
      */
-    function autosubmitGF()
+    function reload_all()
     {
         load_plot_diveprofile();
         load_summary_table();
         if ($('#table_full').is(':visible')) load_full_table(); else unload_full_table();
         // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
     }
+
+    /*
+     * On load
+     */
+    reload_all();
     </script>
 
     <!--
@@ -218,7 +218,7 @@
                 document.getElementById('show_gflow').innerHTML
                     = document.getElementById('ipt_gflow').value
                     = {{dive.gf_low_profile}};
-                autosubmitGF();
+                reload_all();
                 return false;">[reset]</a>
             <!-- SLIDERS -->
             GF
@@ -226,13 +226,13 @@
             <input type="range" min=0 max=100 value={{dive.gf_low_display}} class="slider" list="tickmarks"
                    id="ipt_gflow" name="gflow"
                    onmousemove="document.getElementById('show_gflow').innerHTML=this.value;"
-                   onchange="autosubmitGF();"/>
+                   onchange="reload_all();"/>
             /
             <label for="ipt_gfhigh">high</label>
             <input type="range" min=0 max=100 value={{dive.gf_high_display}} class="slider" list="tickmarks"
                    id="ipt_gfhigh" name="gfhigh"
                    onmousemove="document.getElementById('show_gfhigh').innerHTML=this.value;"
-                   onchange="autosubmitGF();"/>
+                   onchange="reload_all();"/>
             = GF <span id="show_gflow">{{dive.gf_low_display}}</span> / <span id="show_gfhigh">{{dive.gf_high_display}}</span>
             <img id="spinner" style="display:none"
                  src="{{ url_for('static', filename='images/spinner-51px.gif') }}">
@@ -259,7 +259,7 @@
       Heatmap
     -->
     <a name="aheatmap"></a>
-    <h2>Tissue heatmap<div class="viztoggle" onclick="toggleHeatmap(this)">[show]</div></h2>
+    <h2>Tissue heatmap<div class="viztoggle" onclick="toggle_div_heatmap(this)">[show]</div></h2>
 
     <div id="heatmap" style="display: none">
         <p>Displays (scaled) compartment pressure (actually: GF99)</p>
@@ -276,7 +276,7 @@
     -->
     <a name="afulldata"></a>
     <h2>Full dive data
-        <div class="viztoggle" onclick="toggledivfulldata(this)">[show]</div>
+        <div class="viztoggle" onclick="toggle_div_table_full(this)">[show]</div>
         <div class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></div>
     </h2>
     <div id="table_full" class="bigtable" style="display: none">
@@ -292,7 +292,7 @@
     {% if modify_allowed %}
     <a name="amodifydive"></a>
     <h2>Modify dive
-    <div class="viztoggle" onclick="toggledivmodify(this)">[show]</div>
+    <div class="viztoggle" onclick="toggle_div_modify_dive(this)">[show]</div>
     </h2>
     <div id="modifydive" class="modifydive" style="display:none">
     <form method="POST" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
