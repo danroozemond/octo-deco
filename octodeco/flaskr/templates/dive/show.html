@@ -46,6 +46,7 @@
         }
         return r;
     }
+    ANIMATION_SPEED = 'fast';
 
     /*
      * Functions to retrieve the page elements
@@ -63,6 +64,7 @@
         }
       });
     }
+
     function load_summary_table()
     {
       $('#table_summary').hide();
@@ -76,6 +78,7 @@
         }
       });
     }
+
     var plot_heatmap_loaded = false;
     function load_plot_heatmap()
     {
@@ -95,6 +98,7 @@
     {
         plot_heatmap_loaded = false;
     }
+
     var full_table_loaded=false;
     function load_full_table()
     {
@@ -119,49 +123,26 @@
     /*
      * Showing / hiding page elements
      */
-    function toggle_div_heatmap(toggle_elt)
+    function toggle_div_heatmap()
     {
-        var elt = document.getElementById("heatmap");
-        if ( elt.style.display == "block" )
-        {
-            elt.style.display="none";
-            toggle_elt.innerHTML = "[show]";
-        }
-        else
-        {
-            elt.style.display="block";
-            toggle_elt.innerHTML = "[hide]";
-            if (!plot_heatmap_loaded) load_plot_heatmap();
-        }
+        var was_vis = $('#heatmap').is(':visible');
+        if (was_vis) { $('#heatmap').hide(ANIMATION_SPEED); }
+        else         { $('#heatmap').show(ANIMATION_SPEED); if (!plot_heatmap_loaded) load_plot_heatmap(); }
+        $('#heatmap_toggle').html(( was_vis ? '[show]' : '[hide]'));
     }
-    function toggle_div_table_full(toggle_elt)
+    function toggle_div_table_full()
     {
-        var elt = document.getElementById('table_full');
-        if ( elt.style.display == "block" )
-        {
-            elt.style.display="none";
-            toggle_elt.innerHTML = "[show]";
-        }
-        else
-        {
-            elt.style.display="block";
-            toggle_elt.innerHTML = "[hide]";
-            if (!full_table_loaded) load_full_table();
-        }
+        var was_vis = $('#table_full').is(':visible');
+        if (was_vis) { $('#table_full').hide(ANIMATION_SPEED); }
+        else         { $('#table_full').show(ANIMATION_SPEED); if (!full_table_loaded) load_full_table(); }
+        $('#table_full_toggle').html(( was_vis ? '[show]' : '[hide]'));
     }
     function toggle_div_modify_dive(toggle_elt)
     {
-        var elt = document.getElementById('modifydive');
-        if ( elt.style.display == "block" )
-        {
-            elt.style.display="none";
-            toggle_elt.innerHTML = "[show]";
-        }
-        else
-        {
-            elt.style.display="block";
-            toggle_elt.innerHTML = "[hide]";
-        }
+        var was_vis = $('#modify_dive').is(':visible');
+        if (was_vis) { $('#modify_dive').hide(ANIMATION_SPEED); }
+        else         { $('#modify_dive').show(ANIMATION_SPEED); }
+        $('#modify_dive_toggle').html(( was_vis ? '[show]' : '[hide]'));
     }
 
 
@@ -259,7 +240,7 @@
       Heatmap
     -->
     <a name="aheatmap"></a>
-    <h2>Tissue heatmap<div class="viztoggle" onclick="toggle_div_heatmap(this)">[show]</div></h2>
+    <h2>Tissue heatmap<div class="viztoggle" id="heatmap_toggle" onclick="toggle_div_heatmap()">[show]</div></h2>
 
     <div id="heatmap" style="display: none">
         <p>Displays (scaled) compartment pressure (actually: GF99)</p>
@@ -276,7 +257,7 @@
     -->
     <a name="afulldata"></a>
     <h2>Full dive data
-        <div class="viztoggle" onclick="toggle_div_table_full(this)">[show]</div>
+        <div class="viztoggle" id="table_full_toggle" onclick="toggle_div_table_full()">[show]</div>
         <div class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></div>
     </h2>
     <div id="table_full" class="bigtable" style="display: none">
@@ -292,9 +273,9 @@
     {% if modify_allowed %}
     <a name="amodifydive"></a>
     <h2>Modify dive
-    <div class="viztoggle" onclick="toggle_div_modify_dive(this)">[show]</div>
+    <div class="viztoggle" id="modify_dive_toggle" onclick="toggle_div_modify_dive()">[show]</div>
     </h2>
-    <div id="modifydive" class="modifydive" style="display:none">
+    <div id="modify_dive" class="modifydive" style="display:none">
     <form method="POST" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
         <label for="ipt_surface_section">Add surface section to end of dive:</label>
         <input type="text" value="{{dive.length_of_surface_section()}}" name="ipt_surface_section" id="ipt_surface_section">
