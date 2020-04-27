@@ -1,13 +1,11 @@
 TODO this list :) [also check TO-DOs in .py's]
 
+* Generation of run time table
 * Gas consumption
 * CNS tracking
 
-Passing around p_first_stop is ugly. Consider adding this (kind of) info to tissue_state.
 
 * (how to take into account alveolar? remove this detail again?)
-
-
 From https://github.com/torvalds/subsurface-for-dirk/blob/master/core/deco.c
 /* Inspired gas loading equations depend on the partial pressure of inert gas in the alveolar.
  * P_alv = (P_amb - P_H2O + (1 - Rq) / Rq * P_CO2) * f

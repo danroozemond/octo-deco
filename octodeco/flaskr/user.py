@@ -36,6 +36,9 @@ def get_user_details():
     return g.user_details;
 
 
+@bp.before_request
+def load_user_details():
+    get_user_details();
 
 
 @bp.route('/')

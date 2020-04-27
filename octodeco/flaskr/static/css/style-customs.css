@@ -83,6 +83,18 @@ div.chart {
     margin-right: 0px;
 }
 
+div.placeholder
+{
+    height: 220px;
+    margin: 3em;
+    background-color:#eaeaea;
+    text-align:center;
+}
+div.chart.placeholder img
+{
+    vertical-align:middle;
+}
+
 div.viztoggle {
     display: inline;
     font-size: 0.5em;

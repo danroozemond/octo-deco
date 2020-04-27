@@ -120,3 +120,10 @@ def delete_dive(dive_id:int):
 def is_modify_allowed(diveprofile):
     dpu = getattr(diveprofile, 'user_id', None);
     return dpu == get_user_id();
+
+
+def is_display_allowed(diveprofile):
+    dpu = getattr(diveprofile, 'user_id', None);
+    if dpu is None:
+        return False;
+    return dpu == get_user_id() or diveprofile.is_public;
