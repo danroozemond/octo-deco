@@ -1,6 +1,6 @@
 # Please see LICENSE.md
 from . import BuhlmannConstants;
-from . import TissueStateClassic;
+from . import TissueStateNumpy, TissueStateVerify;
 from . import Util;
 
 
@@ -44,10 +44,11 @@ class Buhlmann:
     def __init__(self,
                  gf_low, gf_high,
                  descent_speed, ascent_speed,
-                 debugTissueState = False):
+                 debugTissueState = True):
         self._constants = BuhlmannConstants.ZHL_16C_1a;
         self._n_tissues = self._constants.N_TISSUES;
-        self.TissueState = TissueStateClassic.TissueState;
+        self.TissueState = TissueStateNumpy.TissueState if not debugTissueState \
+                    else   TissueStateVerify.TissueState;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = 1.60;
