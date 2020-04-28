@@ -88,7 +88,7 @@ class TissueState:
         a = (lcpp * self._constants.A_VALUES).sum(axis = 0);
         b = (lcpp * self._constants.B_VALUES).sum(axis = 0);
         self._ab = (a,b);
-        return a,b;
+        return a, b;
 
     def _workmann_m0_all(self, p_amb):
         a,b = self._get_coeffs_a_b_all();
