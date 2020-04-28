@@ -35,7 +35,10 @@ app.config.from_mapping(
     CACHE_THRESHOLD = cache_threshold,
     CACHE_DEFAULT_TIMEOUT = 300
 );
+
+# Create cache; on load flush it
 cache = Cache(app);
+cache.clear();
 
 try:
     os.makedirs(app.instance_path)

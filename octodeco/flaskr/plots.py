@@ -55,13 +55,14 @@ def show_diveprofile(diveprofile):
     graphjson = json.dumps( fig, cls=plotly.utils.PlotlyJSONEncoder);
     return graphjson;
 
+
 def show_heatmap(diveprofile):
     # https://plot.ly/python/heatmaps/
     # will need zauto=False, zmin=0, zmax=100
     tissue_labels = [ 'T%s' % t for t in diveprofile.deco_model()._constants.N2_HALFTIMES ];
     tissue_labels.reverse();
 
-    values = [ p.deco_info[ 'allGF99s' ] for p in diveprofile.points() ];
+    values = [ list(p.deco_info[ 'allGF99s' ]) for p in diveprofile.points() ];
     for v in values:
         v.reverse();
     values = numpy.transpose(values);
@@ -76,4 +77,3 @@ def show_heatmap(diveprofile):
 
     graphjson = json.dumps(fig, cls = plotly.utils.PlotlyJSONEncoder);
     return graphjson;
-
