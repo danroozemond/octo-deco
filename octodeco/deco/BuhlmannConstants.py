@@ -2,11 +2,11 @@
 from collections import namedtuple
 
 ZHL16Constants = namedtuple('ZHL16Constants', [
-    'ID',
     'N_TISSUES',
     'N2_HALFTIMES', 'N2_A_VALUES', 'N2_B_VALUES',
-    'HE_HALFTIMES', 'HE_A_VALUES', 'HE_B_VALUES'
-]);
+    'HE_HALFTIMES', 'HE_A_VALUES', 'HE_B_VALUES',
+    'ID'
+], defaults=['ZHL-16C-1a']);
 
 # ZHL_16A (Source: wikipedia)
 ZHL_16A = ZHL16Constants(

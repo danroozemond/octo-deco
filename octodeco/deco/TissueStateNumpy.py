@@ -132,3 +132,8 @@ class TissueState:
     def GF99(self, p_amb):
         return max(0.0, self.GF99s(p_amb).max());
 
+
+def construct_numpy_from_classic(tissue_state, classic_constants):
+    r = TissueState(classic_constants,empty = True);
+    r._state = np.array(tissue_state, dtype='float64').transpose();
+    return r;
