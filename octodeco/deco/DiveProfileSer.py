@@ -3,6 +3,7 @@
 #   database may be older than current version.
 import datetime
 import pickle;
+
 import pytz
 
 from . import TissueStateNumpy;
@@ -29,6 +30,7 @@ def _migrate_up_to_current(from_version, diveprofile):
 
     # Tissue State
     if from_version < 5:
+        diveprofile._deco_model.TissueState = TissueStateNumpy.TissueState;
         constants = diveprofile.deco_model()._constants;
         for point in diveprofile.points():
             point.tissue_state = TissueStateNumpy.construct_numpy_from_classic(point.tissue_state, constants);
