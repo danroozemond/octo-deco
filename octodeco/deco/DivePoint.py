@@ -54,11 +54,10 @@ class DivePoint:
     def set_cleared_tissue_state(self, deco_model):
         self.tissue_state = deco_model.cleared_tissue_state();
 
-    def set_updated_tissue_state(self, deco_model):
+    def set_updated_tissue_state(self):
         assert self.time >= self.prev.time;  # Otherwise divepoints are in a broken sequence
         assert self.prev is not None;
-        self.tissue_state = deco_model.updated_tissue_state(
-            self.prev.tissue_state,
+        self.tissue_state = self.prev.tissue_state.updated_state(
             self.duration(),
             ( self.p_amb + self.prev.p_amb ) / 2,
             self.prev.gas );

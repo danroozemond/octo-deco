@@ -4,11 +4,13 @@ from collections import namedtuple
 ZHL16Constants = namedtuple('ZHL16Constants', [
     'N_TISSUES',
     'N2_HALFTIMES', 'N2_A_VALUES', 'N2_B_VALUES',
-    'HE_HALFTIMES', 'HE_A_VALUES', 'HE_B_VALUES'
-]);
+    'HE_HALFTIMES', 'HE_A_VALUES', 'HE_B_VALUES',
+    'ID'
+], defaults=['ZHL-16C-1a']);
 
 # ZHL_16A (Source: wikipedia)
 ZHL_16A = ZHL16Constants(
+    ID = 'ZHL-16A',
     N_TISSUES = 16,
     N2_HALFTIMES = [ 4, 8, 12.5, 18.5, 27, 38.3, 54.3, 77, 109, 146, 187, 239, 305, 390, 498, 635 ],
     N2_A_VALUES = [ 1.2599, 1, 0.8618, 0.7562, 0.6667, 0.5933, 0.5282, 0.4701, 0.4187, 0.3798, 0.3497, 0.3223, 0.2971,
@@ -24,6 +26,7 @@ ZHL_16A = ZHL16Constants(
 
 # ZHL_16C, variant 1b
 ZHL_16C_1b = ZHL16Constants(
+    ID = 'ZHL-16C-1b',
     N_TISSUES = 16,
     N2_HALFTIMES = [ 5.0, 8.0, 12.5, 18.5,
                      27.0, 38.3, 54.3, 77.0,
@@ -53,6 +56,7 @@ ZHL_16C_1b = ZHL16Constants(
 
 # ZHL_16C (source: Buhlmann Tauchmedizin, 2002; via OSTC2)
 ZHL_16C_1a = ZHL16Constants(
+    ID = 'ZHL-16C-1a',
     N_TISSUES = 16,
     N2_HALFTIMES = [4.0,8.0,12.5,18.5,27.0,38.3,54.3,77.0,109.0,146.0,187.0,239.0,305.0,390.0,498.0,635.0],
     N2_A_VALUES = [1.2599,1.0000,0.8618,0.7562,0.6200,0.5043,0.4410,0.4000,0.3750,0.3500,0.3295,0.3065,0.2835,0.2610,0.2480,0.2327],
