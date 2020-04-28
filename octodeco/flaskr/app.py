@@ -38,7 +38,7 @@ app.config.from_mapping(
 
 # Create cache; on load flush it
 cache = Cache(app);
-cache.delete_memoized('get_cached_dive');
+cache.clear();
 
 try:
     os.makedirs(app.instance_path)
