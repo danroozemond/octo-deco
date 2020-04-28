@@ -11,18 +11,17 @@ CONSTANTS = {};
 
 
 class TissueState:
-    def __init__(self, constants):
+    def __init__(self, constants, empty=False):
         self._constants = TissueState.ensure_numpy_constants(constants);
         self._n_tissues = self._constants.N_TISSUES;
-        gas = Gas.Air();
-        self._state = list(map( lambda i: (gas[ 'fN2' ], gas[ 'fHe' ]), range(self._n_tissues)));
-        # b = np.array([1.2, 3.5, 5.1], dtype='float64');
+        if not empty:
+            self._state = TissueState.gas_to_numpy(Gas.Air()).repeat(self._n_tissues,axis=1);
 
     def __repr__(self):
         return self._state.__repr__();
 
     def __copy__(self):
-        r = TissueState(self._constants);
+        r = TissueState(self._constants, empty=True);
         r._state = self._state;
         return r;
 
@@ -40,25 +39,25 @@ class TissueState:
                 N_TISSUES = constants.N_TISSUES,
                 HALFTIMES = np.array([ constants.N2_HALFTIMES, constants.HE_HALFTIMES], dtype='float64'),
                 A_VALUES = np.array([ constants.N2_A_VALUES, constants.HE_A_VALUES], dtype='float64'),
-                B_VALUES = np.array([ constants.HE_A_VALUES, constants.HE_B_VALUES], dtype='float64')
+                B_VALUES = np.array([ constants.N2_B_VALUES, constants.HE_B_VALUES], dtype='float64')
             )
         return CONSTANTS[constants.ID];
+
+    @staticmethod
+    def gas_to_numpy(gas):
+        return np.array([[gas[ 'fN2' ],gas[ 'fHe' ]]], dtype='float64').transpose();
 
     #
     # Updating the tissue states
     #
-    @staticmethod
-    def _updated_partial_pressure(pp_tissue, pp_alveolar, halftime, duration):
-        return pp_tissue + (1 - pow(.5, duration / halftime)) * (pp_alveolar - pp_tissue);
+    def _updated_partial_pressure(self, pp_alv, duration):
+        # pp_alv should be a column vector
+        return self._state + (1 - pow(.5, duration / self._constants.HALFTIMES)) * ( pp_alv - self._state);
 
     def updated_state(self, duration, p_amb, gas):
-        r = self.copy();
-        pp_amb_n2 = p_amb * gas[ 'fN2' ];
-        pp_amb_he = p_amb * gas[ 'fHe' ];
-        r._state = [ (
-            self._updated_partial_pressure(self._state[i][0], pp_amb_n2, self._constants.N2_HALFTIMES[ i ], duration),
-            self._updated_partial_pressure(self._state[i][1], pp_amb_he, self._constants.HE_HALFTIMES[ i ], duration)
-        ) for i in range(self._n_tissues) ];
+        r = TissueState(self._constants, empty=True);
+        pp_alv = p_amb * TissueState.gas_to_numpy(gas);
+        r._state = self._updated_partial_pressure(pp_alv, duration);
         return r;
 
     #
@@ -79,20 +78,16 @@ class TissueState:
     alternatively lineartly interpolate the a and b values themselves, 
     based on proportions of gas load in each tissue
     """
-    def _get_coeffs_a_b(self, i):
-        a = self._constants.N2_A_VALUES[ i ];
-        b = self._constants.N2_B_VALUES[ i ];
-        pp_n2, pp_he = self._state[i];
-        if pp_he > 0.0:
-            # Trimix case
-            a_he = self._constants.HE_A_VALUES[ i ];
-            b_he = self._constants.HE_B_VALUES[ i ];
-            a = pp_n2 / (pp_n2 + pp_he) * a + pp_he / (pp_n2 + pp_he) * a_he;
-            b = pp_n2 / (pp_n2 + pp_he) * b + pp_he / (pp_n2 + pp_he) * b_he;
-        return a, b;
+    def _get_coeffs_a_b_all(self):
+        # a and b values are linear combinations depending on current
+        # partial pressures N2/He
+        totalpp = self._state.sum(axis=0);
+        a = ((self._state / totalpp) * self._constants.A_VALUES).sum(axis = 0);
+        b = ((self._state / totalpp) * self._constants.B_VALUES).sum(axis = 0);
+        return a,b;
 
-    def _workmann_m0(self, p_amb, i):
-        a, b = self._get_coeffs_a_b(i);
+    def _workmann_m0_all(self, p_amb):
+        a,b = self._get_coeffs_a_b_all();
         m0 = a + p_amb / b;
         return m0;
 
@@ -102,15 +97,9 @@ class TissueState:
     def p_ceiling_for_gf_now(self, gf_now):
         # Derived from _GF99_new as defined below
         gff = gf_now / 100.0;
-
-        # Returns the ceiling for one particular tissue
-        def for_one(i):
-            a, b = self._get_coeffs_a_b(i);
-            p_amb = (sum(self._state[ i ]) - a * gff) / (gff / b - gff + 1);
-            return p_amb;
-
-        p_ceilings = [ for_one(i) for i in range(self._n_tissues) ];
-        return max(p_ceilings);
+        a,b = self._get_coeffs_a_b_all();
+        p_ceilings = ( self._state.sum(axis=0) - a*gff ) / ( gff/b - gff + 1 );
+        return p_ceilings.max();
 
     def p_ceiling_for_amb_to_gf(self, amb_to_gf):
         # Binary search again
