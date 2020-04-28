@@ -188,8 +188,8 @@ class Buhlmann:
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
         gf99s = tissue_state.GF99s(p_amb);
-        gf99 = max(gf99s);
-        leading_tissue_i = gf99s.index(gf99);
+        gf99 = gf99s.max();
+        leading_tissue_i = gf99s.argmax();
         surfacegf = tissue_state.GF99(1.0);
         result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
                   'GF99': round(gf99, 1),

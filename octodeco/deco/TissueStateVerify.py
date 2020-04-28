@@ -25,7 +25,6 @@ class TissueState(TissueStateNumpy.TissueState):
         r1._old_style_constants = self._old_style_constants;
         r2 = self.construct_classic().updated_state(duration, p_amb, gas);
         assert r1.state_equal(r2);
-        print('updated_state: OK')
         return r1;
 
     def GF99(self, p_amb):
@@ -44,5 +43,4 @@ class TissueState(TissueStateNumpy.TissueState):
         r1 = super().p_ceiling_for_gf_now(gf_now)
         r2 = self.construct_classic().p_ceiling_for_gf_now(gf_now);
         assert r1 == r2;
-        print('ceiling_gf_now: OK');
         return r1;

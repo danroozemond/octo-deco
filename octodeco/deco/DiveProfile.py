@@ -19,7 +19,7 @@ Conventions:
 
 class DiveProfile:
     def __init__(self, descent_speed = 20, ascent_speed = 10,
-                 deco_model = None, gf_low = 35, gf_high = 70):
+                 deco_model = None, gf_low = 35, gf_high = 70, debugBuhlmann = False):
         self._points = [ DivePoint(0, 0, Gas.Air(), None) ];
         self._descent_speed = descent_speed;
         self._ascent_speed = ascent_speed;
@@ -44,7 +44,9 @@ class DiveProfile:
         if deco_model is not None:
             self._deco_model = deco_model;
         else:
-            self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high, self._descent_speed, self._ascent_speed);
+            self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high,
+                                                 self._descent_speed, self._ascent_speed,
+                                                 debugTissueState = debugBuhlmann);
 
         self.update_deco_model_info(update_display = True);
 

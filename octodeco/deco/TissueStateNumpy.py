@@ -125,10 +125,10 @@ class TissueState:
     # GF99
     #
     def GF99s(self, p_amb):
-        def for_one(i):
-            m0 = self._workmann_m0(p_amb, i);
-            return 100.0 * (sum(self._state[ i ]) - p_amb) / (m0 - p_amb);
-        return [ max(0.0, for_one(i)) for i in range(self._n_tissues) ];
+        m0s = self._workmann_m0_all(p_amb);
+        gf99s = 100.0 * ( self._state.sum(axis=0) - p_amb ) / ( m0s - p_amb );
+        return gf99s;
 
     def GF99(self, p_amb):
-        return max(0.0, max(self.GF99s(p_amb)));
+        return max(0.0, self.GF99s(p_amb).max());
+
