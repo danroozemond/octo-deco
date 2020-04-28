@@ -7,8 +7,9 @@ import pandas as pd;
 import pytz
 
 from . import Buhlmann;
+from . import DiveProfileSer;
 from . import Gas;
-from .DivePoint import DivePoint
+from .DivePoint import DivePoint;
 
 '''
 Conventions:
@@ -37,6 +38,7 @@ class DiveProfile:
         self.custom_desc = None;
         self.is_demo_dive = False;
         self.is_public = False;
+        self.db_version = DiveProfileSer.CURRENT_VERSION;
 
         # NOTE - If you add attributes here, also add migration code to DiveProfile code
         #
