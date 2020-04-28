@@ -49,50 +49,55 @@
     ANIMATION_SPEED = 'fast';
 
     /*
+     * Showing/hiding the placeholders
+     */
+    function spin_elt(idstr, set_spinning)
+    {
+        if(set_spinning) { $(idstr).hide(); $(idstr + '_plh').show(); }
+        else             { $(idstr).show(); $(idstr + '_plh').hide(); }
+    }
+    function spin_plot_diveprofile(set_spinning) { spin_elt('#chart_diveprofile', set_spinning); }
+
+    /*
      * Functions to retrieve the page elements
      */
-    function load_plot_diveprofile()
+    function load_plot_diveprofile(after_loading)
     {
-      $('#chart_diveprofile').hide();
-      $('#chart_diveprofile_plh').show();
-      $.getJSON({
+        spin_elt('#chart_diveprofile', true);
+        $.getJSON({
         url: "{{url_for('dive.show_elt_plot_profile', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
         success: function(result) {
-            $('#chart_diveprofile').show();
-            $('#chart_diveprofile_plh').hide();
+            spin_elt('#chart_diveprofile', false);
             Plotly.react('chart_diveprofile',JSON.parse(result),{});
+            after_loading();
         }
-      });
+        });
     }
 
     function load_summary_table()
     {
-      $('#table_summary').hide();
-      $('#table_summary_plh').show();
-      $.ajax({
+        spin_elt( '#table_summary', true );
+        $.ajax({
         url: "{{url_for('dive.show_elt_summary_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
         success: function(result) {
             $('#table_summary').html(result);
-            $('#table_summary').show();
-            $('#table_summary_plh').hide();
+            spin_elt( '#table_summary', false );
         }
-      });
+        });
     }
 
     var plot_heatmap_loaded = false;
     function load_plot_heatmap()
     {
-      $('#chart_heatmap').hide();
-      $('#chart_heatmap_plh').show();
-      $.getJSON({
+        spin_elt( '#chart_heatmap', true );
+        $.getJSON({
         url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}",
         success: function(result) {
-            $('#chart_heatmap').show();
-            $('#chart_heatmap_plh').hide();
+            spin_elt( '#chart_heatmap', false );
             Plotly.react('chart_heatmap',JSON.parse(result),{});
             plot_heatmap_loaded = true;
         }
-      });
+        });
     }
     function unload_plot_heatmap()
     {
@@ -102,17 +107,15 @@
     var full_table_loaded=false;
     function load_full_table()
     {
-      $('#table_full').hide();
-      $('#table_full_plh').show();
-      $.ajax({
+        spin_elt( '#table_full', true );
+        $.ajax({
         url: "{{url_for('dive.show_elt_full_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
         success: function(result) {
             $('#table_full').html(result);
-            $('#table_full').show();
-            $('#table_full_plh').hide();
+            spin_elt( '#table_full', false );
             full_table_loaded = true;
         }
-      });
+        });
     }
     function unload_full_table()
     {
@@ -123,26 +126,21 @@
     /*
      * Showing / hiding page elements
      */
-    function toggle_div_heatmap()
+    function toggle_elt(idstr, on_show_fn)
     {
-        var was_vis = $('#heatmap').is(':visible');
-        if (was_vis) { $('#heatmap').hide(ANIMATION_SPEED); }
-        else         { $('#heatmap').show(ANIMATION_SPEED); if (!plot_heatmap_loaded) load_plot_heatmap(); }
-        $('#heatmap_toggle').html(( was_vis ? '[show]' : '[hide]'));
+        var was_vis = $(idstr).is(':visible');
+        if (was_vis) { $(idstr).hide(ANIMATION_SPEED); }
+        else         { $(idstr).show(ANIMATION_SPEED, on_show_fn); }
+        $(idstr + '_toggle').html(( was_vis ? '[show]' : '[hide]'));
     }
-    function toggle_div_table_full()
-    {
-        var was_vis = $('#table_full').is(':visible');
-        if (was_vis) { $('#table_full').hide(ANIMATION_SPEED); }
-        else         { $('#table_full').show(ANIMATION_SPEED); if (!full_table_loaded) load_full_table(); }
-        $('#table_full_toggle').html(( was_vis ? '[show]' : '[hide]'));
+    function toggle_div_heatmap() {
+        toggle_elt('#heatmap', function() { if (!plot_heatmap_loaded) load_plot_heatmap(); } );
     }
-    function toggle_div_modify_dive(toggle_elt)
-    {
-        var was_vis = $('#modify_dive').is(':visible');
-        if (was_vis) { $('#modify_dive').hide(ANIMATION_SPEED); }
-        else         { $('#modify_dive').show(ANIMATION_SPEED); }
-        $('#modify_dive_toggle').html(( was_vis ? '[show]' : '[hide]'));
+    function toggle_div_table_full() {
+        toggle_elt('#table_full', function() { if (!full_table_loaded) load_full_table(); } );
+    }
+    function toggle_div_modify_dive() {
+        toggle_elt('#modify_dive', function() {} );
     }
 
 
@@ -151,11 +149,18 @@
      */
     function reload_all()
     {
-        load_plot_diveprofile();
-        load_summary_table();
-        if ($('#table_full').is(':visible')) load_full_table(); else unload_full_table();
+        var is_table_full_vis = $('#table_full').is(':visible');
+        // We load the diveprofile first, then the rest to benefit from caching (esp. with multiple workers present)
+        spin_elt('#chart_diveprofile', true);
+        spin_elt('#table_summary', true );
+        if (is_table_full_vis) spin_elt('#table_full', true );
+        load_plot_diveprofile(function(){
+            load_summary_table();
+            if (is_table_full_vis) load_full_table(); else unload_full_table();
+        });
         // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
     }
+
 
     /*
      * On load
