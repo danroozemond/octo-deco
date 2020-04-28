@@ -11,6 +11,7 @@ CONSTANTS = {};
 
 NP_FLOAT_DATATYPE = np.float64;
 
+
 class TissueState:
     def __init__(self, constants, empty=False):
         self._constants = TissueState.ensure_numpy_constants(constants);
@@ -25,6 +26,7 @@ class TissueState:
     def __copy__(self):
         r = TissueState(self._constants, empty=True);
         r._state = self._state;
+        r._ab = self._ab;
         return r;
 
     def copy(self):
@@ -47,7 +49,10 @@ class TissueState:
 
     @staticmethod
     def gas_to_numpy(gas):
-        return np.array([[gas[ 'fN2' ],gas[ 'fHe' ]]], dtype=NP_FLOAT_DATATYPE).transpose();
+        if 'np_array' not in gas:
+            r = np.array([[gas[ 'fN2' ],gas[ 'fHe' ]]], dtype=NP_FLOAT_DATATYPE).transpose();
+            gas['np_array'] = r;
+        return gas['np_array'];
 
     #
     # Updating the tissue states
