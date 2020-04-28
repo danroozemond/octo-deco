@@ -14,6 +14,7 @@ class TissueState:
     def __init__(self, constants, empty=False):
         self._constants = TissueState.ensure_numpy_constants(constants);
         self._n_tissues = self._constants.N_TISSUES;
+        self._ab = None;
         if not empty:
             self._state = TissueState.gas_to_numpy(Gas.Air()).repeat(self._n_tissues,axis=1);
 
@@ -79,11 +80,14 @@ class TissueState:
     based on proportions of gas load in each tissue
     """
     def _get_coeffs_a_b_all(self):
+        if self._ab is not None:
+            return self._ab;
         # a and b values are linear combinations depending on current
         # partial pressures N2/He
-        totalpp = self._state.sum(axis=0);
-        a = ((self._state / totalpp) * self._constants.A_VALUES).sum(axis = 0);
-        b = ((self._state / totalpp) * self._constants.B_VALUES).sum(axis = 0);
+        lcpp = self._state / (self._state.sum(axis=0));
+        a = (lcpp * self._constants.A_VALUES).sum(axis = 0);
+        b = (lcpp * self._constants.B_VALUES).sum(axis = 0);
+        self._ab = (a,b);
         return a,b;
 
     def _workmann_m0_all(self, p_amb):
