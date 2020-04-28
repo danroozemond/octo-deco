@@ -1,11 +1,21 @@
 # Please see LICENSE.md
-import time;
+import sys
+import time
 
 from octodeco.deco import Gas;
 from octodeco.deco.DiveProfile import DiveProfile;
 
 dp = DiveProfile(gf_low=35, gf_high=70);
 dp.append_section(30, 20, gas = Gas.Trimix(21,35));
+
+t0 = time.perf_counter();
+dp.update_deco_info()
+print('#points:   {}'.format(len(dp.points())));
+print('time:      {:.3f}'.format(time.perf_counter() - t0));
+print('deco info: {}'.format(dp.points()[-1].deco_info))
+
+sys.exit(0);
+
 dp.append_section(5, 5, gas = Gas.Air());
 dp.append_section(50, 30, gas = Gas.Trimix(15,40));
 dp.add_gas(Gas.Nitrox(50));
