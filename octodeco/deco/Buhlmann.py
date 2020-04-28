@@ -44,7 +44,7 @@ class Buhlmann:
     def __init__(self,
                  gf_low, gf_high,
                  descent_speed, ascent_speed,
-                 debugTissueState = True):
+                 debugTissueState = False):
         self._constants = BuhlmannConstants.ZHL_16C_1a;
         self._n_tissues = self._constants.N_TISSUES;
         self.TissueState = TissueStateNumpy.TissueState if not debugTissueState \
