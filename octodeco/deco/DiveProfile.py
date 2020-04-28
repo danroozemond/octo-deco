@@ -294,9 +294,12 @@ class DiveProfile:
     '''
     Modifying dive
     '''
-    def set_gf( self, gf_low, gf_high ):
-        self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high, self._descent_speed, self._ascent_speed);
-        self.update_deco_info();
+    def set_gf( self, gf_low, gf_high, updateStops = False ):
+        self._deco_model.set_gf( gf_low, gf_high );
+        if updateStops:
+            self.update_stops();
+        else:
+            self.update_deco_info();
 
     def length_of_surface_section(self):
         i = -1;

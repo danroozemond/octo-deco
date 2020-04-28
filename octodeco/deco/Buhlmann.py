@@ -59,6 +59,10 @@ class Buhlmann:
     def description(self):
         return 'ZHL-16C GF %s/%s' % (self.gf_low, self.gf_high);
 
+    def set_gf(self, gf_low, gf_high):
+        self.gf_low = gf_low;
+        self.gf_high = gf_high;
+
     def cleared_tissue_state(self):
         return self.TissueState(self._constants);
 

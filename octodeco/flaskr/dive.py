@@ -208,8 +208,7 @@ def update(dive_id):
         abort(405);
     if action == 'Update Stops':
         olddecotime = dp.decotime();
-        dp.set_gf(gflow, gfhigh);
-        dp.update_stops();
+        dp.set_gf(gflow, gfhigh, updateStops = True);
         flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
         db_dive.store_dive(dp);
         _invalidate_cached_dive(dive_id);
