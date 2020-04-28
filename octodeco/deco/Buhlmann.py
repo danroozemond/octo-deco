@@ -191,13 +191,11 @@ class Buhlmann:
         # GF99: how do compartment pressure, ambient pressure, tolerance compare
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
-        gf99s = tissue_state.GF99s(p_amb);
-        gf99 = max(0.0, gf99s.max());
-        leading_tissue_i = gf99s.argmax();
+        gf99s, gf99, leading_tissue_i = tissue_state.GF99_all_info(p_amb);
         surfacegf = tissue_state.GF99(1.0);
         result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
                   'GF99': round(gf99, 1),
-                  'SurfaceGF': surfacegf,
+                  'SurfaceGF': round(surfacegf, 1),
                   'LeadingTissueIndex': leading_tissue_i,
                   'allGF99s': gf99s
                   };
