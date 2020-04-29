@@ -1,6 +1,6 @@
 # Please see LICENSE.md
 from . import BuhlmannConstants;
-from . import TissueStateNumpy, TissueStateClassic;
+from . import TissueStateCython, TissueStateClassic;
 from . import Util;
 
 
@@ -47,7 +47,7 @@ class Buhlmann:
                  debugTissueState = False):
         self._constants = BuhlmannConstants.ZHL_16C_1a;
         self._n_tissues = self._constants.N_TISSUES;
-        self.TissueState = TissueStateNumpy.TissueState if not debugTissueState \
+        self.TissueState = TissueStateCython.TissueState if not debugTissueState \
                     else   TissueStateClassic.TissueState;
         self.gf_low = gf_low;
         self.gf_high = gf_high;

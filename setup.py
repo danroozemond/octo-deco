@@ -6,8 +6,8 @@ from setuptools import setup, find_packages, Extension
 # PycharmProjects\octo-deco>python setup.py build_ext --inplace
 #
 
-extensions = [Extension("octodeco.deco.TissueStateClassic", ["octodeco/deco/TissueStateClassic.py"]),
-              Extension("octodeco.deco.TissueStateNumpy",   ["octodeco/deco/TissueStateNumpy.py"])
+extensions = [Extension("octodeco.deco.TissueStateCython",  ["octodeco/deco/TissueStateCython.pyx"])
+              # Extension("octodeco.deco.TissueStateClassic", ["octodeco/deco/TissueStateClassic.py"])
               ];
 
 setup(
