@@ -1,4 +1,6 @@
+from Cython.Build import cythonize
 from setuptools import setup, find_packages
+
 setup(
     name="Octo-Deco",
     version="0.5.0",
@@ -9,5 +11,6 @@ setup(
     url="https://octo-deco.nl/",
     project_urls={
         "Source Code": "https://github.com/danroozemond/octo-deco/",
-    }
+    },
+    ext_modules=cythonize("octodeco/deco/TissueStateClassic.py")
 )
