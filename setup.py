@@ -1,5 +1,14 @@
 from Cython.Build import cythonize
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
+
+#
+# Note - can manually build like so:
+# PycharmProjects\octo-deco>python setup.py build_ext --inplace
+#
+
+extensions = [Extension("octodeco.deco.TissueStateClassic", ["octodeco/deco/TissueStateClassic.py"]),
+              Extension("octodeco.deco.TissueStateNumpy",   ["octodeco/deco/TissueStateNumpy.py"])
+              ];
 
 setup(
     name="Octo-Deco",
@@ -12,5 +21,5 @@ setup(
     project_urls={
         "Source Code": "https://github.com/danroozemond/octo-deco/",
     },
-    ext_modules=cythonize("octodeco/deco/TissueStateClassic.py")
+    ext_modules = cythonize(extensions)
 )

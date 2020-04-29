@@ -132,3 +132,5 @@ dmypy.json
 /.idea/
 instance
 cache
+/octodeco/deco/TissueStateClassic.c
+/octodeco/deco/TissueStateNumpy.c

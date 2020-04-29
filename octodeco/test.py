@@ -4,22 +4,19 @@ import time
 
 from octodeco.deco import CreateDive;
 
-dp = CreateDive.create_demo_dive(debugBuhlmann = False);
-for i in range(5):
+for db in [False,True]:
+    dp = CreateDive.create_demo_dive(debugBuhlmann = db);
+    times = list();
     s = dp.deco_model().TissueState;
-    t0 = time.perf_counter();
-    dp.set_gf(35, 70, updateStops = True);
-    print('{:2} {} #points:   {}'.format(i, s, len(dp.points())));
-    print('{:2} {} time:      {:.3f}'.format(i, s, time.perf_counter() - t0));
+    for i in range(5):
+        t0 = time.perf_counter();
+        dp.set_gf(35, 70, updateStops = True);
+        t1 = time.perf_counter();
+        print('{:2} {} #points:   {}'.format(i, s, len(dp.points())));
+        print('{:2} {} time:      {:.3f}'.format(i, s, t1 - t0));
+        times.append(t1-t0);
+    print('{} avg: {:.3f}s'.format( s, sum(times)/len(times)));
 
-
-dp = CreateDive.create_demo_dive(debugBuhlmann = True);
-for i in range(5):
-    s = dp.deco_model().TissueState;
-    t0 = time.perf_counter();
-    dp.set_gf(35, 70, updateStops = True);
-    print('{:2} {} #points:   {}'.format(i, s, len(dp.points())));
-    print('{:2} {} time:      {:.3f}'.format(i, s, time.perf_counter() - t0));
 
 sys.exit(0);
 #
