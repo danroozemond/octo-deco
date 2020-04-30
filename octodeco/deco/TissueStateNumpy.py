@@ -9,6 +9,8 @@ ZHL16ConstantsNP = namedtuple('ZHL16ConstantsNP', [
     'ID', 'N_TISSUES', 'HALFTIMES', 'A_VALUES', 'B_VALUES']);
 CONSTANTS = {};
 
+NP_FLOAT_DATATYPE = np.float64;
+
 
 class TissueState:
     def __init__(self, constants, empty=False):
@@ -24,6 +26,7 @@ class TissueState:
     def __copy__(self):
         r = TissueState(self._constants, empty=True);
         r._state = self._state;
+        r._ab = self._ab;
         return r;
 
     def copy(self):
@@ -38,15 +41,18 @@ class TissueState:
             CONSTANTS[constants.ID] = ZHL16ConstantsNP(
                 ID = constants.ID,
                 N_TISSUES = constants.N_TISSUES,
-                HALFTIMES = np.array([ constants.N2_HALFTIMES, constants.HE_HALFTIMES], dtype='float64'),
-                A_VALUES = np.array([ constants.N2_A_VALUES, constants.HE_A_VALUES], dtype='float64'),
-                B_VALUES = np.array([ constants.N2_B_VALUES, constants.HE_B_VALUES], dtype='float64')
+                HALFTIMES = np.array([ constants.N2_HALFTIMES, constants.HE_HALFTIMES], dtype=NP_FLOAT_DATATYPE),
+                A_VALUES = np.array([ constants.N2_A_VALUES, constants.HE_A_VALUES], dtype=NP_FLOAT_DATATYPE),
+                B_VALUES = np.array([ constants.N2_B_VALUES, constants.HE_B_VALUES], dtype=NP_FLOAT_DATATYPE)
             )
         return CONSTANTS[constants.ID];
 
     @staticmethod
     def gas_to_numpy(gas):
-        return np.array([[gas[ 'fN2' ],gas[ 'fHe' ]]], dtype='float64').transpose();
+        if 'np_array' not in gas:
+            r = np.array([[gas[ 'fN2' ],gas[ 'fHe' ]]], dtype=NP_FLOAT_DATATYPE).transpose();
+            gas['np_array'] = r;
+        return gas['np_array'];
 
     #
     # Updating the tissue states
@@ -134,10 +140,15 @@ class TissueState:
         return gf99s;
 
     def GF99(self, p_amb):
-        return max(0.0, self.GF99s(p_amb).max());
+        r = self.GF99s(p_amb).max();
+        return r if r >= 0.0 else 0.0;
+
+    def GF99_all_info(self, p_amb):
+        gf99s = self.GF99s(p_amb);
+        return gf99s, max(0.0, gf99s.max()), gf99s.argmax();
 
 
 def construct_numpy_from_classic(tissue_state, classic_constants):
-    r = TissueState(classic_constants,empty = True);
-    r._state = np.array(tissue_state, dtype='float64').transpose();
+    r = TissueState(classic_constants, empty = True);
+    r._state = np.array(tissue_state, dtype=NP_FLOAT_DATATYPE).transpose();
     return r;

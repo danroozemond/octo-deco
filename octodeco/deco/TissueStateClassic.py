@@ -120,3 +120,10 @@ class TissueState:
 
     def GF99(self, p_amb):
         return max(0.0, max(self.GF99s(p_amb)));
+
+    def GF99_all_info(self, p_amb):
+        gf99s = self.GF99s(p_amb);
+        gf99 = max(0.0, max(gf99s));
+        leading_tissue_i = gf99s.index(gf99);
+        return gf99s, gf99, leading_tissue_i;
+

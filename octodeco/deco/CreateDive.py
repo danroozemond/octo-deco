@@ -1,14 +1,15 @@
 # Please see LICENSE.md
-from .DiveProfile import DiveProfile;
-from . import Gas;
 import csv;
+
+from . import Gas;
+from .DiveProfile import DiveProfile;
 
 
 #
 # Create: Demo dive
 #
-def create_demo_dive():
-    dp = DiveProfile(gf_low = 35, gf_high = 70);
+def create_demo_dive(debugBuhlmann = False):
+    dp = DiveProfile(gf_low = 35, gf_high = 70, debugBuhlmann = debugBuhlmann);
     dp.is_demo_dive = True;
     dp.add_gas(Gas.Nitrox(50));
     dp.append_section(20, 43, Gas.Trimix(21, 35));
