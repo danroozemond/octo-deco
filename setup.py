@@ -21,5 +21,5 @@ setup(
     project_urls={
         "Source Code": "https://github.com/danroozemond/octo-deco/",
     },
-    ext_modules = cythonize(extensions)
+    ext_modules = cythonize(extensions, annotate=True)
 )
