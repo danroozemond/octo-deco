@@ -1,4 +1,6 @@
 # Please see LICENSE.md
+#
+# I apologize, this has become an awful file to look at.
 
 from cpython cimport array;
 import array;
@@ -140,9 +142,10 @@ class TissueState:
         cdef float[:] cm = m;
         cdef float[:] ca = a;
         cdef float[:] cb = b;
+        cdef float cpamb = p_amb;
         cdef int i = 0;
         while i < N_TISSUES:
-            m[i] = a[i] + p_amb / b[i];
+            m[i] = a[i] + cpamb / b[i];
             i += 1;
         return m;
 
@@ -205,11 +208,24 @@ class TissueState:
         return res;
 
     def GF99(self, p_amb):
-        # TODO speed up
-        return max(0.0, max(self.GF99s(p_amb)));
+        a, b = self._get_coeffs_a_b();
+        cdef float[:] ca = a;
+        cdef float[:] cb = b;
+        cdef float[:] cstate = self._state;
+        cdef float cpamb = p_amb;
+        cdef float gf99 = 0.0;
+        cdef float r = 0.0;
+        cdef m0 = 0.0;
+        cdef int i = 0;
+        while i < N_TISSUES:
+            m0 = a[i] + cpamb / b[i];
+            r = 100.0 * (cstate[ 2 * i ] + cstate[ 2 * i + 1 ] - cpamb) / (m0 - cpamb);
+            if r > gf99:
+                gf99 = r;
+            i += 1;
+        return gf99;
 
     def GF99_all_info(self, p_amb):
-        # TODO speed up
         gf99s = self.GF99s(p_amb);
         gf99 = max(gf99s);
         leading_tissue_i = gf99s.index(gf99);
