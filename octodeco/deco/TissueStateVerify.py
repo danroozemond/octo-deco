@@ -1,18 +1,19 @@
 # Please see LICENSE.md
-# This implementation designed to check the results of TissueState implementation
+# This class designed to check the results of TissueState implementation
 
 from . import TissueStateClassic;
-from . import TissueStateNumpy;
+from . import TissueStateCython;
 
 
-class TissueState(TissueStateNumpy.TissueState):
+class TissueState(TissueStateCython.TissueState):
     def __init__(self, constants):
         super().__init__(constants);
+        self._n_tissues = constants.N_TISSUES;
         self._old_style_constants = constants;
 
     def construct_classic(self):
         r = TissueStateClassic.TissueState(self._old_style_constants);
-        r._state = [ ( self._state[0][i], self._state[1][i]) for i in range(self._n_tissues)];
+        r._state = [ ( self._state[2*i], self._state[2*i+1]) for i in range(self._n_tissues)];
         return r;
 
     def state_equal(self, classic_state):
@@ -23,6 +24,7 @@ class TissueState(TissueStateNumpy.TissueState):
         r1 = super().updated_state(duration, p_amb, gas);
         r1.__class__ = TissueState;
         r1._old_style_constants = self._old_style_constants;
+        r1._n_tissues = self._n_tissues;
         r2 = self.construct_classic().updated_state(duration, p_amb, gas);
         assert r1.state_equal(r2);
         return r1;

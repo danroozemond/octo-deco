@@ -1,4 +1,5 @@
 # Please see LICENSE.md
+
 array;
 import array;
 
@@ -203,10 +204,19 @@ class TissueState:
         return res;
 
     def GF99(self, p_amb):
+        # TODO speed up
         return max(0.0, max(self.GF99s(p_amb)));
 
     def GF99_all_info(self, p_amb):
+        # TODO speed up
         gf99s = self.GF99s(p_amb);
-        gf99 = max(0.0, max(gf99s));
+        gf99 = max(gf99s);
         leading_tissue_i = gf99s.index(gf99);
-        return gf99s, gf99, leading_tissue_i;
+        return gf99s, max(0.0, gf99), leading_tissue_i;
+
+
+#TODO IMPLEMENT + CODE IN _SER
+# def construct_numpy_from_classic(tissue_state, classic_constants):
+#     r = TissueState(classic_constants, empty = True);
+#     r._state = np.array(tissue_state, dtype=NP_FLOAT_DATATYPE).transpose();
+#     return r;
