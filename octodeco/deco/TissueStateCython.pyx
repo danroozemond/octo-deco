@@ -232,6 +232,7 @@ class TissueState:
         return gf99s, max(0.0, gf99), leading_tissue_i;
 
 
+
 def construct_cython_from_numpy(tissue_state, classic_constants):
     oldstate = tissue_state._state;
     r = TissueState(classic_constants, empty = True);
