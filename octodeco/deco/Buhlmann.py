@@ -1,6 +1,6 @@
 # Please see LICENSE.md
 from . import BuhlmannConstants;
-from . import TissueStateCython, TissueStateVerify;
+from . import TissueStateCython, TissueStateVerify, TissueStateClassic;
 from . import Util;
 
 

@@ -1,5 +1,5 @@
 # Please see LICENSE.md
-import time
+import time, sys;
 
 from octodeco.deco import CreateDive;
 
