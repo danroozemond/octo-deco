@@ -14,6 +14,7 @@ for i in range(10):
     for p in dp._points[1:]:
         ts = ts.updated_state(p.duration(), p.p_amb, p.gas);
         pc = ts.p_ceiling_for_gf_now(50);
+        g = ts.GF99s(p.p_amb);
         n += 1;
     t1 = time.perf_counter();
     print('{:2} {} {} time:      {:.3f}'.format(i, type(ts), n, t1 - t0));

@@ -133,10 +133,17 @@ class TissueState:
             self._set_coeffs_a_b();
         return self._ab;
 
-    def _workmann_m0(self, p_amb, i):
-        a, b = self._get_coeffs_a_b(i);
-        m0 = a + p_amb / b;
-        return m0;
+    def _workmann_m0(self, p_amb):
+        m = array.array('f', [ ]); array.resize(m, N_TISSUES);
+        a, b = self._get_coeffs_a_b();
+        cdef float[:] cm = m;
+        cdef float[:] ca = a;
+        cdef float[:] cb = b;
+        cdef int i = 0;
+        while i < N_TISSUES:
+            m[i] = a[i] + p_amb / b[i];
+            i += 1;
+        return m;
 
     #
     # p_ceiling for various scenarios
@@ -182,10 +189,18 @@ class TissueState:
     # GF99
     #
     def GF99s(self, p_amb):
-        def for_one(i):
-            m0 = self._workmann_m0(p_amb, i);
-            return 100.0 * (sum(self._state[ i ]) - p_amb) / (m0 - p_amb);
-        return [ max(0.0, for_one(i)) for i in range(self._n_tissues) ];
+        m = self._workmann_m0(p_amb);
+        cdef float[:] cm = m;
+        cdef float[:] cstate = self._state;
+        cdef float cpamb = p_amb;
+        cdef int i = 0;
+        cdef float r;
+        res = [];
+        while i < N_TISSUES:
+            r = 100.0 * ( cstate[2*i] + cstate[2*i+1] - cpamb ) / ( cm[i] - cpamb );
+            res.append(r);
+            i += 1;
+        return res;
 
     def GF99(self, p_amb):
         return max(0.0, max(self.GF99s(p_amb)));
@@ -195,4 +210,3 @@ class TissueState:
         gf99 = max(0.0, max(gf99s));
         leading_tissue_i = gf99s.index(gf99);
         return gf99s, gf99, leading_tissue_i;
-
