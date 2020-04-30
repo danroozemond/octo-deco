@@ -112,17 +112,26 @@ class TissueState:
     alternatively lineartly interpolate the a and b values themselves, 
     based on proportions of gas load in each tissue
     """
-    def _get_coeffs_a_b(self, i):
-        a = self._constants.N2_A_VALUES[ i ];
-        b = self._constants.N2_B_VALUES[ i ];
-        pp_n2, pp_he = self._state[i];
-        if pp_he > 0.0:
-            # Trimix case
-            a_he = self._constants.HE_A_VALUES[ i ];
-            b_he = self._constants.HE_B_VALUES[ i ];
-            a = pp_n2 / (pp_n2 + pp_he) * a + pp_he / (pp_n2 + pp_he) * a_he;
-            b = pp_n2 / (pp_n2 + pp_he) * b + pp_he / (pp_n2 + pp_he) * b_he;
-        return a, b;
+    def _set_coeffs_a_b(self):
+        cdef float pp;
+        cdef float[:] cstate = self._state;
+        cdef int i = 0;
+        a = array.array('f', [ ]); array.resize(a, N_TISSUES);
+        b = array.array('f', [ ]); array.resize(b, N_TISSUES);
+        cdef float[:] ca = a;
+        cdef float[:] cb = b;
+        while i < N_TISSUES:
+            pp = cstate[2*i] + cstate[2*i+1];
+            ca[i] = (cstate[2*i]/pp)*A_VALUES[2*i] + (cstate[2*i+1]/pp)*A_VALUES[2*i+1];
+            cb[i] = (cstate[2*i]/pp)*B_VALUES[2*i] + (cstate[2*i+1]/pp)*B_VALUES[2*i+1];
+            i += 1;
+        # Do stuff
+        self._ab = (a,b);
+
+    def _get_coeffs_a_b(self):
+        if self._ab is None:
+            self._set_coeffs_a_b();
+        return self._ab;
 
     def _workmann_m0(self, p_amb, i):
         a, b = self._get_coeffs_a_b(i);
@@ -134,16 +143,20 @@ class TissueState:
     #
     def p_ceiling_for_gf_now(self, gf_now):
         # Derived from _GF99_new as defined below
-        gff = gf_now / 100.0;
-
-        # Returns the ceiling for one particular tissue
-        def for_one(i):
-            a, b = self._get_coeffs_a_b(i);
-            p_amb = (sum(self._state[ i ]) - a * gff) / (gff / b - gff + 1);
-            return p_amb;
-
-        p_ceilings = [ for_one(i) for i in range(self._n_tissues) ];
-        return max(p_ceilings);
+        cdef float gff = gf_now / 100.0;
+        cdef float pceil = -100;
+        cdef float pceil_i;
+        cdef int i = 0;
+        a,b = self._get_coeffs_a_b();
+        cdef float[:] ca = a;
+        cdef float[:] cb = b;
+        cdef float[:] cstate = self._state;
+        while i < N_TISSUES:
+            pceil_i = ( cstate[2*i] + cstate[2*i+1] - a[i]*gff) / ( gff / b[i] - gff + 1);
+            if pceil_i > pceil:
+                pceil = pceil_i;
+            i += 1;
+        return pceil;
 
     def p_ceiling_for_amb_to_gf(self, amb_to_gf):
         # Binary search again

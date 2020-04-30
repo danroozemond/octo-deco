@@ -1,24 +1,39 @@
 # Please see LICENSE.md
-import sys
 import time
 
-from octodeco.deco import CreateDive;
+from octodeco.deco import CreateDive, TissueStateCython, TissueStateClassic;
 
-for db in [False,True]:
-    dp = CreateDive.create_demo_dive(debugBuhlmann = db);
-    times = list();
-    s = dp.deco_model().TissueState;
-    for i in range(5):
-        t0 = time.perf_counter();
-        dp.set_gf(35, 70, updateStops = True);
-        t1 = time.perf_counter();
-        # print('{:2} {} #points:   {}'.format(i, s, len(dp.points())));
-        print('{:2} {} time:      {:.3f}'.format(i, s, t1 - t0));
-        times.append(t1-t0);
-    print('{} avg: {:.3f}s'.format( s, sum(times)/len(times)));
+dp = CreateDive.create_demo_dive(debugBuhlmann = True);
+for i in range(10):
+    t0 = time.perf_counter();
+    n = 0;
+    if i < 5:
+        ts = TissueStateCython.TissueState(dp.deco_model()._constants);
+    else:
+        ts = TissueStateClassic.TissueState(dp.deco_model()._constants);
+    for p in dp._points[1:]:
+        ts = ts.updated_state(p.duration(), p.p_amb, p.gas);
+        pc = ts.p_ceiling_for_gf_now(50);
+        n += 1;
+    t1 = time.perf_counter();
+    print('{:2} {} {} time:      {:.3f}'.format(i, type(ts), n, t1 - t0));
 
 
-sys.exit(0);
+# for db in [False,True]:
+#     dp = CreateDive.create_demo_dive(debugBuhlmann = db);
+#     times = list();
+#     s = dp.deco_model().TissueState;
+#     for i in range(5):
+#         t0 = time.perf_counter();
+#         dp.set_gf(35, 70, updateStops = True);
+#         t1 = time.perf_counter();
+#         # print('{:2} {} #points:   {}'.format(i, s, len(dp.points())));
+#         print('{:2} {} time:      {:.3f}'.format(i, s, t1 - t0));
+#         times.append(t1-t0);
+#     print('{} avg: {:.3f}s'.format( s, sum(times)/len(times)));
+#
+#
+# sys.exit(0);
 #
 #
 #
