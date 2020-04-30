@@ -216,8 +216,12 @@ class TissueState:
         return gf99s, max(0.0, gf99), leading_tissue_i;
 
 
-#TODO IMPLEMENT + CODE IN _SER
-# def construct_numpy_from_classic(tissue_state, classic_constants):
-#     r = TissueState(classic_constants, empty = True);
-#     r._state = np.array(tissue_state, dtype=NP_FLOAT_DATATYPE).transpose();
-#     return r;
+def construct_cython_from_numpy(tissue_state, classic_constants):
+    oldstate = tissue_state._state;
+    r = TissueState(classic_constants, empty = True);
+    r._state = array.array('f',[]); array.resize(r._state, 2*N_TISSUES);
+    cdef float[:] cstate = r._state;
+    for i in range(N_TISSUES):
+        cstate[2*i] = oldstate[0][i];
+        cstate[2*i+1] = oldstate[1][i];
+    return r;

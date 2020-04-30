@@ -6,9 +6,9 @@ import pickle;
 
 import pytz
 
-from . import TissueStateNumpy;
+from . import TissueStateNumpy, TissueStateCython;
 
-CURRENT_VERSION = 5;
+CURRENT_VERSION = 6;
 
 
 #
@@ -34,6 +34,11 @@ def _migrate_up_to_current(from_version, diveprofile):
         constants = diveprofile.deco_model()._constants;
         for point in diveprofile.points():
             point.tissue_state = TissueStateNumpy.construct_numpy_from_classic(point.tissue_state, constants);
+    if from_version < 6:
+        diveprofile._deco_model.TissueState = TissueStateCython.TissueState;
+        constants = diveprofile.deco_model()._constants;
+        for point in diveprofile.points():
+            point.tissue_state = TissueStateCython.construct_cython_from_numpy(point.tissue_state, constants);
 
     # Note that we upgraded
     diveprofile.db_version = CURRENT_VERSION;
