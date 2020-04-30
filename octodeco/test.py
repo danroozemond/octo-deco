@@ -1,18 +1,21 @@
 # Please see LICENSE.md
-import sys
-import time
+import time, sys;
 
-from octodeco.deco import CreateDive;
+from octodeco.deco import CreateDive, Gas;
+from octodeco.deco.DiveProfile import DiveProfile;
 
-dp = CreateDive.create_demo_dive();
-for i in range(5):
-    t0 = time.perf_counter();
-    dp.set_gf(35, 70, updateStops = True);
-    print('{:2} #points:   {}'.format(i, len(dp.points())));
-    print('{:2} time:      {:.3f}'.format(i, time.perf_counter() - t0));
-
-sys.exit(0);
-
+# for db in [False,True]:
+#     dp = CreateDive.create_demo_dive(debugBuhlmann = db);
+#     times = list();
+#     s = dp.deco_model().TissueState;
+#     for i in range(5):
+#         t0 = time.perf_counter();
+#         dp.set_gf(35, 70, updateStops = True);
+#         t1 = time.perf_counter();
+#         # print('{:2} {} #points:   {}'.format(i, s, len(dp.points())));
+#         print('{:2} {} time:      {:.3f}'.format(i, s, t1 - t0));
+#         times.append(t1-t0);
+#     print('{} avg: {:.3f}s'.format( s, sum(times)/len(times)));
 
 
 dp = DiveProfile(gf_low=35, gf_high=70);
