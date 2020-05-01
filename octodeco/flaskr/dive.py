@@ -87,6 +87,22 @@ class CachedDiveProfile:
         return dsdf_table;
 
     @cache.memoize()
+    def runtime_table(self):
+        dp = self.profile_base();
+        rtt = dp.runtimetable();
+        if rtt is None:
+            return 'A runtime table is unfortunately not available for this dive.';
+        dsdf = pandas.DataFrame(rtt);
+        frm = {
+            'depth': lambda x: '{:.0f}'.format(x),
+            'time': lambda x: '{:.1f}'.format(x) if not pandas.isnull(x) else '',
+            'gas': str
+        };
+        dsdf_table = dsdf.to_html(classes="smalltable", header="true",
+                                  formatters=frm, na_rep='');
+        return dsdf_table;
+
+    @cache.memoize()
     def full_table(self, gflow, gfhigh):
         dp = self.profile_gf(gflow, gfhigh);
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
@@ -164,7 +180,9 @@ def show_elt_plot_heatmap(dive_id):
 def show_elt_summary_table(dive_id):
     cdp = get_cached_dive(dive_id);
     gflow, gfhigh = get_gf_args_from_request();
-    return cdp.summary_table(gflow, gfhigh);
+    r1 = cdp.summary_table(gflow, gfhigh);
+    r2 = cdp.runtime_table();
+    return r1 + r2;
 
 
 @bp.route('/show/<int:dive_id>/fulldata', methods = ['GET'])
