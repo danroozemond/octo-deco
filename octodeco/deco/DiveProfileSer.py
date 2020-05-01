@@ -8,7 +8,7 @@ import pytz
 
 from . import TissueStateNumpy, TissueStateCython, TissueStateClassic;
 
-CURRENT_VERSION = 6;
+CURRENT_VERSION = 7;
 
 
 #
@@ -41,6 +41,11 @@ def _migrate_up_to_current(from_version, diveprofile):
         constants = diveprofile.deco_model()._constants;
         for point in diveprofile.points():
             point.tissue_state = TissueStateCython.construct_cython_from_numpy(point.tissue_state, constants);
+
+    # Point attributes
+    for point in diveprofile.points():
+        if not hasattr(point, 'is_ascent_point'):
+            point.is_ascent_point = False;
 
     # Note that we upgraded
     diveprofile.db_version = CURRENT_VERSION;

@@ -87,12 +87,28 @@ class CachedDiveProfile:
         return dsdf_table;
 
     @cache.memoize()
+    def runtime_table(self):
+        dp = self.profile_base();
+        rtt = dp.runtimetable();
+        if rtt is None:
+            return 'A runtime table is unfortunately not available for this dive.';
+        dsdf = pandas.DataFrame(rtt);
+        frm = {
+            'depth': lambda x: '{:.0f}'.format(x),
+            'time': lambda x: '{:.1f}'.format(x) if not pandas.isnull(x) else '',
+            'gas': str
+        };
+        dsdf_table = dsdf.to_html(classes="smalltable", header="true",
+                                  formatters=frm, na_rep='');
+        return dsdf_table;
+
+    @cache.memoize()
     def full_table(self, gflow, gfhigh):
         dp = self.profile_gf(gflow, gfhigh);
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
         return fulldata_table;
 
-    @cache.memoize()
+    #@cache.memoize()
     def gfdeco_table(self):
         dp = self.profile_base()
         t0 = time.perf_counter();
@@ -101,7 +117,9 @@ class CachedDiveProfile:
         # Format
         url = url_for('dive.show', dive_id=self.dive_id);
         dtt2 = { gflow: {
-                gfhigh: (val, '<a href="{}?gflow={:d}&gfhigh={:d}">{:.1f}</a>'.format(url, gflow, gfhigh, val))
+                gfhigh: (val,
+                         '<a href="{}?gflow={:d}&gfhigh={:d}">{:.1f}</a>'.format(url, gflow, gfhigh, val),
+                         gflow == dp.gf_low_profile and gfhigh == dp.gf_high_profile)
                 for gfhigh, val in r.items() }for gflow, r in dtt.items()};
         minv = min(min([v for v in r.values()] for r in dtt.values()));
         maxv = max(max([ v for v in r.values() ] for r in dtt.values()));
@@ -110,12 +128,17 @@ class CachedDiveProfile:
                 op = (v[0]-minv)/(maxv-minv);
             except ZeroDivisionError:
                 op = 0.5;
-            return 'background-color:rgba(150,150,150,{:.2f});'.format(op);
+            # base color varies between 150,150,150 and 230,230,230
+            r = 'background-color:rgba({0},{0},{0},0.35);'.format(150 + round((1-op)*80));
+            if v[2]:
+                # Matches current GF's.
+                r += 'border:2px dashed black';
+            return r;
         def format_map(v):
             return v[1];
         df = pandas.DataFrame(dtt2).transpose();
         styled_df = df.style\
-            .set_table_attributes('class="dataframe smalltable"')\
+            .set_table_attributes('class="dataframe gfdecotable smalltable"')\
             .applymap(style_map)\
             .format(format_map)\
             .render(classes="smalltable");
@@ -162,7 +185,9 @@ def show_elt_plot_heatmap(dive_id):
 def show_elt_summary_table(dive_id):
     cdp = get_cached_dive(dive_id);
     gflow, gfhigh = get_gf_args_from_request();
-    return cdp.summary_table(gflow, gfhigh);
+    r1 = cdp.summary_table(gflow, gfhigh);
+    r2 = cdp.runtime_table();
+    return r1 + r2;
 
 
 @bp.route('/show/<int:dive_id>/fulldata', methods = ['GET'])

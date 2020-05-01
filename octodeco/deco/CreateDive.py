@@ -136,6 +136,7 @@ def create_from_octodeco_csv(lines):
             g = str(row['gas']);
             ids = ( int(row['IsDecoStop']) == 1 );
             iip = ( int(row['IsInterpolated']) == 1 );
+            iap = ( int(row.get('IsAscent',0)) == 1 );
             if result is None:
                 dgflow = int(row[ 'DiveGFLow' ]);
                 dgfhigh = int(row[ 'DiveGFHigh' ]);
@@ -152,6 +153,7 @@ def create_from_octodeco_csv(lines):
         # Point
         p = result._append_point_abstime(t, d, gas);
         p.is_deco_stop = ids;
+        p.is_ascent_point = iap;
         p.is_interpolated_point = iip;
     # Wrap up
     result.add_custom_desc = 'CSV';
