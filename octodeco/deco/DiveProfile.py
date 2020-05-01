@@ -40,7 +40,7 @@ class DiveProfile:
         self.is_public = False;
         self.db_version = DiveProfileSer.CURRENT_VERSION;
 
-        # NOTE - If you add attributes here, also add migration code to DiveProfile code
+        # NOTE - If you add attributes here, also add migration code to DiveProfileSer
         #
 
         if deco_model is not None:
@@ -129,7 +129,7 @@ class DiveProfile:
             transit_point_duration = time_needed - new_duration;
             transit_point_depth = self._points[-1].depth - self._ascent_speed*transit_point_duration;
             tp = self._append_point( transit_point_duration, transit_point_depth, gas );
-            tp.is_deco_stop = True;
+            tp.is_ascent_point = True;
             have_point_added = True;
         # Add the original point
         p = self._append_point(new_duration, new_depth, gas);
@@ -200,13 +200,14 @@ class DiveProfile:
                     pt = DivePoint(tcurr, dcurr, gas, new_points[-1]);
                     new_points.append(pt);
                     pt.is_deco_stop = orig_point.is_deco_stop;
+                    pt.is_ascent_point = orig_point.is_ascent_point;
                     pt.is_interpolated_point = True;
             # Finally, add the point itself (remove duplicates)
             orig_point.prev = new_points[-1] if len(new_points) > 0 else None;
             if orig_point.prev is None \
                 or orig_point.time != orig_point.prev.time or orig_point.depth != orig_point.prev.depth \
-                or ( orig_point.prev.is_deco_stop or orig_point.prev.is_interpolated_point
-                     and not ( orig_point.is_deco_stop or orig_point.is_interpolated_point)):
+                or ( orig_point.prev.is_deco_stop or orig_point.prev.is_ascent_point or orig_point.prev.is_interpolated_point
+                     and not ( orig_point.is_deco_stop or orig_point.is_ascent_point or orig_point.is_interpolated_point)):
                 new_points.append(orig_point);
                 prev_point = orig_point;
         self._points = new_points;
@@ -335,12 +336,16 @@ class DiveProfile:
         if update_deco_info:
             self.update_deco_info();
 
+    def _remove_all_extra_points(self, update_deco_info = True):
+        self.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = update_deco_info)
+        self.remove_points(lambda x: x.is_ascent_point, fix_durations = True, update_deco_info = update_deco_info)
+        self.remove_points(lambda x: x.is_deco_stop, fix_durations = True, update_deco_info = update_deco_info)
+
     def update_stops( self, interpolate = True ):
         # Remove surface time
         surfacetime = self.remove_surface_at_end();
         # Remove deco stops & interpolated points
-        self.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = False)
-        self.remove_points(lambda x: x.is_deco_stop, fix_durations = True, update_deco_info = False)
+        self._remove_all_extra_points( update_deco_info = False );
         # Bring back stops, surface section, interpolated points
         self.append_surfacing(transit = False);
         self.add_stops();
@@ -353,8 +358,7 @@ class DiveProfile:
     def decotime_for_gf(self, gf_low, gf_high):
         cp = copy.deepcopy(self);
         cp.remove_surface_at_end();
-        cp.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = False)
-        cp.remove_points(lambda x: x.is_deco_stop, fix_durations = True, update_deco_info = False)
+        cp._remove_all_extra_points( update_deco_info = False );
         cp._deco_model.set_gf(gf_low, gf_high);
         cp.add_stops_to_surface();
         return cp.decotime();
