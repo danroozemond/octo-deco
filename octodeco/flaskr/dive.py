@@ -108,7 +108,7 @@ class CachedDiveProfile:
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
         return fulldata_table;
 
-    @cache.memoize()
+    #@cache.memoize()
     def gfdeco_table(self):
         dp = self.profile_base()
         t0 = time.perf_counter();
@@ -117,7 +117,9 @@ class CachedDiveProfile:
         # Format
         url = url_for('dive.show', dive_id=self.dive_id);
         dtt2 = { gflow: {
-                gfhigh: (val, '<a href="{}?gflow={:d}&gfhigh={:d}">{:.1f}</a>'.format(url, gflow, gfhigh, val))
+                gfhigh: (val,
+                         '<a href="{}?gflow={:d}&gfhigh={:d}">{:.1f}</a>'.format(url, gflow, gfhigh, val),
+                         gflow == dp.gf_low_profile and gfhigh == dp.gf_high_profile)
                 for gfhigh, val in r.items() }for gflow, r in dtt.items()};
         minv = min(min([v for v in r.values()] for r in dtt.values()));
         maxv = max(max([ v for v in r.values() ] for r in dtt.values()));
@@ -127,8 +129,11 @@ class CachedDiveProfile:
             except ZeroDivisionError:
                 op = 0.5;
             # base color varies between 150,150,150 and 230,230,230
-            print('{:.1f} < {:.1f} < {:.1f} -> {:.1f}'.format(minv, v[0], maxv, op));
-            return 'background-color:rgba({0},{0},{0},0.35);'.format(150 + round((1-op)*80));
+            r = 'background-color:rgba({0},{0},{0},0.35);'.format(150 + round((1-op)*80));
+            if v[2]:
+                # Matches current GF's.
+                r += 'border:2px dashed black';
+            return r;
         def format_map(v):
             return v[1];
         df = pandas.DataFrame(dtt2).transpose();
