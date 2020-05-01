@@ -92,6 +92,33 @@ class CachedDiveProfile:
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
         return fulldata_table;
 
+    #TODO REACTIVATE @cache.memoize()
+    def gfdeco_table(self):
+        t0 = time.perf_counter();
+        dtt = self.profile_base().decotimes_for_gfs();
+        t1 = time.perf_counter();
+        # Format
+        url = url_for('dive.show', dive_id=self.dive_id);
+        dtt2 = { gflow: {
+                gfhigh: (val, '<a href="{}?gflow={:d}&gfhigh={:d}">{:.1f}</a>'.format(url, gflow, gfhigh, val))
+                for gfhigh, val in r.items()
+            }
+            for gflow, r in dtt.items()
+        };
+        df = pandas.DataFrame(dtt2).transpose();
+        minv = min(min([v for v in r] for r in dtt));
+        maxv = max(max([ v for v in r ] for r in dtt));
+        def style_map(v):
+            return 'color:red';
+        def format_map(v):
+            return v[1];
+        styled_df = df.style\
+            .set_table_attributes('class="dataframe smalltable"')\
+            .applymap(style_map)\
+            .format(format_map)\
+            .render(classes="smalltable");
+        return styled_df;
+
 
 @cache.memoize()
 def get_cached_dive(dive_id: int):
@@ -140,6 +167,14 @@ def show_elt_full_table(dive_id):
     cdp = get_cached_dive(dive_id);
     gflow, gfhigh = get_gf_args_from_request();
     return cdp.full_table(gflow, gfhigh);
+
+@bp.route('/show/<int:dive_id>/gfdecodata', methods = ['GET'])
+def show_elt_gfdeco_table(dive_id):
+    cdp = get_cached_dive(dive_id);
+    if user.get_user_details().is_logged_in():
+        return cdp.gfdeco_table();
+    else:
+        return render_template('dive/elt_login_please.html');
 
 
 #

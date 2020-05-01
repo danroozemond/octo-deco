@@ -1,8 +1,8 @@
 # Please see LICENSE.md
 import datetime
 import math;
-import time
-
+import time;
+import copy;
 import pandas as pd;
 import pytz
 
@@ -335,7 +335,7 @@ class DiveProfile:
         if update_deco_info:
             self.update_deco_info();
 
-    def update_stops( self ):
+    def update_stops( self, interpolate = True ):
         # Remove surface time
         surfacetime = self.remove_surface_at_end();
         # Remove deco stops & interpolated points
@@ -346,3 +346,23 @@ class DiveProfile:
         self.add_stops();
         self.append_section(0, surfacetime);
         self.interpolate_points();
+
+    '''
+    Evaluating various GF's and impact on deco time
+    '''
+    def decotime_for_gf(self, gf_low, gf_high):
+        cp = copy.deepcopy(self);
+        cp.remove_surface_at_end();
+        cp.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = False)
+        cp.remove_points(lambda x: x.is_deco_stop, fix_durations = True, update_deco_info = False)
+        cp._deco_model.set_gf(gf_low, gf_high);
+        cp.add_stops_to_surface();
+        return cp.decotime();
+
+    def decotimes_for_gfs(self, gflows=[ 20, 30, 40, 50 ],gfhighs=[ 70, 75, 80, 85, 90 ]):
+        res = dict();
+        for gflow in gflows:
+            res[gflow] = dict();
+            for gfhigh in gfhighs:
+                res[ gflow ][ gfhigh ] = self.decotime_for_gf( gflow, gfhigh );
+        return res;

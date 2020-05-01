@@ -1,5 +1,7 @@
 # Please see LICENSE.md
 import time, sys;
+import copy;
+import pandas as pd;
 
 from octodeco.deco import CreateDive, Gas;
 from octodeco.deco.DiveProfile import DiveProfile;
@@ -32,6 +34,23 @@ print('For interpolate_points ({} points): {:.3f}\n'.format(len(dp._points), tim
 
 for k,v in dp.dive_summary().items():
     print(k,':',v);
+
+print("\n");
+dp2 = copy.deepcopy(dp);
+dp2.set_gf(20,50, updateStops = True);
+dp.update_deco_info();
+for k,v in dp.dive_summary().items():
+    print(k,':',v);
+
+t0 = time.perf_counter();
+res = dp.decotimes_for_gfs();
+t1 = time.perf_counter();
+df = pd.DataFrame(res).transpose();
+print(df);
+print('Total computation time: {:.3f}s'.format(t1-t0))
+print(df.to_html(classes="smalltable", header="true", escape=False))
+# --> format the elements by linking to /dive/show/..?gflow=..&gfhigh=..
+
 
 # for i in range(len(dp._points)):
 #     p = dp._points[i];
