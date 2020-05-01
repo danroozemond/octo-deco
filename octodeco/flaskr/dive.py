@@ -115,7 +115,7 @@ class CachedDiveProfile:
             return v[1];
         df = pandas.DataFrame(dtt2).transpose();
         styled_df = df.style\
-            .set_table_attributes('class="dataframe smalltable"')\
+            .set_table_attributes('class="dataframe gfdecotable smalltable"')\
             .applymap(style_map)\
             .format(format_map)\
             .render(classes="smalltable");

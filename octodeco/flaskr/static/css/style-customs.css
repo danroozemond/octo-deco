@@ -77,6 +77,10 @@ table.dataframe th, td {
     white-space: nowrap;
 }
 
+table.dataframe.gfdecotable a:hover {
+    color: white;
+}
+
 div.chart {
     width: 100%;
     margin-left: 0px;
@@ -100,6 +104,9 @@ div.viztoggle {
     font-size: 0.5em;
     margin: 1em;
     cursor: pointer;
+}
+div.viztoggle:hover {
+    text-decoration: underline;
 }
 
 div.adjust {
