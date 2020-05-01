@@ -359,7 +359,7 @@ class DiveProfile:
         cp.add_stops_to_surface();
         return cp.decotime();
 
-    def decotimes_for_gfs(self, gflows=[ 20, 30, 40, 50 ],gfhighs=[ 70, 75, 80, 85, 90 ]):
+    def decotimes_for_gfs(self, gflows=[ 25, 35, 45, 55 ],gfhighs=[ 45, 65, 70, 75, 85, 95 ]):
         res = dict();
         for gflow in gflows:
             res[gflow] = dict();

@@ -94,8 +94,9 @@ class CachedDiveProfile:
 
     @cache.memoize()
     def gfdeco_table(self):
+        dp = self.profile_base()
         t0 = time.perf_counter();
-        dtt = self.profile_base().decotimes_for_gfs();
+        dtt = dp.decotimes_for_gfs();
         t1 = time.perf_counter();
         # Format
         url = url_for('dive.show', dive_id=self.dive_id);
@@ -109,7 +110,7 @@ class CachedDiveProfile:
                 op = (v[0]-minv)/(maxv-minv);
             except ZeroDivisionError:
                 op = 0.5;
-            return 'background-color:rgba(128,128,128,{:.2f});'.format(op);
+            return 'background-color:rgba(150,150,150,{:.2f});'.format(op);
         def format_map(v):
             return v[1];
         df = pandas.DataFrame(dtt2).transpose();

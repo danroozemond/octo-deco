@@ -21,26 +21,15 @@ from octodeco.deco.DiveProfile import DiveProfile;
 
 
 dp = DiveProfile(gf_low=35, gf_high=70);
-dp.append_section(30, 20, gas = Gas.Trimix(21,35));
-dp.append_section(5, 5, gas = Gas.Air());
-dp.append_section(50, 30, gas = Gas.Trimix(15,40));
+# dp.append_section(30, 20, gas = Gas.Trimix(21,35));
+# dp.append_section(5, 5, gas = Gas.Air());
+dp.append_section(50, 50, gas = Gas.Trimix(21,35));
 dp.add_gas(Gas.Nitrox(50));
-dp.add_gas(Gas.Nitrox(99));
 dp.add_stops_to_surface();
 dp.append_section(0,10);
 t0 = time.perf_counter();
 dp.interpolate_points();
 print('For interpolate_points ({} points): {:.3f}\n'.format(len(dp._points), time.perf_counter()-t0));
-
-for k,v in dp.dive_summary().items():
-    print(k,':',v);
-
-print("\n");
-dp2 = copy.deepcopy(dp);
-dp2.set_gf(20,50, updateStops = True);
-dp.update_deco_info();
-for k,v in dp.dive_summary().items():
-    print(k,':',v);
 
 t0 = time.perf_counter();
 res = dp.decotimes_for_gfs();
@@ -48,8 +37,6 @@ t1 = time.perf_counter();
 df = pd.DataFrame(res).transpose();
 print(df);
 print('Total computation time: {:.3f}s'.format(t1-t0))
-print(df.to_html(classes="smalltable", header="true", escape=False))
-# --> format the elements by linking to /dive/show/..?gflow=..&gfhigh=..
 
 
 # for i in range(len(dp._points)):
