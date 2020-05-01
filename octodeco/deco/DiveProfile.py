@@ -214,6 +214,33 @@ class DiveProfile:
         self.update_deco_info();
 
     '''
+    Generating a runtime
+    '''
+    def runtimetable(self):
+        # Collect the interesting points: last points of each section
+        points = [];
+        for i in range(len(self._points)-1):
+            p = self._points[i];
+            np = self._points[i+1];
+            if p.is_interpolated_point or p.is_ascent_point or p.depth == 0.0:
+                continue;
+            if p.depth != np.depth or p.gas != np.gas:
+                points.append(p)
+            # When importing CSV's, this doesn't make sense
+            if len(points) > 30:
+                return None;
+        # Transform to runtime
+        res = []; lastgas = None;
+        for p in points:
+            r = {'depth':p.depth, 'time':p.time};
+            if p.gas != lastgas:
+                lastgas = p.gas;
+                r['gas'] = p.gas;
+            res.append(r);
+        res.append({'depth':0.0});
+        return res;
+
+    '''
     Deco model info
     '''
     def _update_all_tissue_states(self):

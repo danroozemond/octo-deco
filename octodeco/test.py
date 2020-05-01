@@ -21,23 +21,18 @@ from octodeco.deco.DiveProfile import DiveProfile;
 
 
 dp = DiveProfile(gf_low=35, gf_high=70);
-# dp.append_section(30, 20, gas = Gas.Trimix(21,35));
-# dp.append_section(5, 5, gas = Gas.Air());
 dp.append_section(50, 50, gas = Gas.Trimix(21,35));
-dp.add_gas(Gas.Nitrox(50));
+# dp.append_section(30, 15, gas = Gas.Air());
+dp.add_gas(Gas.Nitrox(50))
+dp.add_gas(Gas.Nitrox(99))
 dp.add_stops_to_surface();
 dp.append_section(0,10);
-t0 = time.perf_counter();
 dp.interpolate_points();
-print('For interpolate_points ({} points): {:.3f}\n'.format(len(dp._points), time.perf_counter()-t0));
 
-t0 = time.perf_counter();
-res = dp.decotimes_for_gfs();
-t1 = time.perf_counter();
-df = pd.DataFrame(res).transpose();
-print(df);
-print('Total computation time: {:.3f}s'.format(t1-t0))
+print(dp.dive_summary());
 
+for s in dp.runtimetable():
+    print(s);
 
 # for i in range(len(dp._points)):
 #     p = dp._points[i];
