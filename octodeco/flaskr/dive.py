@@ -110,7 +110,9 @@ class CachedDiveProfile:
                 op = (v[0]-minv)/(maxv-minv);
             except ZeroDivisionError:
                 op = 0.5;
-            return 'background-color:rgba(150,150,150,{:.2f});'.format(op);
+            # base color varies between 150,150,150 and 230,230,230
+            print('{:.1f} < {:.1f} < {:.1f} -> {:.1f}'.format(minv, v[0], maxv, op));
+            return 'background-color:rgba({0},{0},{0},0.35);'.format(150 + round((1-op)*80));
         def format_map(v):
             return v[1];
         df = pandas.DataFrame(dtt2).transpose();
