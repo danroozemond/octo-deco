@@ -92,7 +92,7 @@ class CachedDiveProfile:
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
         return fulldata_table;
 
-    #TODO REACTIVATE @cache.memoize()
+    @cache.memoize()
     def gfdeco_table(self):
         t0 = time.perf_counter();
         dtt = self.profile_base().decotimes_for_gfs();
@@ -101,23 +101,25 @@ class CachedDiveProfile:
         url = url_for('dive.show', dive_id=self.dive_id);
         dtt2 = { gflow: {
                 gfhigh: (val, '<a href="{}?gflow={:d}&gfhigh={:d}">{:.1f}</a>'.format(url, gflow, gfhigh, val))
-                for gfhigh, val in r.items()
-            }
-            for gflow, r in dtt.items()
-        };
-        df = pandas.DataFrame(dtt2).transpose();
-        minv = min(min([v for v in r] for r in dtt));
-        maxv = max(max([ v for v in r ] for r in dtt));
+                for gfhigh, val in r.items() }for gflow, r in dtt.items()};
+        minv = min(min([v for v in r.values()] for r in dtt.values()));
+        maxv = max(max([ v for v in r.values() ] for r in dtt.values()));
         def style_map(v):
-            return 'color:red';
+            try:
+                op = (v[0]-minv)/(maxv-minv);
+            except ZeroDivisionError:
+                op = 0.5;
+            return 'background-color:rgba(128,128,128,{:.2f});'.format(op);
         def format_map(v):
             return v[1];
+        df = pandas.DataFrame(dtt2).transpose();
         styled_df = df.style\
             .set_table_attributes('class="dataframe smalltable"')\
             .applymap(style_map)\
             .format(format_map)\
             .render(classes="smalltable");
-        return styled_df;
+        html_comp_time = 'Computation time: {:.2f}s.'.format(t1-t0);
+        return styled_df + '<br/>' + html_comp_time;
 
 
 @cache.memoize()
