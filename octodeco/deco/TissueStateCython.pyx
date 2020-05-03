@@ -170,7 +170,6 @@ class TissueState:
         return pceil;
 
     def p_ceiling_for_amb_to_gf(self, amb_to_gf):
-        # TODO check for cython speedup
         # Binary search again
         #   p0 < h < p1
         #   too_high_gf(p0) > 0

@@ -11,8 +11,10 @@
     <div class="diveselect">
         <form method="get" action="{{url_for('dive.show_get')}}">
         <label for="dives" style="display:none">Display:</label>
-        <select id="dives" name="dive_id" onchange="this.form.submit()">{%
-            for x in alldives %}
+        <select id="dives" name="dive_id" onchange="this.form.submit()">
+            <option disabled>{{dive.description()}}</option>
+            <option style="font-size: 1pt; background-color: #000000;" disabled>&nbsp;</option>
+            {% for x in alldives %}
               <option value="{{x['dive_id']}}"{%
               if x['dive_id'] == dive.dive_id %} selected {% endif
               %}>{{x['dive_desc']}}</option>{% endfor %}
@@ -27,6 +29,7 @@
     <li><span class="fa fa-chevron-circle-right"></span><a href="#diveprofile">Dive profile</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#divesummary">Dive summary</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#aheatmap">Heatmap</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#agfdeco">GF-Decotime table</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#afulldata">Full dive data</a></li>
     {% if modify_allowed %}
     <li><span class="fa fa-chevron-circle-right"></span><a href="#amodifydive">Modify</a></li>
@@ -122,6 +125,20 @@
         full_table_loaded=false;
     }
 
+    var gfdeco_table_loaded=false;
+    function load_gfdeco_table()
+    {
+        spin_elt( '#table_gfdeco', true );
+        $.ajax({
+        url: "{{url_for('dive.show_elt_gfdeco_table', dive_id=dive.dive_id)}}",
+        success: function(result) {
+            $('#table_gfdeco').html(result);
+            spin_elt( '#table_gfdeco', false );
+            gfdeco_table_loaded = true;
+        }
+        });
+    }
+
 
     /*
      * Showing / hiding page elements
@@ -138,6 +155,9 @@
     }
     function toggle_div_table_full() {
         toggle_elt('#table_full', function() { if (!full_table_loaded) load_full_table(); } );
+    }
+    function toggle_div_table_gfdeco() {
+        toggle_elt('#table_gfdeco', function() { if (!gfdeco_table_loaded) load_gfdeco_table(); } );
     }
     function toggle_div_modify_dive() {
         toggle_elt('#modify_dive', function() {} );
@@ -254,6 +274,19 @@
         <div class="chart placeholder" id="chart_heatmap_plh" style="display:block;">
             <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
         </div>
+    </div>
+
+
+    <!--
+      GF-Decotime-Table
+    -->
+    <a name="agfdeco"></a>
+    <h2>GFs vs Decotime<div class="viztoggle" id="table_gfdeco_toggle" onclick="toggle_div_table_gfdeco()">[show]</div></h2>
+
+    <div id="table_gfdeco" style="display: none">
+    </div>
+    <div id="table_gfdeco_plh" class="placeholder" style="display: none">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
     </div>
 
 

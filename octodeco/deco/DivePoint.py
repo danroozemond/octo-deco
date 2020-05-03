@@ -11,8 +11,11 @@ class DivePoint:
         self.tissue_state = None;
         self.deco_info = None;
         self.is_deco_stop = False;
+        self.is_ascent_point = False;
         self.is_interpolated_point = False;
         self.prev = prev;
+        # NOTE - If you add attributes here, also add migration code to DiveProfileSer
+        #
 
     def __repr__(self):
         return '%.1f:%dm' % (self.time, self.depth);
@@ -26,7 +29,7 @@ class DivePoint:
         return [ 'time', 'depth', 'gas', 'ppO2' ]         \
                 + DivePoint.dataframe_columns_deco_info() \
                 + [ 'Stops' ]                             \
-                + [ 'IsDecoStop', 'IsInterpolated', 'DiveGFLow', 'DiveGFHigh'];
+                + [ 'IsDecoStop', 'IsAscent', 'IsInterpolated', 'DiveGFLow', 'DiveGFHigh'];
 
     def repr_for_dataframe(self, diveprofile = None):
         r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * self.p_amb ];
@@ -35,7 +38,7 @@ class DivePoint:
             r += [ Util.stops_to_string( self.deco_info['Stops'] ) ]
         else:
             r += [ '' for i in range( len(DivePoint.dataframe_columns_deco_info()) + 1) ];
-        r += [ 1 if self.is_deco_stop else 0, 1 if self.is_interpolated_point else 0];
+        r += [ 1 if self.is_deco_stop else 0, 1 if self.is_ascent_point else 0, 1 if self.is_interpolated_point else 0];
         r += [ diveprofile.gf_low_profile, diveprofile.gf_high_profile ] if diveprofile is not None else [100,100];
         return r;
 
