@@ -294,15 +294,18 @@ def delete(dive_id):
 def modify(dive_id):
     if request.form.get('action_update', '') != '':
         # Some input sanitation
-        ipt_surface_section = min(120, request.form.get('ipt_surface_section', 0, type=int));
+        ipt_surface_section = max(0, min(120, request.form.get('ipt_surface_section', 0, type=int)));
         ipt_description = request.form.get('ipt_description')[:100];
         ipt_public = ( request.form.get('ipt_public', 'off').lower() == 'on')
         dp = get_diveprofile_for_display(dive_id);
-        dp.remove_surface_at_end();
-        if ipt_surface_section > 0:
-            flash("Added {} mins surface section".format(ipt_surface_section));
-            dp.append_section(0, ipt_surface_section);
-        dp.interpolate_points();
+        if abs(dp.length_of_surface_section() - ipt_surface_section) > 0.1:
+            dp.remove_surface_at_end();
+            if ipt_surface_section > 0:
+                flash("Added {} mins surface section".format(ipt_surface_section));
+                dp.append_section(0, ipt_surface_section);
+            else:
+                flash("Removed surface section");
+            dp.interpolate_points();
         if ipt_description != dp.description():
             flash('Modified description');
             if ipt_description.strip() != '':
