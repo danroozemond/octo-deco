@@ -108,7 +108,7 @@ class CachedDiveProfile:
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
         return fulldata_table;
 
-    #@cache.memoize()
+    @cache.memoize()
     def gfdeco_table(self):
         dp = self.profile_base()
         t0 = time.perf_counter();
