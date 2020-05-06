@@ -120,8 +120,8 @@ class CachedDiveProfile:
                 gfhigh: (val,
                          '<a href="{}?gflow={:d}&gfhigh={:d}">{:.1f}</a>'.format(url, gflow, gfhigh, val),
                          gflow == dp.gf_low_profile and gfhigh == dp.gf_high_profile)
-                for gfhigh, val in r.items() }for gflow, r in dtt.items()};
-        minv = min(min([v for v in r.values()] for r in dtt.values()));
+                for gfhigh, val in r.items() } for gflow, r in dtt.items() };
+        minv = min(min([ v for v in r.values() ] for r in dtt.values()));
         maxv = max(max([ v for v in r.values() ] for r in dtt.values()));
         def style_map(v):
             try:
