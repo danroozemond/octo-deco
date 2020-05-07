@@ -4,7 +4,7 @@ import time;
 
 import pandas;
 from flask import (
-    Blueprint, render_template, Response, flash, redirect, url_for, request, abort, jsonify
+    Blueprint, render_template, Response, flash, redirect, url_for, request, abort, jsonify, session
 )
 
 from octodeco.deco import CreateDive;
@@ -148,11 +148,14 @@ class CachedDiveProfile:
 
 @cache.memoize()
 def get_cached_dive(dive_id: int):
+    session[ 'last_dive_id' ] = None;
     cdp = CachedDiveProfile(dive_id);
     if cdp is None:
-        abort(405);
+        flash('Dive not found [%i]' % dive_id);
+        return redirect(url_for('dive.show_any'));
     if not db_dive.is_display_allowed(cdp.profile_base()):
         abort(403);
+    session[ 'last_dive_id' ] = dive_id;
     return cdp;
 
 
@@ -222,12 +225,10 @@ def show_get():
 @bp.route('/show/<int:dive_id>', methods = ['GET'])
 def show(dive_id):
     dp = get_diveprofile_for_display(dive_id);
-    if dp is None:
-        flash('Dive not found [%i]' % dive_id)
-        return redirect(url_for('dive.show_any'));
+    # This will never return None, get_diveprofile_for_display will redirect/abort if necessary
+    assert dp is not None;
 
     alldives = db_dive.get_all_dives();
-
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
@@ -237,11 +238,14 @@ def show(dive_id):
 
 @bp.route('/show/any', methods = [ 'GET'])
 def show_any():
+    last_dive_id = session.get('last_dive_id', None);
+    if last_dive_id is not None:
+        return redirect(url_for('dive.show', dive_id = last_dive_id));
     dive_id = db_dive.get_any_dive_id();
     if dive_id is None:
         return redirect(url_for('dive.show_none'));
     else:
-        return redirect(url_for('dive.show', dive_id = dive_id))
+        return redirect(url_for('dive.show', dive_id = dive_id));
 
 
 #
