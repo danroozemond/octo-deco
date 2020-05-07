@@ -1,6 +1,5 @@
 TODO this list :) [also check TO-DOs in .py's]
 
-* Generation of run time table
 * Gas consumption
 * CNS tracking
 
