@@ -69,7 +69,7 @@ def destroy_session():
         ''', [ str(session_id) ]
                 );
     g.user_details = None;
-    session.pop('session_id');
+    session.clear();
 
 
 def destroy_user_profile():

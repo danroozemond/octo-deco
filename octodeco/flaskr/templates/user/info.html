@@ -9,7 +9,6 @@
     <header><h2>User info</h2></header>
     <p>session_id: {{ session['session_id'] }} </p>
     <p>user details: {{ g.user_details }} </p>
-    <p>env: {# request.environ #}</p>
 
     <form method="post" action="{{url_for('user.update')}}">
         <input type="submit" name="action" value="Destroy session" onclick="return confirm('Sure?');">
