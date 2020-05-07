@@ -43,6 +43,7 @@
 					<div class="login_info">
 						{% if g.user_details.is_logged_in() %}
 						<img class="profile_pic" src="{{ g.user_details['google_picture'] }}">
+						<div class="given_name">{{ g.user_details['google_given_name'] }}</div>
 						<a href="{{ g.user_details.logout_link }}">logout</a>
 						{% else %}
 						<a href="{{ g.user_details.login_link }}">

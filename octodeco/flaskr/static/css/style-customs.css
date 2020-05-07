@@ -172,7 +172,13 @@ img.google_signin
 {
 
 }
+div.login_info div.given_name
+{
+    color:white;
+    margin-bottom: 0.1em;
+}
 div.login_info a {
+    display: block;
     color:white;
     font-weight: bold;
     text-decoration:none;
