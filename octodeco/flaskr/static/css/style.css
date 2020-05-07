@@ -38,7 +38,10 @@
 	}
 
 	a {
-		color: #D1551F;
+		color: #047886;
+	}
+	a:hover {
+	    color: #37bbd5;
 	}
 
 	strong {
