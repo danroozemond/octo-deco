@@ -39,9 +39,11 @@
 
 	a {
 		color: #047886;
+	    text-decoration: none;
 	}
 	a:hover {
 	    color: #37bbd5;
+	    text-decoration: underline;
 	}
 
 	strong {
@@ -569,6 +571,7 @@ ul.style1 a {
 }
 
 ul.style1 a:hover {
+    color: #37bbd5;
 	text-decoration: underline;
 }
 
@@ -733,12 +736,6 @@ ul.style3 .first {
 		border-top: 1px solid;
 		border-color: rgba(0,0,0,.1);
 	}
-	
-	#copyright a
-	{
-		text-decoration: none;
-	}
-	
 	
 	#main
 	{

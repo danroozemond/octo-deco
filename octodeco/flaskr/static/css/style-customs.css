@@ -77,10 +77,6 @@ table.dataframe th, td {
     white-space: nowrap;
 }
 
-table.dataframe.gfdecotable a:hover {
-    color: white;
-}
-
 div.chart {
     width: 100%;
     margin-left: 0px;
