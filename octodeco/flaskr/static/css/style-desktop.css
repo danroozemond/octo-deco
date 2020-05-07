@@ -87,13 +87,13 @@
 				font-weight: 200;
 				font-size: 1em;
 				outline: 0;
-				color: #323338;
+				color: #FFF;
 			}
 
 
 			#nav > ul > li > a:hover
 			{
-				color: #FFF;
+				color: #323338;
 			}
 
 			#nav li.active a

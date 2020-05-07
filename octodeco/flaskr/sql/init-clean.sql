@@ -11,7 +11,8 @@ CREATE TABLE users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT,
   google_sub TEXT,
   google_given_name TEXT,
-  google_picture TEXT
+  google_picture TEXT,
+  last_activity DATETIME
 );
 CREATE TABLE sessions (
   session_id TEXT NOT NULL,

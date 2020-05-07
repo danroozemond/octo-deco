@@ -4,6 +4,7 @@ import uuid;
 from flask import session, g;
 
 from . import db;
+from .app import cache;
 
 
 #
@@ -17,7 +18,6 @@ def get_session_id():
             print('Migrated from user_id to session_id');
             session_id = session.pop('user_id');
         else:
-            print('Generated new session_id');
             session_id = uuid.uuid4();
         # Store
         session['session_id'] = session_id;
@@ -38,7 +38,7 @@ def get_db_user_details():
         row = cur.fetchone();
         if row is None:
             # Add details, try again
-            cur.execute('INSERT INTO users(google_sub) values(null)');
+            cur.execute('INSERT INTO users(last_activity) VALUES(datetime(\'now\'))');
             user_id = cur.lastrowid;
             cur.execute("""
                         INSERT INTO sessions(session_id, user_id)
@@ -49,6 +49,7 @@ def get_db_user_details():
             assert row is not None;
         g.db_user_details = { 'session_id' : session_id };
         g.db_user_details.update(dict(row));
+        update_last_activity(row['user_id']);
     return g.db_user_details;
 
 
@@ -70,7 +71,7 @@ def destroy_session():
         ''', [ str(session_id) ]
                 );
     g.user_details = None;
-    session.pop('session_id');
+    session.clear();
 
 
 def destroy_user_profile():
@@ -91,7 +92,8 @@ def get_all_sessions_for_user():
 
 
 #
-# Auth
+# Authentication -> merge/allocate sessions
+# (Google OAuth code is in auth.py)
 #
 def process_valid_google_login(userinfo_json):
     cur = db.get_db().cursor();
@@ -101,7 +103,8 @@ def process_valid_google_login(userinfo_json):
         # User previously unknown, update current user_id with these details
         cur.execute("""
                     UPDATE users 
-                    SET google_sub = ?, google_given_name = ?, google_picture = ?
+                    SET google_sub = ?, google_given_name = ?, google_picture = ?, 
+                        last_activity = datetime('now') 
                     WHERE user_id = ?
                     """,
                     [ userinfo_json['sub'], userinfo_json['given_name'], userinfo_json['picture'],
@@ -114,6 +117,7 @@ def process_valid_google_login(userinfo_json):
                     [ target_user_id, str(get_session_id())] );
         cur.execute("""DELETE FROM users WHERE user_id = ?""",
                     [ current_user_id ]);
+        update_last_activity(target_user_id);
         # Update / remove existing dives
         cur.execute("""DELETE FROM dives WHERE user_id = ? AND is_demo = 1""",
                     [ current_user_id ]);
@@ -121,3 +125,15 @@ def process_valid_google_login(userinfo_json):
                     [ target_user_id, current_user_id ]);
 
 
+#
+# Keeping last_activity up to date, keeping the database clean
+#
+@cache.memoize(timeout = 60)
+def update_last_activity(user_id):
+    cur = db.get_db().cursor();
+    cur.execute("""
+                UPDATE users 
+                SET last_activity = datetime('now') 
+                WHERE user_id = ?""",
+            [ user_id ]);
+    return True;

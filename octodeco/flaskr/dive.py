@@ -4,7 +4,7 @@ import time;
 
 import pandas;
 from flask import (
-    Blueprint, render_template, Response, flash, redirect, url_for, request, abort, jsonify
+    Blueprint, render_template, Response, flash, redirect, url_for, request, abort, jsonify, session
 )
 
 from octodeco.deco import CreateDive;
@@ -108,7 +108,7 @@ class CachedDiveProfile:
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
         return fulldata_table;
 
-    #@cache.memoize()
+    @cache.memoize()
     def gfdeco_table(self):
         dp = self.profile_base()
         t0 = time.perf_counter();
@@ -120,8 +120,8 @@ class CachedDiveProfile:
                 gfhigh: (val,
                          '<a href="{}?gflow={:d}&gfhigh={:d}">{:.1f}</a>'.format(url, gflow, gfhigh, val),
                          gflow == dp.gf_low_profile and gfhigh == dp.gf_high_profile)
-                for gfhigh, val in r.items() }for gflow, r in dtt.items()};
-        minv = min(min([v for v in r.values()] for r in dtt.values()));
+                for gfhigh, val in r.items() } for gflow, r in dtt.items() };
+        minv = min(min([ v for v in r.values() ] for r in dtt.values()));
         maxv = max(max([ v for v in r.values() ] for r in dtt.values()));
         def style_map(v):
             try:
@@ -148,11 +148,14 @@ class CachedDiveProfile:
 
 @cache.memoize()
 def get_cached_dive(dive_id: int):
+    session[ 'last_dive_id' ] = None;
     cdp = CachedDiveProfile(dive_id);
     if cdp is None:
-        abort(405);
+        flash('Dive not found [%i]' % dive_id);
+        return redirect(url_for('dive.show_any'));
     if not db_dive.is_display_allowed(cdp.profile_base()):
         abort(403);
+    session[ 'last_dive_id' ] = dive_id;
     return cdp;
 
 
@@ -222,12 +225,10 @@ def show_get():
 @bp.route('/show/<int:dive_id>', methods = ['GET'])
 def show(dive_id):
     dp = get_diveprofile_for_display(dive_id);
-    if dp is None:
-        flash('Dive not found [%i]' % dive_id)
-        return redirect(url_for('dive.show_any'));
+    # This will never return None, get_diveprofile_for_display will redirect/abort if necessary
+    assert dp is not None;
 
     alldives = db_dive.get_all_dives();
-
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
@@ -237,11 +238,14 @@ def show(dive_id):
 
 @bp.route('/show/any', methods = [ 'GET'])
 def show_any():
+    last_dive_id = session.get('last_dive_id', None);
+    if last_dive_id is not None:
+        return redirect(url_for('dive.show', dive_id = last_dive_id));
     dive_id = db_dive.get_any_dive_id();
     if dive_id is None:
         return redirect(url_for('dive.show_none'));
     else:
-        return redirect(url_for('dive.show', dive_id = dive_id))
+        return redirect(url_for('dive.show', dive_id = dive_id));
 
 
 #
@@ -294,15 +298,18 @@ def delete(dive_id):
 def modify(dive_id):
     if request.form.get('action_update', '') != '':
         # Some input sanitation
-        ipt_surface_section = min(120, request.form.get('ipt_surface_section', 0, type=int));
+        ipt_surface_section = max(0, min(120, request.form.get('ipt_surface_section', 0, type=int)));
         ipt_description = request.form.get('ipt_description')[:100];
         ipt_public = ( request.form.get('ipt_public', 'off').lower() == 'on')
         dp = get_diveprofile_for_display(dive_id);
-        dp.remove_surface_at_end();
-        if ipt_surface_section > 0:
-            flash("Added {} mins surface section".format(ipt_surface_section));
-            dp.append_section(0, ipt_surface_section);
-        dp.interpolate_points();
+        if abs(dp.length_of_surface_section() - ipt_surface_section) > 0.1:
+            dp.remove_surface_at_end();
+            if ipt_surface_section > 0:
+                flash("Added {} mins surface section".format(ipt_surface_section));
+                dp.append_section(0, ipt_surface_section);
+            else:
+                flash("Removed surface section");
+            dp.interpolate_points();
         if ipt_description != dp.description():
             flash('Modified description');
             if ipt_description.strip() != '':
