@@ -98,7 +98,8 @@ def redirected():
         urj = userinfo_response.json();
         db_user.process_valid_google_login(urj);
         flash("User %s authenticated succesfully" % urj['email']);
+        return redirect(url_for('dive.show_any'));
     else:
         flash("User email not available or not verified by Google.");
-    return redirect(url_for('user.info'));
+        return redirect(url_for('user.info'));
 
