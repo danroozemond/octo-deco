@@ -17,7 +17,6 @@ def get_session_id():
             print('Migrated from user_id to session_id');
             session_id = session.pop('user_id');
         else:
-            print('Generated new session_id');
             session_id = uuid.uuid4();
         # Store
         session['session_id'] = session_id;

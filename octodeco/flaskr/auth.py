@@ -36,7 +36,6 @@ def get_google_provider_cfg():
 
 @cache.memoize()
 def get_google_request_uri():
-    print('construct_google_request_uri actually executing');
     # Get google's config for Google login
     google_provider_cfg = get_google_provider_cfg();
 
