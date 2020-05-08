@@ -55,8 +55,8 @@ def _get_db_user_details(session_id):
 def get_db_user_details():
     session_id = get_session_id();
     result = _get_db_user_details(session_id);
-    # This is also a nice hook to, call two update functions
-    # This happens only at intervals using cache.memoize
+    # This is also a nice hook to call two update functions.
+    # This happens only at intervals using cache.memoize.
     update_last_activity(result['user_id']);
     cleanup_stale_users();
     # Done
