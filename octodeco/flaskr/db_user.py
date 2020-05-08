@@ -24,8 +24,8 @@ def get_session_id():
     return session_id;
 
 
-def get_db_user_details():
-    session_id = get_session_id();
+@cache.memoize(timeout = 10)  # Short timeout
+def _get_db_user_details(session_id):
     if 'db_user_details' not in g:
         cur = db.get_db().cursor();
         selectquery = '''
@@ -49,8 +49,18 @@ def get_db_user_details():
             assert row is not None;
         g.db_user_details = { 'session_id' : session_id };
         g.db_user_details.update(dict(row));
-        update_last_activity(row['user_id']);
     return g.db_user_details;
+
+
+def get_db_user_details():
+    session_id = get_session_id();
+    result = _get_db_user_details(session_id);
+    # This is also a nice hook to, call two update functions
+    # This happens only at intervals using cache.memoize
+    update_last_activity(result['user_id']);
+    cleanup_stale_users();
+    # Done
+    return result;
 
 
 def get_user_id():
@@ -60,7 +70,6 @@ def get_user_id():
 #
 # Session / user manipulation
 #
-
 def destroy_session():
     session_id = get_db_user_details()[ 'session_id' ];
     cur = db.get_db().cursor();
@@ -70,6 +79,7 @@ def destroy_session():
         WHERE session_id = ?
         ''', [ str(session_id) ]
                 );
+    cache.delete_memoized(_get_db_user_details, session_id);
     g.user_details = None;
     session.clear();
 
@@ -136,4 +146,30 @@ def update_last_activity(user_id):
                 SET last_activity = datetime('now') 
                 WHERE user_id = ?""",
             [ user_id ]);
+    return True;
+
+
+@cache.memoize(timeout = 300)
+def cleanup_stale_users():
+    # Every now and then, find stale/useless users/sessions and clean them out
+    # Settings
+    age_to_remove = 1.0;  # days
+    max_nr_to_remove = 10;
+    # Do
+    cur = db.get_db().cursor();
+    cur.execute("""
+                SELECT u.user_id, u.google_sub, julianday()-julianday(u.last_activity) as age, 
+                       count(d.dive_id) as divecnt
+                FROM users u LEFT JOIN dives d ON u.user_id = d.user_id
+                GROUP BY u.user_id
+                HAVING divecnt = 0 and age > ? and google_sub is null
+                ORDER BY last_activity
+                LIMIT ?;
+                """, [ age_to_remove, max_nr_to_remove ]);
+    cur2 = db.get_db().cursor();
+    for row in cur:
+        user_id = row['user_id'];
+        cur2.execute("DELETE FROM sessions WHERE user_id = ?", [ user_id ] );
+        cur2.execute("DELETE FROM users WHERE user_id = ?", [ user_id ]);
+        print('Removed stale user %i' % user_id)
     return True;
