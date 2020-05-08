@@ -24,8 +24,8 @@ def get_session_id():
     return session_id;
 
 
-def get_db_user_details():
-    session_id = get_session_id();
+@cache.memoize(timeout = 10)  # Short timeout
+def _get_db_user_details(session_id):
     if 'db_user_details' not in g:
         cur = db.get_db().cursor();
         selectquery = '''
@@ -53,6 +53,11 @@ def get_db_user_details():
     return g.db_user_details;
 
 
+def get_db_user_details():
+    session_id = get_session_id();
+    return _get_db_user_details(session_id);
+
+
 def get_user_id():
     return get_db_user_details()[ 'user_id' ];
 
@@ -60,7 +65,6 @@ def get_user_id():
 #
 # Session / user manipulation
 #
-
 def destroy_session():
     session_id = get_db_user_details()[ 'session_id' ];
     cur = db.get_db().cursor();
@@ -70,6 +74,7 @@ def destroy_session():
         WHERE session_id = ?
         ''', [ str(session_id) ]
                 );
+    cache.delete_memoized(_get_db_user_details, session_id);
     g.user_details = None;
     session.clear();
 
