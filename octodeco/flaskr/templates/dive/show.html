@@ -195,7 +195,7 @@
     <div class="chart" id="chart_diveprofile" style="display:none;">
     </div>
     <div class="chart placeholder" id="chart_diveprofile_plh" style="display:block;">
-        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
 
     <!--
@@ -240,7 +240,7 @@
                    onmousemove="document.getElementById('show_gfhigh').innerHTML=this.value;"
                    onchange="reload_all();"/>
             = GF <span id="show_gflow">{{dive.gf_low_display}}</span> / <span id="show_gfhigh">{{dive.gf_high_display}}</span>
-            <img id="spinner" style="display:none"
+            <img id="spinner" style="display:none" alt="spinner"
                  src="{{ url_for('static', filename='images/spinner-51px.gif') }}">
         </div>
         {% if modify_allowed %}
@@ -258,7 +258,7 @@
     <div id="table_summary" style="display:none;">
     </div>
     <div class="placeholder" id="table_summary_plh" style="display:block;">
-        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
 
     <!--
@@ -272,7 +272,7 @@
         <div class="chart" id="chart_heatmap" style="display:none;">
         </div>
         <div class="chart placeholder" id="chart_heatmap_plh" style="display:block;">
-            <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+            <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
         </div>
     </div>
 
@@ -286,7 +286,7 @@
     <div id="table_gfdeco" style="display: none">
     </div>
     <div id="table_gfdeco_plh" class="placeholder" style="display: none">
-        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
 
 
@@ -301,7 +301,7 @@
     <div id="table_full" class="bigtable" style="display: none">
     </div>
     <div id="table_full_plh" class="bigtable placeholder" style="display: none">
-        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
 
 
