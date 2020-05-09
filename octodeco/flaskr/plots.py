@@ -16,12 +16,17 @@ def show_diveprofile(diveprofile):
     fs_ys2 = [ 0 for y in fs_ys1 ];
     comp_x = fs_xs + [ fs_xs[ -1 ], fs_xs[ -1 ] ] + fs_xs[ ::-1 ];
     comp_y = fs_ys2 + [ 0, fs_ys1[ -1 ] ] + fs_ys1[ ::-1 ];
+    stopinfo = list(df[ "Stops"]);
+    stopinfo = stopinfo + ['',''] + stopinfo[ ::-1 ];
     fig.add_trace(go.Scatter(
         x = comp_x,
         y = comp_y,
         fill = 'toself',
         fillcolor = 'rgba(255,0,0,0.2)',
         line_color = 'rgba(255,0,0,0)',
+        customdata = stopinfo,
+        hoveron = 'points+fills',
+        hovertemplate = '1st stop: %{y:.1f}m @ %{x:.1f}mins [%{customdata}]<extra></extra>',
         showlegend = True,
         name = '1st stop',
     ))
