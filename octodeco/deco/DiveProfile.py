@@ -1,8 +1,9 @@
 # Please see LICENSE.md
+import copy;
 import datetime
 import math;
 import time;
-import copy;
+
 import pandas as pd;
 import pytz
 
@@ -394,6 +395,11 @@ class DiveProfile:
         return cp.decotime();
 
     def decotimes_for_gfs(self, gflows=[ 25, 35, 45, 55 ],gfhighs=[ 45, 65, 70, 75, 85, 95 ]):
+        rtt = self.runtimetable();
+        if rtt is None:
+            # We could not create a runtime table, because it did not make sense
+            # => also gfdecotable does not make sense
+            return None;
         res = dict();
         for gflow in gflows:
             res[gflow] = dict();

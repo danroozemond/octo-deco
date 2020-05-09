@@ -114,6 +114,8 @@ class CachedDiveProfile:
         t0 = time.perf_counter();
         dtt = dp.decotimes_for_gfs();
         t1 = time.perf_counter();
+        if dtt is None:
+            return 'Such a table is unfortunately not available for this dive.';
         # Format
         url = url_for('dive.show', dive_id=self.dive_id);
         dtt2 = { gflow: {
