@@ -32,6 +32,8 @@ def show_diveprofile(diveprofile):
                              line = {'color': 'rgb(176,42,143)', 'dash': 'dot', 'width': 1},
                              visible = "legendonly"),
                   secondary_y = True);
+    fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "Ceil99" ], name = 'Ceil GF99',
+                             line = {'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 2}));
     fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "Ceil" ], name = 'Ceil',
                              line = {'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 2}));
     fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "SurfaceGF" ], name = 'SurfaceGF',
