@@ -26,9 +26,9 @@ def show_diveprofile(diveprofile):
         line_color = 'rgba(255,0,0,0)',
         customdata = stopinfo,
         hoveron = 'points+fills',
-        hovertemplate = '1st stop: %{y:.1f}m @ %{x:.1f}mins [%{customdata}]<extra></extra>',
+        hovertemplate = 'Stops at %{x:.1f}mins: %{customdata}<extra></extra>',
         showlegend = True,
-        name = '1st stop',
+        name = 'Stops',
     ))
     # ppO2
     fig.add_trace(go.Scatter(x = df[ "time" ], y = 100 * df[ "ppO2" ], name = 'ppO2',
