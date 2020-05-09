@@ -26,13 +26,13 @@
 
 {% block sidebaritems %}
     <li><span class="fa fa-play"></span><a href="{{url_for('dive.new_show')}}">New dive..</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#diveprofile">Dive profile</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#divesummary">Dive summary</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#aheatmap">Heatmap</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#agfdeco">GF-Decotime table</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#afulldata">Full dive data</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#chart_diveprofile">Dive profile</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hdivesummary">Dive summary</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hheatmap">Heatmap</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hgfdeco">GF-Decotime table</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hfulldata">Full dive data</a></li>
     {% if modify_allowed %}
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#amodifydive">Modify</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hmodifydive">Modify</a></li>
     {% endif %}
 {% endblock %}
 
@@ -191,7 +191,6 @@
     <!--
       Diveprofile chart
     -->
-    <a name="diveprofile"></a>
     <div class="chart" id="chart_diveprofile" style="display:none;">
     </div>
     <div class="chart placeholder" id="chart_diveprofile_plh" style="display:block;">
@@ -253,8 +252,7 @@
     <!--
       Dive summary
     -->
-    <a name="divesummary"></a>
-    <h2>Dive summary</h2>
+    <h2 id="hdivesummary">Dive summary</h2>
     <div id="table_summary" style="display:none;">
     </div>
     <div class="placeholder" id="table_summary_plh" style="display:block;">
@@ -264,8 +262,7 @@
     <!--
       Heatmap
     -->
-    <a name="aheatmap"></a>
-    <h2>Tissue heatmap<div class="viztoggle" id="heatmap_toggle" onclick="toggle_div_heatmap()">[show]</div></h2>
+    <h2 id="hheatmap">Tissue heatmap<div class="viztoggle" id="heatmap_toggle" onclick="toggle_div_heatmap()">[show]</div></h2>
 
     <div id="heatmap" style="display: none">
         <p>Displays (scaled) compartment pressure (actually: GF99)</p>
@@ -280,8 +277,7 @@
     <!--
       GF-Decotime-Table
     -->
-    <a name="agfdeco"></a>
-    <h2>GFs vs Decotime<div class="viztoggle" id="table_gfdeco_toggle" onclick="toggle_div_table_gfdeco()">[show]</div></h2>
+    <h2 id="hgfdeco">GFs vs Decotime<div class="viztoggle" id="table_gfdeco_toggle" onclick="toggle_div_table_gfdeco()">[show]</div></h2>
 
     <div id="table_gfdeco" style="display: none">
     </div>
@@ -293,8 +289,7 @@
     <!--
       Full data table
     -->
-    <a name="afulldata"></a>
-    <h2>Full dive data
+    <h2 id="hfulldata">Full dive data
         <div class="viztoggle" id="table_full_toggle" onclick="toggle_div_table_full()">[show]</div>
         <div class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></div>
     </h2>
@@ -309,8 +304,7 @@
       Modify block
     -->
     {% if modify_allowed %}
-    <a name="amodifydive"></a>
-    <h2>Modify dive
+    <h2 id="hmodifydive">Modify dive
     <div class="viztoggle" id="modify_dive_toggle" onclick="toggle_div_modify_dive()">[show]</div>
     </h2>
     <div id="modify_dive" class="modifydive" style="display:none">
