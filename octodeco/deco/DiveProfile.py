@@ -147,7 +147,10 @@ class DiveProfile:
     # Relatively clever functions to modify
     def append_section(self, depth, duration, gas = None, transit = True):
         if gas is None:
-            gas = self._points[ -1 ].gas;
+            if depth == 0:
+                gas = Gas.Air();
+            else:
+                gas = self._points[ -1 ].gas;
         if depth > 0:
             self.add_gas(gas);
         if transit:
