@@ -83,7 +83,6 @@ def show_diveprofile(diveprofile):
 
 def show_heatmap(diveprofile):
     # https://plot.ly/python/heatmaps/
-    # will need zauto=False, zmin=0, zmax=100
     tissue_labels = [ 'T%s' % t for t in diveprofile.deco_model()._constants.N2_HALFTIMES ];
     tissue_labels.reverse();
 
@@ -98,6 +97,7 @@ def show_heatmap(diveprofile):
         z = values,
         y = tissue_labels,
         x = times,
+        hovertemplate = '%{x:.1f}mins, %{y}, GF: %{z:.1f}%<extra></extra>',
         zauto = False, zmin = 0, zmax = 100 ));
 
     graphjson = json.dumps(fig, cls = plotly.utils.PlotlyJSONEncoder);
