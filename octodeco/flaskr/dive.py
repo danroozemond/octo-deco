@@ -291,6 +291,7 @@ def delete(dive_id):
         abort(405);
     flash('Dive %i is now history' % dive_id);
     _invalidate_cached_dive(dive_id);
+    session[ 'last_dive_id' ] = None;
     return redirect(url_for('dive.show_any'));
 
 
