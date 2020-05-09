@@ -27,34 +27,40 @@ def show_diveprofile(diveprofile):
     ))
     # ppO2
     fig.add_trace(go.Scatter(x = df[ "time" ], y = 100 * df[ "ppO2" ], name = 'ppO2',
+                             hovertemplate = 'ppO2: %{y:.1f} @ %{x:.1f}mins<extra></extra>',
                              line = {'color': 'rgb(176,42,143)', 'dash': 'dot', 'width': 1},
                              visible = "legendonly"),
                   secondary_y = True);
-    # TTS
+    # TTS (scaled to make visible, using customdata)
     fig.add_trace(go.Scatter(x = df[ "time" ], y = 2*df[ "TTS" ], name = 'TTS',
-                             hovertemplate = 'TTS: %{customdata:.1f} @ %{x:.1f}mins<extra></extra>',
+                             hovertemplate = 'TTS: %{customdata:.1f}mins @ %{x:.1f}mins<extra></extra>',
                              customdata = df[ "TTS" ],
                              line = {'color': 'rgb(44,160,174)', 'width': 2},
                              visible = "legendonly"),
                   secondary_y = True);
     # Ceil99
     fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "Ceil99" ], name = 'Ceil GF99',
+                             hovertemplate = 'Ceil GF99: %{y:.1f}m @ %{x:.1f}mins<extra></extra>',
                              line = {'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 2},
                              visible = "legendonly"));
     # Ceil
     fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "Ceil" ], name = 'Ceil',
+                             hovertemplate = 'Ceil: %{y:.1f}m @ %{x:.1f}mins<extra></extra>',
                              line = {'color': 'rgb(251,165,56)', 'dash': 'dot', 'width': 2}));
     # SurfaceGF
     fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "SurfaceGF" ], name = 'SurfaceGF',
+                             hovertemplate = 'SurfaceGF: %{y:.1f} @ %{x:.1f}mins<extra></extra>',
                              line = {'color': 'rgb(251,165,56)', 'width': 3},
                              visible = "legendonly"),
                   secondary_y = True);
     # GF99
     fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "GF99" ], name = 'GF99',
+                             hovertemplate = 'GF99: %{y:.1f} @ %{x:.1f}mins<extra></extra>',
                              line = {'color': 'rgb(255,255,0)', 'width': 3}),
                   secondary_y = True);
     # Depth
     fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "depth" ], name = 'Depth',
+                             hovertemplate = 'Depth: %{y:.1f}m @ %{x:.1f}mins<extra></extra>',
                              line = {'color': 'rgb(30,7,143)', 'width': 3}));
     # Leading tissue -> not that interesting
     # fig.add_trace( go.Scatter( x=df["time"], y=(100/16)*(df["LeadingTissueIndex"]+2), name='Leading tissue',
