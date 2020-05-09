@@ -262,7 +262,7 @@
     <!--
       Heatmap
     -->
-    <h2 id="hheatmap">Tissue heatmap<div class="viztoggle" id="heatmap_toggle" onclick="toggle_div_heatmap()">[show]</div></h2>
+    <h2 id="hheatmap">Tissue heatmap<span class="viztoggle" id="heatmap_toggle" onclick="toggle_div_heatmap()">[show]</span></h2>
 
     <div id="heatmap" style="display: none">
         <p>Displays (scaled) compartment pressure (actually: GF99)</p>
@@ -277,7 +277,7 @@
     <!--
       GF-Decotime-Table
     -->
-    <h2 id="hgfdeco">GFs vs Decotime<div class="viztoggle" id="table_gfdeco_toggle" onclick="toggle_div_table_gfdeco()">[show]</div></h2>
+    <h2 id="hgfdeco">GFs vs Decotime<span class="viztoggle" id="table_gfdeco_toggle" onclick="toggle_div_table_gfdeco()">[show]</span></h2>
 
     <div id="table_gfdeco" style="display: none">
     </div>
@@ -290,8 +290,8 @@
       Full data table
     -->
     <h2 id="hfulldata">Full dive data
-        <div class="viztoggle" id="table_full_toggle" onclick="toggle_div_table_full()">[show]</div>
-        <div class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></div>
+        <span class="viztoggle" id="table_full_toggle" onclick="toggle_div_table_full()">[show]</span>
+        <span class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></span>
     </h2>
     <div id="table_full" class="bigtable" style="display: none">
     </div>
@@ -305,7 +305,7 @@
     -->
     {% if modify_allowed %}
     <h2 id="hmodifydive">Modify dive
-    <div class="viztoggle" id="modify_dive_toggle" onclick="toggle_div_modify_dive()">[show]</div>
+    <span class="viztoggle" id="modify_dive_toggle" onclick="toggle_div_modify_dive()">[show]</span>
     </h2>
     <div id="modify_dive" class="modifydive" style="display:none">
     <form method="POST" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">

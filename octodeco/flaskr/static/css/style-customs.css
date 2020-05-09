@@ -95,13 +95,13 @@ div.chart.placeholder img
     vertical-align:middle;
 }
 
-div.viztoggle {
+span.viztoggle {
     display: inline;
     font-size: 0.5em;
-    margin: 1em;
+    margin: 0.7em;
     cursor: pointer;
 }
-div.viztoggle:hover {
+span.viztoggle:hover {
     text-decoration: underline;
 }
 
