@@ -79,6 +79,7 @@
 					<div class="row">
 						<div class="3u">
 							<section id="sidebar2">
+								<h4 style="display:none">Sidebar 2</h4>
 								{% block sidebarheader %}{% endblock %}
 								<ul class="style1">
 									{% block sidebaritems %}{% endblock %}
@@ -95,6 +96,7 @@
 						</script>
 						<div class="9u skel-cell-important">
 							<section id="content" >
+								<h4 style="display:none">Content</h4>
 							{% for message in get_flashed_messages() %}
 								<div class="flash">
 									{{ message }}
@@ -117,16 +119,19 @@
 					<div class="row">
 						<div class="3u">
 							<section id="box1">
+								<h4 style="display:none">Footer box 1</h4>
 								{% block sidebarleftlow %}{% endblock %}
 							</section>
 						</div>
 						<div class="6u">
 							<section id="box2">
+								<h4 style="display:none">Footer box 2</h4>
 								{% block contentlow %}{% endblock %}
 							</section>
 						</div>
 						<div class="3u">
 							<section id="box3">
+								<h4 style="display:none">Footer box 3</h4>
 								{% block sidebarrightlow %}{% endblock %}
 							</section>
 						</div>
