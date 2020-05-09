@@ -121,10 +121,11 @@ def process_valid_google_login(userinfo_json):
                       str(get_user_id()) ]);
     else:
         current_user_id = get_user_id();
+        current_session_id = get_session_id();
         target_user_id = row['user_id'];
         # Update the session to tie to this user
         cur.execute("""UPDATE sessions SET user_id = ? WHERE session_id = ?""",
-                    [ target_user_id, str(get_session_id())] );
+                    [ target_user_id, str(current_session_id)] );
         cur.execute("""DELETE FROM users WHERE user_id = ?""",
                     [ current_user_id ]);
         update_last_activity(target_user_id);
@@ -133,6 +134,8 @@ def process_valid_google_login(userinfo_json):
                     [ current_user_id ]);
         cur.execute("""UPDATE dives SET user_id = ? WHERE user_id = ?""",
                     [ target_user_id, current_user_id ]);
+    # Done logging in
+    cache.delete_memoized(_get_db_user_details, current_session_id);
 
 
 #
