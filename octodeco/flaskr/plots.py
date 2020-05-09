@@ -32,7 +32,8 @@ def show_diveprofile(diveprofile):
     ))
     # ppO2
     fig.add_trace(go.Scatter(x = df[ "time" ], y = 100 * df[ "ppO2" ], name = 'ppO2',
-                             hovertemplate = 'ppO2: %{y:.1f} @ %{x:.1f}mins<extra></extra>',
+                             hovertemplate = 'ppO2: %{customdata:.2f} @ %{x:.1f}mins<extra></extra>',
+                             customdata = df[ "ppO2" ],
                              line = {'color': 'rgb(176,42,143)', 'dash': 'dot', 'width': 1},
                              visible = "legendonly"),
                   secondary_y = True);
