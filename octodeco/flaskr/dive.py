@@ -286,7 +286,7 @@ def update(dive_id):
         abort(405);
 
 
-@bp.route('/delete/<int:dive_id>', methods = [ 'GET', 'DELETE' ])
+@bp.route('/delete/<int:dive_id>', methods = [ 'GET', 'POST' ])
 def delete(dive_id):
     aff = db_dive.delete_dive(dive_id);
     if aff == 0:

@@ -200,7 +200,7 @@
     <!--
       GF update sliders
     -->
-    <form method="POST" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
+    <form method="post" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
         <div class="adjust">
             <datalist id="tickmarks">
               <option value="0" label="0"></option>
@@ -308,7 +308,7 @@
     <span class="viztoggle" id="modify_dive_toggle" onclick="toggle_div_modify_dive()">[show]</span>
     </h2>
     <div id="modify_dive" class="modifydive" style="display:none">
-    <form method="POST" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
+    <form method="post" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
         <label for="ipt_surface_section">Add surface section to end of dive:</label>
         <input type="text" value="{{dive.length_of_surface_section()}}" name="ipt_surface_section" id="ipt_surface_section">
         <br/>
@@ -321,7 +321,7 @@
         <label for="action_update"></label>
         <input type="submit" name="action_update" id="action_update" value="Update">
     </form>
-    <form method="DELETE" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
+    <form method="post" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
         <label for="subm_delete">Delete:</label>
         <input type="submit" name="action_delete" id="subm_delete" value="Delete this dive" onclick="return confirm('Sure?');">
     </form>
