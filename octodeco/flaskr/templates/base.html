@@ -42,12 +42,12 @@
 					<!-- Login box -->
 					<div class="login_info">
 						{% if g.user_details.is_logged_in() %}
-						<img class="profile_pic" src="{{ g.user_details['google_picture'] }}">
+						<img class="profile_pic" src="{{ g.user_details['google_picture'] }}" alt="google profile pic">
 						<div class="given_name">{{ g.user_details['google_given_name'] }}</div>
 						<a href="{{ g.user_details.logout_link }}">logout</a>
 						{% else %}
 						<a href="{{ g.user_details.login_link }}">
-							<img class="google_signin" src="{{ url_for('static', filename='images/google_signin.png') }}">
+							<img class="google_signin" src="{{ url_for('static', filename='images/google_signin.png') }}" alt="google sign in">
 						</a>
 						{% endif %}
 					</div>
@@ -79,6 +79,7 @@
 					<div class="row">
 						<div class="3u">
 							<section id="sidebar2">
+								<h4 style="display:none">Sidebar 2</h4>
 								{% block sidebarheader %}{% endblock %}
 								<ul class="style1">
 									{% block sidebaritems %}{% endblock %}
@@ -95,6 +96,7 @@
 						</script>
 						<div class="9u skel-cell-important">
 							<section id="content" >
+								<h4 style="display:none">Content</h4>
 							{% for message in get_flashed_messages() %}
 								<div class="flash">
 									{{ message }}
@@ -117,16 +119,19 @@
 					<div class="row">
 						<div class="3u">
 							<section id="box1">
+								<h4 style="display:none">Footer box 1</h4>
 								{% block sidebarleftlow %}{% endblock %}
 							</section>
 						</div>
 						<div class="6u">
 							<section id="box2">
+								<h4 style="display:none">Footer box 2</h4>
 								{% block contentlow %}{% endblock %}
 							</section>
 						</div>
 						<div class="3u">
 							<section id="box3">
+								<h4 style="display:none">Footer box 3</h4>
 								{% block sidebarrightlow %}{% endblock %}
 							</section>
 						</div>

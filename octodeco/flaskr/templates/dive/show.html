@@ -26,13 +26,13 @@
 
 {% block sidebaritems %}
     <li><span class="fa fa-play"></span><a href="{{url_for('dive.new_show')}}">New dive..</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#diveprofile">Dive profile</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#divesummary">Dive summary</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#aheatmap">Heatmap</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#agfdeco">GF-Decotime table</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#afulldata">Full dive data</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#chart_diveprofile">Dive profile</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hdivesummary">Dive summary</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hheatmap">Heatmap</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hgfdeco">GF-Decotime table</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hfulldata">Full dive data</a></li>
     {% if modify_allowed %}
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#amodifydive">Modify</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hmodifydive">Modify</a></li>
     {% endif %}
 {% endblock %}
 
@@ -191,17 +191,16 @@
     <!--
       Diveprofile chart
     -->
-    <a name="diveprofile"></a>
     <div class="chart" id="chart_diveprofile" style="display:none;">
     </div>
     <div class="chart placeholder" id="chart_diveprofile_plh" style="display:block;">
-        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
 
     <!--
       GF update sliders
     -->
-    <form method="POST" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
+    <form method="post" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
         <div class="adjust">
             <datalist id="tickmarks">
               <option value="0" label="0"></option>
@@ -240,7 +239,7 @@
                    onmousemove="document.getElementById('show_gfhigh').innerHTML=this.value;"
                    onchange="reload_all();"/>
             = GF <span id="show_gflow">{{dive.gf_low_display}}</span> / <span id="show_gfhigh">{{dive.gf_high_display}}</span>
-            <img id="spinner" style="display:none"
+            <img id="spinner" style="display:none" alt="spinner"
                  src="{{ url_for('static', filename='images/spinner-51px.gif') }}">
         </div>
         {% if modify_allowed %}
@@ -253,26 +252,24 @@
     <!--
       Dive summary
     -->
-    <a name="divesummary"></a>
-    <h2>Dive summary</h2>
+    <h2 id="hdivesummary">Dive summary</h2>
     <div id="table_summary" style="display:none;">
     </div>
     <div class="placeholder" id="table_summary_plh" style="display:block;">
-        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
 
     <!--
       Heatmap
     -->
-    <a name="aheatmap"></a>
-    <h2>Tissue heatmap<div class="viztoggle" id="heatmap_toggle" onclick="toggle_div_heatmap()">[show]</div></h2>
+    <h2 id="hheatmap">Tissue heatmap<span class="viztoggle" id="heatmap_toggle" onclick="toggle_div_heatmap()">[show]</span></h2>
 
     <div id="heatmap" style="display: none">
         <p>Displays (scaled) compartment pressure (actually: GF99)</p>
         <div class="chart" id="chart_heatmap" style="display:none;">
         </div>
         <div class="chart placeholder" id="chart_heatmap_plh" style="display:block;">
-            <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+            <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
         </div>
     </div>
 
@@ -280,28 +277,26 @@
     <!--
       GF-Decotime-Table
     -->
-    <a name="agfdeco"></a>
-    <h2>GFs vs Decotime<div class="viztoggle" id="table_gfdeco_toggle" onclick="toggle_div_table_gfdeco()">[show]</div></h2>
+    <h2 id="hgfdeco">GFs vs Decotime<span class="viztoggle" id="table_gfdeco_toggle" onclick="toggle_div_table_gfdeco()">[show]</span></h2>
 
     <div id="table_gfdeco" style="display: none">
     </div>
     <div id="table_gfdeco_plh" class="placeholder" style="display: none">
-        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
 
 
     <!--
       Full data table
     -->
-    <a name="afulldata"></a>
-    <h2>Full dive data
-        <div class="viztoggle" id="table_full_toggle" onclick="toggle_div_table_full()">[show]</div>
-        <div class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></div>
+    <h2 id="hfulldata">Full dive data
+        <span class="viztoggle" id="table_full_toggle" onclick="toggle_div_table_full()">[show]</span>
+        <span class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></span>
     </h2>
     <div id="table_full" class="bigtable" style="display: none">
     </div>
     <div id="table_full_plh" class="bigtable placeholder" style="display: none">
-        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
 
 
@@ -309,12 +304,11 @@
       Modify block
     -->
     {% if modify_allowed %}
-    <a name="amodifydive"></a>
-    <h2>Modify dive
-    <div class="viztoggle" id="modify_dive_toggle" onclick="toggle_div_modify_dive()">[show]</div>
+    <h2 id="hmodifydive">Modify dive
+    <span class="viztoggle" id="modify_dive_toggle" onclick="toggle_div_modify_dive()">[show]</span>
     </h2>
     <div id="modify_dive" class="modifydive" style="display:none">
-    <form method="POST" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
+    <form method="post" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
         <label for="ipt_surface_section">Add surface section to end of dive:</label>
         <input type="text" value="{{dive.length_of_surface_section()}}" name="ipt_surface_section" id="ipt_surface_section">
         <br/>
@@ -327,7 +321,7 @@
         <label for="action_update"></label>
         <input type="submit" name="action_update" id="action_update" value="Update">
     </form>
-    <form method="DELETE" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
+    <form method="post" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
         <label for="subm_delete">Delete:</label>
         <input type="submit" name="action_delete" id="subm_delete" value="Delete this dive" onclick="return confirm('Sure?');">
     </form>
