@@ -103,3 +103,16 @@ def show_heatmap(diveprofile):
 
     graphjson = json.dumps(fig, cls = plotly.utils.PlotlyJSONEncoder);
     return graphjson;
+
+
+def show_pressure_graph(diveprofile):
+    df = diveprofile.dataframe();
+    fig = sp.make_subplots();
+    # Depth
+    fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "depth" ], name = 'Depth',
+                             hovertemplate = 'Depth: %{y:.1f}m @ %{x:.1f}mins<extra></extra>',
+                             line = {'color': 'rgb(30,7,143)', 'width': 3}));
+    # Draw
+    graphjson = json.dumps( fig, cls=plotly.utils.PlotlyJSONEncoder);
+    return graphjson;
+

@@ -79,6 +79,15 @@ class CachedDiveProfile:
             jp = {};
         return jsonify(jp);
 
+    #@cache.memoize() TODO - turn on
+    def plot_pressure_graph(self, gflow, gfhigh):
+        dp = self.profile_gf(gflow, gfhigh);
+        try:
+            jp = plots.show_diveprofile(dp);
+        except TypeError:
+            jp = {};
+        return jsonify(jp);
+
     @cache.memoize()
     def summary_table(self, gflow, gfhigh):
         dp = self.profile_gf(gflow, gfhigh);
@@ -201,6 +210,7 @@ def show_elt_full_table(dive_id):
     gflow, gfhigh = get_gf_args_from_request();
     return cdp.full_table(gflow, gfhigh);
 
+
 @bp.route('/show/<int:dive_id>/gfdecodata', methods = ['GET'])
 def show_elt_gfdeco_table(dive_id):
     cdp = get_cached_dive(dive_id);
@@ -208,6 +218,13 @@ def show_elt_gfdeco_table(dive_id):
         return cdp.gfdeco_table();
     else:
         return render_template('dive/elt_login_please.html');
+
+
+@bp.route('/show/<int:dive_id>/plot/pressuregraph', methods = ['GET'])
+def show_elt_pressure_graph(dive_id):
+    cdp = get_cached_dive(dive_id);
+    gflow, gfhigh = get_gf_args_from_request();
+    return cdp.plot_pressure_graph(gflow,gfhigh);
 
 
 #

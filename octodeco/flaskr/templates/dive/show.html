@@ -30,6 +30,7 @@
     <li><span class="fa fa-chevron-circle-right"></span><a href="#hdivesummary">Dive summary</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#hheatmap">Heatmap</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#hgfdeco">GF-Decotime table</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hpressuregraph">Pressure graph</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#hfulldata">Full dive data</a></li>
     {% if modify_allowed %}
     <li><span class="fa fa-chevron-circle-right"></span><a href="#hmodifydive">Modify</a></li>
@@ -139,6 +140,24 @@
         });
     }
 
+    var pressure_graph_loaded = false;
+    function load_pressure_graph()
+    {
+        spin_elt( '#chart_pressure_graph', true );
+        $.getJSON({
+        url: "{{url_for('dive.show_elt_pressure_graph', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        success: function(result) {
+            spin_elt( '#chart_pressure_graph', false );
+            Plotly.react('chart_pressure_graph',JSON.parse(result),{});
+            pressure_graph_loaded = true;
+        }
+        });
+    }
+    function unload_pressure_graph()
+    {
+        pressure_graph_loaded = false;
+    }
+
 
     /*
      * Showing / hiding page elements
@@ -159,6 +178,9 @@
     function toggle_div_table_gfdeco() {
         toggle_elt('#table_gfdeco', function() { if (!gfdeco_table_loaded) load_gfdeco_table(); } );
     }
+    function toggle_div_pressure_graph() {
+        toggle_elt('#pressure_graph', function() { if (!pressure_graph_loaded) load_pressure_graph(); } );
+    }
     function toggle_div_modify_dive() {
         toggle_elt('#modify_dive', function() {} );
     }
@@ -170,13 +192,16 @@
     function reload_all()
     {
         var is_table_full_vis = $('#table_full').is(':visible');
+        var is_pressure_graph_vis = $('#chart_pressure_graph').is(':visible');
         // We load the diveprofile first, then the rest to benefit from caching (esp. with multiple workers present)
         spin_elt('#chart_diveprofile', true);
         spin_elt('#table_summary', true );
         if (is_table_full_vis) spin_elt('#table_full', true );
+        if (is_pressure_graph_vis) spin_elt('#chart_pressure_graph', true );
         load_plot_diveprofile(function(){
             load_summary_table();
             if (is_table_full_vis) load_full_table(); else unload_full_table();
+            if (is_pressure_graph_vis) load_pressure_graph(); else unload_pressure_graph();
         });
         // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
     }
@@ -277,12 +302,28 @@
     <!--
       GF-Decotime-Table
     -->
-    <h2 id="hgfdeco">GFs vs Decotime<span class="viztoggle" id="table_gfdeco_toggle" onclick="toggle_div_table_gfdeco()">[show]</span></h2>
+    <h2 id="hgfdeco">GFs vs Decotime<span class="viztoggle" id="table_gfdeco_toggle"
+                                          onclick="toggle_div_table_gfdeco()">[show]</span></h2>
 
     <div id="table_gfdeco" style="display: none">
     </div>
     <div id="table_gfdeco_plh" class="placeholder" style="display: none">
         <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
+    </div>
+
+
+    <!--
+      Pressure graph
+    -->
+    <h2 id="hpressuregraph">Pressure graph<span class="viztoggle" id="pressure_graph_toggle"
+                                                onclick="toggle_div_pressure_graph()">[show]</span></h2>
+
+    <div id="pressure_graph" style="display: none">
+        <div class="chart" id="chart_pressure_graph" style="display:none;">
+        </div>
+        <div class="chart placeholder" id="chart_pressure_graph_plh" style="display:block;">
+            <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
+        </div>
     </div>
 
 
