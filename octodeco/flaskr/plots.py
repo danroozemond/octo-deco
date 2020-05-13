@@ -172,9 +172,9 @@ def show_pressure_graph(diveprofile):
                              showlegend=False));
     # Labels etc
     fig.update_yaxes(secondary_y = False, title_text = "Compartment pressure",
-                     range = [ 0, max_x ], tick0 = 0, dtick = 1);
-    fig.update_xaxes(title_text = "Ambient pressure",
                      range = [ 0, max_y ], tick0 = 0, dtick = 1);
+    fig.update_xaxes(title_text = "Ambient pressure",
+                     range = [ 0, max_x ], tick0 = 0, dtick = 1);
     # Draw
     graphjson = json.dumps( fig, cls=plotly.utils.PlotlyJSONEncoder);
     return graphjson;
