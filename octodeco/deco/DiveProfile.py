@@ -144,9 +144,10 @@ class DiveProfile:
             else abs(depth_diff) / self._descent_speed;
         transit_time = math.ceil(transit_time) if round_to_mins else transit_time;
         self._append_point(transit_time, new_depth, gas);
+        return transit_time;
 
     # Relatively clever functions to modify
-    def append_section(self, depth, duration, gas = None, transit = True):
+    def append_section(self, depth, duration, gas = None, transit = True, correct_duration_with_transit = False):
         if gas is None:
             if depth == 0:
                 gas = Gas.Air();
@@ -155,7 +156,9 @@ class DiveProfile:
         if depth > 0:
             self.add_gas(gas);
         if transit:
-            self._append_transit(depth, gas);
+            transit_time = self._append_transit(depth, gas);
+            if correct_duration_with_transit:
+                duration -= transit_time;
         if duration > 0.0:
             self._append_point(duration, depth, gas)
 
