@@ -131,9 +131,11 @@ def show_pressure_graph(diveprofile):
         hovertemplate = '%{customdata:.1f}mins: Ambient:%{x:.1f}, Comptmt:%{y:.1f}<extra>'+name+'</extra>';
         fig.add_trace(go.Scatter(x = x, y = y,
                                  name = name,
+                                 mode = 'lines+markers',
                                  customdata = customdata,
                                  hovertemplate = hovertemplate,
                                  line = { 'color' : colors[i] },
+                                 marker = { 'symbol': 'circle', 'size' : 4, 'color' : colors[i] },
                                  visible = "legendonly" if i > 0 else True
                                  ));
     # The extra stuff
