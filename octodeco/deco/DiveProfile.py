@@ -299,6 +299,7 @@ class DiveProfile:
                                             before_stop.gas,
                                             self._gases_carried,
                                             p_target = op.p_amb,
+                                            add_gas_switch = True,
                                             amb_to_gf = amb_to_gf );
                 if len(stops) == 0:
                     # Exceptional case, we were /right/ on the edge
