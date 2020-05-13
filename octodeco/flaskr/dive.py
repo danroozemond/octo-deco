@@ -79,11 +79,11 @@ class CachedDiveProfile:
             jp = {};
         return jsonify(jp);
 
-    #@cache.memoize() TODO - turn on
+    @cache.memoize()
     def plot_pressure_graph(self, gflow, gfhigh):
         dp = self.profile_gf(gflow, gfhigh);
         try:
-            jp = plots.show_diveprofile(dp);
+            jp = plots.show_pressure_graph(dp);
         except TypeError:
             jp = {};
         return jsonify(jp);
