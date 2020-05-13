@@ -80,10 +80,10 @@ class DiveProfile:
         return v;
 
     def decotime(self):
-        return sum([ p.duration() for p in self._points if p.depth > 0 and p.is_deco_stop ]);
+        return sum(map(lambda p: p.duration_deco_only(), self._points));
 
     def divetime(self):
-        return sum([ p.duration() for p in self._points if p.depth > 0 ]);
+        return sum(map(lambda p: p.duration_diving_only(), self._points));
 
     def description(self):
         if self.custom_desc is not None:

@@ -47,6 +47,14 @@ class DivePoint:
             return 0.0;
         return self.time - self.prev.time;
 
+    def duration_deco_only(self):
+        return self.duration() if self.is_deco_stop and self.depth > 0 else 0.0;
+
+    def duration_diving_only(self):
+        if self.depth <= 0 and self.prev is not None and self.prev.depth <= 0:
+            return 0.0;
+        return self.duration();
+
     def ascent_speed(self):
         d = self.duration();
         if d == 0.0:
