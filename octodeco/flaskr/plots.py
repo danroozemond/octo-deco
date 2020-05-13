@@ -1,8 +1,10 @@
 # Please see LICENSE.md
 import json;
+import math;
 
 import numpy;
 import plotly;
+import plotly.express as px
 import plotly.graph_objects as go
 import plotly.subplots as sp
 
@@ -109,17 +111,43 @@ def show_pressure_graph(diveprofile):
     fig = sp.make_subplots();
     # The lines
     pts = diveprofile.points();
+    # Strip the surface section
+    while len(pts) > 2 and pts[-2].depth == 0:
+        pts.pop(-1);
+    # Get the rest of the reusable info
     buhlmann = diveprofile.deco_model();
     n_tissues = buhlmann._constants.N_TISSUES;
     n2halftimes = buhlmann._constants.N2_HALFTIMES;
+    colors = px.colors.qualitative.Dark24;
     x = [ p.p_amb for p in pts ];
+    max_x = max(x);
+    customdata = [ p.time for p in pts ];
+    max_y = 0;
+    # For each tissue ..
     for i in range(n_tissues):
         y = [ p.tissue_state.p_tissue(i) for p in pts ];
+        max_y = max(max_y, max(y));
         name = 'T{:.1f}'.format(n2halftimes[i]);
-        fig.add_trace(go.Scatter(x = x, y = y, name = name));
+        hovertemplate = '%{customdata:.1f}mins: Ambient:%{x:.1f}, Comptmt:%{y:.1f}<extra>'+name+'</extra>';
+        fig.add_trace(go.Scatter(x = x, y = y,
+                                 name = name,
+                                 customdata = customdata,
+                                 hovertemplate = hovertemplate,
+                                 line = { 'color' : colors[i] },
+                                 visible = "legendonly" if i > 0 else True
+                                 ));
+    # The extra stuff
+    max_x = math.ceil(max_x);
+    max_y = math.ceil(max_y);
+    # Ambient = compartment
+    fig.add_trace(go.Scatter(x = [0,max(max_x,max_y)],y=[0,max(max_x,max_y)],
+                             line = {'color':'grey', 'width':0.5},
+                             showlegend=False));
     # Labels etc
-    fig.update_yaxes(secondary_y = False, title_text = "Compartment pressure");
-    fig.update_xaxes(title_text = "Ambient pressure");
+    fig.update_yaxes(secondary_y = False, title_text = "Compartment pressure",
+                     range = [ 0, max_x ], tick0 = 0, dtick = 1);
+    fig.update_xaxes(title_text = "Ambient pressure",
+                     range = [ 0, max_y ], tick0 = 0, dtick = 1);
     # Draw
     graphjson = json.dumps( fig, cls=plotly.utils.PlotlyJSONEncoder);
     return graphjson;
