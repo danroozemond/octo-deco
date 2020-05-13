@@ -67,6 +67,10 @@ class TissueState:
         r._state = self._updated_partial_pressure(pp_alv, duration);
         return r;
 
+    def p_tissue(self, i):
+        ## did not implement yet
+        return None;
+
     #
     # Workmann / Buhlmann coefficients (retrieval nontrivial in Trimix case)
     #

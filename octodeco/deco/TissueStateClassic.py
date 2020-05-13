@@ -38,6 +38,9 @@ class TissueState:
         ) for i in range(self._n_tissues) ];
         return r;
 
+    def p_tissue(self, i):
+        return sum(self._state[i]);
+
     #
     # Workmann / Buhlmann coefficients (retrieval nontrivial in Trimix case)
     #
