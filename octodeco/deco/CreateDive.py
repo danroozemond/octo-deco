@@ -12,7 +12,7 @@ def create_demo_dive(debugBuhlmann = False):
     dp = DiveProfile(gf_low = 35, gf_high = 70, debugBuhlmann = debugBuhlmann);
     dp.is_demo_dive = True;
     dp.add_gas(Gas.Nitrox(50));
-    dp.append_section(20, 43, Gas.Trimix(21, 35));
+    dp.append_section(20, 45, Gas.Trimix(21, 35));
     dp.append_section(5, 5, gas = Gas.Trimix(21, 35));
     dp.append_section(40, 35, gas = Gas.Trimix(21, 35));
     dp.add_stops_to_surface();
@@ -41,7 +41,7 @@ def create_dive_by_depth_time_gas(dtgs, extragas):
     for dtg in dtgs:
         gas = Gas.from_string(dtg[ 2 ]);
         if gas is not None and _ipt_check_depth_time(dtg[ 0 ], dtg[ 1 ]):
-            result.append_section(int(dtg[ 0 ]), int(dtg[ 1 ]), gas);
+            result.append_section(int(dtg[ 0 ]), int(dtg[ 1 ]), gas, correct_duration_with_transit = True);
             cntok += 1;
     if cntok == 0:
         return None;
@@ -51,7 +51,7 @@ def create_dive_by_depth_time_gas(dtgs, extragas):
         result.add_gas(g);
     # Add deco stops
     result.add_stops_to_surface();
-    result.append_section(0, 30);
+    result.append_section(0, 10);
     result.interpolate_points();
     # Done.
     return result;

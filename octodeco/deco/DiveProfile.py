@@ -80,10 +80,10 @@ class DiveProfile:
         return v;
 
     def decotime(self):
-        return sum([ p.duration() for p in self._points if p.depth > 0 and p.is_deco_stop ]);
+        return sum(map(lambda p: p.duration_deco_only(), self._points));
 
     def divetime(self):
-        return sum([ p.duration() for p in self._points if p.depth > 0 ]);
+        return sum(map(lambda p: p.duration_diving_only(), self._points));
 
     def description(self):
         if self.custom_desc is not None:
@@ -144,9 +144,10 @@ class DiveProfile:
             else abs(depth_diff) / self._descent_speed;
         transit_time = math.ceil(transit_time) if round_to_mins else transit_time;
         self._append_point(transit_time, new_depth, gas);
+        return transit_time;
 
     # Relatively clever functions to modify
-    def append_section(self, depth, duration, gas = None, transit = True):
+    def append_section(self, depth, duration, gas = None, transit = True, correct_duration_with_transit = False):
         if gas is None:
             if depth == 0:
                 gas = Gas.Air();
@@ -155,7 +156,9 @@ class DiveProfile:
         if depth > 0:
             self.add_gas(gas);
         if transit:
-            self._append_transit(depth, gas);
+            transit_time = self._append_transit(depth, gas);
+            if correct_duration_with_transit:
+                duration -= transit_time;
         if duration > 0.0:
             self._append_point(duration, depth, gas)
 
@@ -293,8 +296,10 @@ class DiveProfile:
                 stops, p_ceiling, amb_to_gf = deco_model.compute_deco_profile(
                                             before_stop.tissue_state,
                                             before_stop.p_amb,
+                                            before_stop.gas,
                                             self._gases_carried,
                                             p_target = op.p_amb,
+                                            add_gas_switch = True,
                                             amb_to_gf = amb_to_gf );
                 if len(stops) == 0:
                     # Exceptional case, we were /right/ on the edge
