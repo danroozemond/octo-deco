@@ -106,12 +106,20 @@ def show_heatmap(diveprofile):
 
 
 def show_pressure_graph(diveprofile):
-    df = diveprofile.dataframe();
     fig = sp.make_subplots();
-    # Depth
-    fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "depth" ], name = 'Depth',
-                             hovertemplate = 'Depth: %{y:.1f}m @ %{x:.1f}mins<extra></extra>',
-                             line = {'color': 'rgb(30,7,143)', 'width': 3}));
+    # The lines
+    pts = diveprofile.points();
+    buhlmann = diveprofile.deco_model();
+    n_tissues = buhlmann._constants.N_TISSUES;
+    n2halftimes = buhlmann._constants.N2_HALFTIMES;
+    x = [ p.p_amb for p in pts ];
+    for i in range(n_tissues):
+        y = [ p.tissue_state.p_tissue(i) for p in pts ];
+        name = 'T{:.1f}'.format(n2halftimes[i]);
+        fig.add_trace(go.Scatter(x = x, y = y, name = name));
+    # Labels etc
+    fig.update_yaxes(secondary_y = False, title_text = "Compartment pressure");
+    fig.update_xaxes(title_text = "Ambient pressure");
     # Draw
     graphjson = json.dumps( fig, cls=plotly.utils.PlotlyJSONEncoder);
     return graphjson;
