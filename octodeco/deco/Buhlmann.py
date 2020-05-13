@@ -201,8 +201,9 @@ class Buhlmann:
         while p_now > p_target + 0.01:
             p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_now, p_first_stop, gas_now, gases);
             stoplength, tissue_state = self._time_to_stay_at_stop(p_now, p_amb_next_stop, tissue_state, gas_now, amb_to_gf);
-            if gas_prev != gas_now and add_gas_switch:
-                stoplength = max(stoplength, self.gas_switch_mins);
+            if gas_prev != gas_now and add_gas_switch and stoplength < self.gas_switch_mins:
+                tissue_state = tissue_state.updated_state( self.gas_switch_mins - stoplength, p_now, gas_now );
+                stoplength = self.gas_switch_mins;
             if stoplength != 0:
                 result.append((Util.Pamb_to_depth(p_now), stoplength, gas_now));
             tissue_state = self._update_tissue_state_travel(tissue_state, p_now, p_amb_next_stop, gas_now);
