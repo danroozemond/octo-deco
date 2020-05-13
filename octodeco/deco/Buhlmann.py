@@ -194,11 +194,8 @@ class Buhlmann:
         p_ceiling = tissue_state.p_ceiling_for_amb_to_gf(amb_to_gf);
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
-        # Go to first stop
-        p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_amb, p_first_stop, current_gas, gases);
-        tissue_state = self._update_tissue_state_travel(tissue_state, p_amb, p_amb_next_stop, current_gas);
-        p_now = p_amb_next_stop; gas_now = gas_next_stop; gas_prev = current_gas;
         # 'Walk' up
+        p_now = p_amb; gas_now = gas_prev = current_gas;
         result = [ ];
         while p_now > p_target + 0.01:
             p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_now, p_first_stop, gas_now, gases);
