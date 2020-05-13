@@ -11,10 +11,13 @@ def depth_to_Pamb(depth):
     return (depth/10.0) + 1.0;
 
 
-def Pamb_to_Pamb_stop(p_amb):
+def Pamb_to_Pamb_stop(p_amb, direction = 'down'):
     t = Pamb_to_depth(p_amb);
     if (t % 3) > 0.01:
-        t = 3*(math.floor(t/3) + 1);
+        if direction == 'down':
+            t = 3*(math.floor(t/3) + 1);
+        elif direction == 'up':
+            t = 3 * (math.ceil(t / 3) - 1);
     return depth_to_Pamb(t);
 
 

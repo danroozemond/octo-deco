@@ -1,6 +1,6 @@
 # Please see LICENSE.md
 from . import BuhlmannConstants;
-from . import TissueStateCython, TissueStateVerify, TissueStateClassic;
+from . import TissueStateCython, TissueStateVerify;
 from . import Util;
 
 
@@ -52,7 +52,6 @@ class Buhlmann:
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = 1.60;
-        self._p_last_stop = 1.3;
         self.descent_speed = descent_speed;
         self.ascent_speed = ascent_speed;
 
@@ -102,9 +101,16 @@ class Buhlmann:
     def _best_deco_gas(self, p_amb, gases):
         # What is the best deco gas at this ambient pressure?
         suitable = [ gas for gas in gases if p_amb * gas[ 'fO2' ] <= self.max_pO2_deco ];
-        assert (len(suitable) > 0);
+        if len(suitable) == 0:
+            print('_best_deco_gas: No suitable gases. p_amb = {}, gases = {}'.format(p_amb, gases));
+            suitable = gases;
         gas = max(suitable, key = lambda g: ( g[ 'fO2' ], -g['fHe'] ) );
         return gas;
+
+    def _gas_switch_p_amb(self, gas):
+        p_amb = self.max_pO2_deco / gas['fO2'];
+        p_amb = Util.Pamb_to_Pamb_stop(p_amb, direction='up');
+        return p_amb;
 
     def _time_to_stay_at_stop(self, p_amb, p_amb_next_stop, tissue_state, gas, amb_to_gf):
         # Returns both the time (integer) and the updated tissue_state.
@@ -163,7 +169,7 @@ class Buhlmann:
             p_avg = (p_amb + p_new_amb)/2.0;
             return state.updated_state(time, p_avg, gas);
 
-    def compute_deco_profile(self, tissue_state, p_amb, gases, p_target = 1.0, amb_to_gf = None):
+    def compute_deco_profile(self, tissue_state, p_amb, current_gas, gases, p_target = 1.0, amb_to_gf = None):
         # Returns triples depth, length, gas
         amb_to_gf = self._get_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
         p_ceiling = tissue_state.p_ceiling_for_amb_to_gf(amb_to_gf);
@@ -171,6 +177,8 @@ class Buhlmann:
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
         # Travel to first stop
         gas = self._best_deco_gas(p_amb, gases);
+        if gas != current_gas:
+            print('gas switch!');
         tissue_state = self._update_tissue_state_travel(tissue_state, p_amb, p_first_stop, gas);
         # 'Walk' up
         result = [ ];
@@ -201,7 +209,7 @@ class Buhlmann:
                   };
 
         # Below is about computing the decompression profile
-        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, gases_carried,
+        stops, p_ceiling, amb_to_gf = self.compute_deco_profile(tissue_state, p_amb, gas, gases_carried,
                                                                 amb_to_gf = amb_to_gf);
         result[ 'Ceil' ] = Util.Pamb_to_depth(p_ceiling);
         result[ 'Stops' ] = stops;

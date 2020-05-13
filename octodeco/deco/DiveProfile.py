@@ -296,6 +296,7 @@ class DiveProfile:
                 stops, p_ceiling, amb_to_gf = deco_model.compute_deco_profile(
                                             before_stop.tissue_state,
                                             before_stop.p_amb,
+                                            before_stop.gas,
                                             self._gases_carried,
                                             p_target = op.p_amb,
                                             amb_to_gf = amb_to_gf );
