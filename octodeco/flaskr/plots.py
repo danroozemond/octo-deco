@@ -114,10 +114,20 @@ def show_pressure_graph(diveprofile):
     # Strip the surface section
     while len(pts) > 2 and pts[-2].depth == 0:
         pts.pop(-1);
-    # Get the rest of the reusable info
+    # deco model params
     buhlmann = diveprofile.deco_model();
-    n_tissues = buhlmann._constants.N_TISSUES;
-    n2halftimes = buhlmann._constants.N2_HALFTIMES;
+    con = buhlmann._constants;
+    n_tissues = con.N_TISSUES;
+    n2halftimes = con.N2_HALFTIMES;
+    def m_line_n2(i, p_amb):
+        return con.N2_A_VALUES[i] + p_amb/con.N2_B_VALUES[i];
+    def m_line_he(i, p_amb):
+        return con.HE_A_VALUES[i] + p_amb/con.HE_B_VALUES[i];
+    if any(map(lambda g:g['fHe'] > 0.0, diveprofile.gases_carried())):
+        show_m_lines = [ ('N2', m_line_n2), ('He', m_line_he) ];
+    else:
+        show_m_lines = [ ('N2', m_line_n2) ];
+    # Get the rest of the reusable info
     colors = px.colors.qualitative.Dark24;
     x = [ p.p_amb for p in pts ];
     max_x = max(x);
@@ -125,6 +135,7 @@ def show_pressure_graph(diveprofile):
     max_y = 0;
     # For each tissue ..
     for i in range(n_tissues):
+        # The actual line of inert gas pressures
         y = [ p.tissue_state.p_tissue(i) for p in pts ];
         max_y = max(max_y, max(y));
         name = 'T{:.1f}'.format(n2halftimes[i]);
@@ -132,12 +143,26 @@ def show_pressure_graph(diveprofile):
         fig.add_trace(go.Scatter(x = x, y = y,
                                  name = name,
                                  mode = 'lines+markers',
+                                 legendgroup = name,
                                  customdata = customdata,
                                  hovertemplate = hovertemplate,
                                  line = { 'color' : colors[i] },
                                  marker = { 'symbol': 'circle', 'size' : 4, 'color' : colors[i] },
                                  visible = "legendonly" if i > 0 else True
                                  ));
+        # Also add the M-value line(s)
+        for t, m_line in show_m_lines:
+            xx = [0,1,2,10];
+            yy = [ m_line(i, x) for x in xx ];
+            fig.add_trace(go.Scatter(x = xx, y = yy,
+                                     name = name + '_M_line_' + t,
+                                     mode = 'lines',
+                                     legendgroup = name,
+                                     hovertemplate = '<extra>M-line for '+name+' ('+t+')</extra>',
+                                     line = {'color': colors[ i ], 'dash' : 'dot'},
+                                     showlegend = False,
+                                     visible = "legendonly" if i > 0 else True
+                                     ));
     # The extra stuff
     max_x = math.ceil(max_x);
     max_y = math.ceil(max_y);
