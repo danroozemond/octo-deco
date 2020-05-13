@@ -91,7 +91,6 @@ class Buhlmann:
 
         while t1 - t0 > 0.01:
             h = t0 + (t1-t0)/2;
-            # print('%.1f < %.1f < %.1f -> %.1f' %( t0,h,t1,max_over_supersat(h)));
             if max_over_supersat(h) < 0:
                 t0 = h;
             else:
@@ -124,8 +123,6 @@ class Buhlmann:
             ts2 = tissue_state.updated_state(t, p_amb, gas);
             return ts2.GF99(p_amb_next_stop) - gf99allowed_next;
 
-        print('time to stay at stop, p_amb = {}, p_amb_next_stop = {}, gas = {}'.format(p_amb, p_amb_next_stop, gas));
-
         # Binary search:
         #   t0 <= t <= t1, max_over_supersat(t) = 0.
         #   max_over_supersat(t0) > 0
@@ -137,7 +134,7 @@ class Buhlmann:
             return 0.0, tissue_state;
         if max_over_supersat(t1) > 0:
             # Still on-gassing
-            return -1, tissue_state;
+            return 0.0, tissue_state;
         while t1 - t0 > 0.1:
             h = t0 + (t1 - t0) / 2;
             if max_over_supersat(h) > 0:
@@ -198,27 +195,17 @@ class Buhlmann:
         # Go to first stop
         p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_amb, p_first_stop, current_gas, gases);
         tissue_state = self._update_tissue_state_travel(tissue_state, p_amb, p_amb_next_stop, current_gas);
-        p_now = p_amb_next_stop; gas_now = gas_next_stop;
+        p_now = p_amb_next_stop; gas_now = gas_next_stop; gas_prev = current_gas;
         # 'Walk' up
         result = [ ];
-        cnt = 0;
-        print('START')
         while p_now > p_target + 0.01:
             p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_now, p_first_stop, gas_now, gases);
-            print('p_now = {}, p_first_stop = {}, p_amb_next_stop = {}, gas_now = {}, gas_next_stop = {}'.format(p_now, p_first_stop, p_amb_next_stop, gas_now, gas_next_stop))
-            print('result so far:', result)
             stoplength, tissue_state = self._time_to_stay_at_stop(p_now, p_amb_next_stop, tissue_state, gas_now, amb_to_gf);
-            if stoplength == -1:
-                # Still ongassing
-                pass;
-            else:
-                result.append((Util.Pamb_to_depth(p_now), stoplength, gas_now));
-            print('_update_tissue_state_travel p_now = {}, p_amb_next_stop = {}'.format(p_now, p_amb_next_stop))
+            if gas_prev != gas_now:
+                stoplength = max(stoplength, self.gas_switch_mins);
+            result.append((Util.Pamb_to_depth(p_now), stoplength, gas_now));
             tissue_state = self._update_tissue_state_travel(tissue_state, p_now, p_amb_next_stop, gas_now);
-            p_now = p_amb_next_stop; gas_now = gas_next_stop;
-            cnt += 1;
-            assert cnt < 20;
-        print(result);
+            p_now = p_amb_next_stop; gas_prev = gas_now; gas_now = gas_next_stop;
         return result, p_ceiling, amb_to_gf;
 
     def deco_info(self, tissue_state, depth, gas, gases_carried, amb_to_gf = None):
