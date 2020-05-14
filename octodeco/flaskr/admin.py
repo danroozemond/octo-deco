@@ -21,8 +21,11 @@ def info():
     return render_template('admin/info.html');
 
 
-@bp.route('/update', methods = [ 'POST' ])
-def update():
-    return 'hello, world';
+@bp.route('/migrate/all')
+def migrate_all():
+    res = db_dive.migrate_all_profiles_to_latest();
+    flash('Migrate all: ' + str(res));
+    return redirect(url_for('admin.info'));
+
 
 
