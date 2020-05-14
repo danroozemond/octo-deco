@@ -1,12 +1,7 @@
 # Please see LICENSE.md
 
-import sys
-import time
-
-from octodeco.deco import Gas;
+from octodeco.deco import Gas, Util;
 from octodeco.deco.DiveProfile import DiveProfile;
-
-t0 = time.perf_counter();
 
 dp = DiveProfile(gf_low=35, gf_high=85);
 # dp.append_section(50, 50, gas = Gas.Trimix(21,35));
@@ -19,17 +14,6 @@ dp.interpolate_points();
 print(dp.dive_summary());
 for s in dp.runtimetable():
     print(s);
-
-dp.set_gf(55,65);
-
-print(dp.dive_summary());
-for s in dp.runtimetable():
-    print(s);
-
-t1 = time.perf_counter();
-print('Time taken {:.3f}'.format(t1-t0));
-
-sys.exit(0);
 
 
 for i in range(len(dp._points)):
