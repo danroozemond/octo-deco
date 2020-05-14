@@ -44,6 +44,7 @@ class Buhlmann:
     def __init__(self,
                  gf_low, gf_high,
                  descent_speed, ascent_speed,
+                 max_pO2_deco, gas_swich_mins,
                  debugTissueState = False):
         self._constants = BuhlmannConstants.ZHL_16C_1a;
         self._n_tissues = self._constants.N_TISSUES;
@@ -51,10 +52,10 @@ class Buhlmann:
                     else   TissueStateVerify.TissueState;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
-        self.max_pO2_deco = 1.60;
-        self.gas_switch_mins = 3.0;
+        self.max_pO2_deco = max_pO2_deco;
         self.descent_speed = descent_speed;
         self.ascent_speed = ascent_speed;
+        self.gas_switch_mins = gas_swich_mins;
 
     def description(self):
         return 'ZHL-16C GF %s/%s' % (self.gf_low, self.gf_high);

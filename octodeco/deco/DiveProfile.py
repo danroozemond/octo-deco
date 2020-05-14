@@ -20,11 +20,15 @@ Conventions:
 
 
 class DiveProfile:
-    def __init__(self, descent_speed = 20, ascent_speed = 10,
-                 deco_model = None, gf_low = 35, gf_high = 70, debugBuhlmann = False):
+    def __init__(self,
+                 descent_speed = 20, ascent_speed = 10,
+                 max_pO2_deco = 1.60, gas_switch_mins = 3.0,
+                 gf_low = 35, gf_high = 70):
         self._points = [ DivePoint(0, 0, Gas.Air(), None) ];
         self._descent_speed = descent_speed;
         self._ascent_speed = ascent_speed;
+        self._max_pO2_deco = max_pO2_deco;
+        self._gas_switch_mins = gas_switch_mins;
         self._gases_carried = set();
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;
@@ -43,15 +47,7 @@ class DiveProfile:
 
         # NOTE - If you add attributes here, also add migration code to DiveProfileSer
         #
-
-        if deco_model is not None:
-            self._deco_model = deco_model;
-        else:
-            self._deco_model = Buhlmann.Buhlmann(gf_low, gf_high,
-                                                 self._descent_speed, self._ascent_speed,
-                                                 debugTissueState = debugBuhlmann);
-
-        self.update_deco_model_info(update_display = True);
+        self.update_deco_model_info( self.deco_model(gf_low, gf_high), update_display = True);
 
     def points(self):
         return self._points;
@@ -61,8 +57,13 @@ class DiveProfile:
                               for p in self._points ],
                             columns = DivePoint.dataframe_columns());
 
-    def deco_model(self):
-        return self._deco_model;
+    def deco_model(self, gf_low = None, gf_high = None):
+        gf_low = gf_low if gf_low is not None else self.gf_low_display;
+        gf_high = gf_high if gf_high is not None else self.gf_high_display;
+        dm = Buhlmann.Buhlmann(gf_low, gf_high,
+                               self._descent_speed, self._ascent_speed,
+                               self._max_pO2_deco, self._gas_switch_mins );
+        return dm;
 
     '''
     Dive / deco model info
@@ -96,15 +97,15 @@ class DiveProfile:
             r = '%s: %s' % (self.add_custom_desc, r);
         return r;
 
-    def update_deco_model_info(self, update_display = False, update_profile = False):
+    def update_deco_model_info(self, deco_model, update_display = False, update_profile = False):
         if update_display:
-            self._desc_deco_model_display = self._deco_model.description();
-            self.gf_low_display = self._deco_model.gf_low;
-            self.gf_high_display = self._deco_model.gf_high;
+            self._desc_deco_model_display = deco_model.description();
+            self.gf_low_display = deco_model.gf_low;
+            self.gf_high_display = deco_model.gf_high;
         if update_profile:
-            self._desc_deco_model_profile = self._deco_model.description();
-            self.gf_low_profile = self._deco_model.gf_low;
-            self.gf_high_profile = self._deco_model.gf_high;
+            self._desc_deco_model_profile = deco_model.description();
+            self.gf_low_profile = deco_model.gf_low;
+            self.gf_high_profile = deco_model.gf_high;
 
     '''
     Modifying the profile (adding sections etc)
@@ -252,18 +253,19 @@ class DiveProfile:
     '''
     def _update_all_tissue_states(self):
         assert self._points[0].time == 0.0;
-        self._points[0].set_cleared_tissue_state( self._deco_model );
+        self._points[0].set_cleared_tissue_state( self.deco_model() );
         for i in range(1, len(self._points)):
             self._points[i].set_updated_tissue_state( );
 
     def update_deco_info(self):
         t0 = time.perf_counter();
+        deco_model = self.deco_model();
         self._update_all_tissue_states();
         amb_to_gf = None;
         for p in self._points:
-            p.set_updated_deco_info( self._deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
+            p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = p.deco_info['amb_to_gf'];
-        self.update_deco_model_info(update_display = True)
+        self.update_deco_model_info(deco_model, update_display = True)
         self._full_info_computation_time = time.perf_counter() - t0;
 
     '''
@@ -325,14 +327,15 @@ class DiveProfile:
                 # Careful, there's another i += 1 in an exceptional case above.
                 i += 1;
         # Done!
-        self.update_deco_model_info(update_display = True, update_profile = True)
+        self.update_deco_model_info(deco_model, update_display = True, update_profile = True)
         self._deco_stops_computation_time = time.perf_counter() - t0;
 
     '''
     Modifying dive
     '''
     def set_gf( self, gf_low, gf_high, updateStops = False ):
-        self._deco_model.set_gf( gf_low, gf_high );
+        self.gf_low_display = gf_low;
+        self.gf_high_display = gf_high;
         if updateStops:
             self.update_stops();
         else:
@@ -395,7 +398,8 @@ class DiveProfile:
         cp = copy.deepcopy(self);
         cp.remove_surface_at_end();
         cp._remove_all_extra_points( update_deco_info = False );
-        cp._deco_model.set_gf(gf_low, gf_high);
+        cp.gf_low_display = gf_low;
+        cp.gf_high_display = gf_high;
         cp.add_stops_to_surface();
         return cp.decotime();
 
@@ -405,9 +409,14 @@ class DiveProfile:
             # We could not create a runtime table, because it did not make sense
             # => also gfdecotable does not make sense
             return None;
+        # Prepare template
+        cp = copy.deepcopy(self);
+        cp.remove_surface_at_end();
+        cp._remove_all_extra_points( update_deco_info = False );
+        # Do the math
         res = dict();
         for gflow in gflows:
             res[gflow] = dict();
             for gfhigh in gfhighs:
-                res[ gflow ][ gfhigh ] = self.decotime_for_gf( gflow, gfhigh );
+                res[ gflow ][ gfhigh ] = cp.decotime_for_gf( gflow, gfhigh );
         return res;
