@@ -119,7 +119,7 @@ def create_from_shearwater_csv(lines):
         result._append_point_abstime(t, d, gas);
     # Wrap up
     result.update_deco_info();
-    result.update_deco_model_info(update_profile = True);
+    result.update_deco_model_info(result.deco_model(), update_profile = True);
     return result;
 
 
@@ -158,7 +158,7 @@ def create_from_octodeco_csv(lines):
     # Wrap up
     result.add_custom_desc = 'CSV';
     result.update_deco_info();
-    result.update_deco_model_info( update_profile = True );
+    result.update_deco_model_info( result.deco_model(), update_profile = True );
     return result;
 
 
