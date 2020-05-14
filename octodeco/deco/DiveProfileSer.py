@@ -54,6 +54,8 @@ def _migrate_up_to_current(from_version, diveprofile):
         diveprofile._deco_model = None;
 
     # Note that we upgraded
+    dive_id = getattr(diveprofile, 'dive_id', -1);
+    print('Upgraded dive {} from v{} to v{}'.format(dive_id, from_version, CURRENT_VERSION));
     diveprofile.db_version = CURRENT_VERSION;
 
 
