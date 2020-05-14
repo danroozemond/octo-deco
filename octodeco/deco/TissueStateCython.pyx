@@ -101,6 +101,9 @@ class TissueState:
         # Return inert gas pressure in tissue i
         return self._state[2*i] + self._state[2*i+1];
 
+    def p_tissue_n2_he(self, i):
+        return self._state[2*i], self._state[2*i+1];
+
     #
     # Workmann / Buhlmann coefficients (retrieval nontrivial in Trimix case)
     #

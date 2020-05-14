@@ -41,6 +41,9 @@ class TissueState:
     def p_tissue(self, i):
         return sum(self._state[i]);
 
+    def p_tissue_n2_he(self, i):
+        return self._state[i];
+
     #
     # Workmann / Buhlmann coefficients (retrieval nontrivial in Trimix case)
     #

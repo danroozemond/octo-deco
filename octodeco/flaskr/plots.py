@@ -107,6 +107,27 @@ def show_heatmap(diveprofile):
     return graphjson;
 
 
+def _pg_m_lines(diveprofile, constants):
+    def m_line_n2(i, p_amb):
+        return constants.N2_A_VALUES[i] + p_amb/constants.N2_B_VALUES[i];
+    def m_line_he(i, p_amb):
+        return constants.HE_A_VALUES[i] + p_amb/constants.HE_B_VALUES[i];
+    if any(map(lambda g:g['fHe'] > 0.0, diveprofile.gases_carried())):
+        show_m_lines = [ ('N2', m_line_n2), ('He', m_line_he) ];
+    else:
+        show_m_lines = [ ('N2', m_line_n2) ];
+    return show_m_lines;
+
+
+def _pg_m_line_gf_ceil(amb_to_gf, i, p_amb, tissue_state):
+    gff = amb_to_gf(p_amb) / 100.0;
+    a,b = tissue_state._get_coeffs_a_b();
+    p_tissue = tissue_state.p_tissue(i);
+    # Copied from TissueState[xx].p_ceiling_for_gf_now
+    p_ceil = (p_tissue - a[i] * gff) / (gff / b[i] - gff + 1);
+    return p_ceil;
+
+
 def show_pressure_graph(diveprofile):
     fig = sp.make_subplots();
     # The lines
@@ -119,20 +140,15 @@ def show_pressure_graph(diveprofile):
     con = buhlmann._constants;
     n_tissues = con.N_TISSUES;
     n2halftimes = con.N2_HALFTIMES;
-    def m_line_n2(i, p_amb):
-        return con.N2_A_VALUES[i] + p_amb/con.N2_B_VALUES[i];
-    def m_line_he(i, p_amb):
-        return con.HE_A_VALUES[i] + p_amb/con.HE_B_VALUES[i];
-    if any(map(lambda g:g['fHe'] > 0.0, diveprofile.gases_carried())):
-        show_m_lines = [ ('N2', m_line_n2), ('He', m_line_he) ];
-    else:
-        show_m_lines = [ ('N2', m_line_n2) ];
+    show_m_lines = _pg_m_lines(diveprofile, con);
+    amb_to_gf = pts[-1].deco_info.get('amb_to_gf', None);
     # Get the rest of the reusable info
     colors = px.colors.qualitative.Dark24;
     x = [ p.p_amb for p in pts ];
     max_x = max(x);
     customdata = [ p.time for p in pts ];
     max_y = 0;
+    pts_sorted = pts;
     # For each tissue ..
     for i in range(n_tissues):
         # The actual line of inert gas pressures
@@ -160,6 +176,22 @@ def show_pressure_graph(diveprofile):
                                      legendgroup = name,
                                      hovertemplate = '<extra>M-line for '+name+' ('+t+')</extra>',
                                      line = {'color': colors[ i ], 'dash' : 'dot'},
+                                     showlegend = False,
+                                     visible = "legendonly" if i > 0 else True
+                                     ));
+        # .. and add the resulting gradient factor line that resulted from the GF's
+        if amb_to_gf is not None:
+            # x = ambient pressure allowed; y = tissue pressure
+            xx = [ _pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state) for p in pts_sorted ];
+            yy = [ p.tissue_state.p_tissue(i) for p in pts_sorted ];
+            customdata_gf_i = [ 'T:{:.1f}mins, GF:{.1f}%'.format(p.time, amb_to_gf(p.p_amb))];
+            fig.add_trace(go.Scatter(x = xx, y = yy,
+                                     name = name + '_M_line_GF',
+                                     mode = 'lines',
+                                     legendgroup = name,
+                                     customdata = customdata_gf_i,
+                                     hovertemplate = '%{customdata}<extra>GF M-line</extra>',
+                                     line = {'color': 'red', 'dash' : 'dot'},
                                      showlegend = False,
                                      visible = "legendonly" if i > 0 else True
                                      ));
