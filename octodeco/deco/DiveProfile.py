@@ -409,9 +409,14 @@ class DiveProfile:
             # We could not create a runtime table, because it did not make sense
             # => also gfdecotable does not make sense
             return None;
+        # Prepare template
+        cp = copy.deepcopy(self);
+        cp.remove_surface_at_end();
+        cp._remove_all_extra_points( update_deco_info = False );
+        # Do the math
         res = dict();
         for gflow in gflows:
             res[gflow] = dict();
             for gfhigh in gfhighs:
-                res[ gflow ][ gfhigh ] = self.decotime_for_gf( gflow, gfhigh );
+                res[ gflow ][ gfhigh ] = cp.decotime_for_gf( gflow, gfhigh );
         return res;
