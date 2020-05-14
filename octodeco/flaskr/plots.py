@@ -164,8 +164,8 @@ def show_pressure_graph(diveprofile):
                                      visible = "legendonly" if i > 0 else True
                                      ));
     # The extra stuff
-    max_x = math.ceil(max_x);
-    max_y = math.ceil(max_y);
+    max_x = max_x+0.5;
+    max_y = max_y+0.5;
     # Ambient = compartment
     fig.add_trace(go.Scatter(x = [0,max(max_x,max_y)],y=[0,max(max_x,max_y)],
                              line = {'color':'grey', 'width':0.5},
