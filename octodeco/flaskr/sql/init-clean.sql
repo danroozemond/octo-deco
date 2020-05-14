@@ -12,7 +12,8 @@ CREATE TABLE users (
   google_sub TEXT,
   google_given_name TEXT,
   google_picture TEXT,
-  last_activity DATETIME
+  last_activity DATETIME,
+  is_admin BOOL
 );
 CREATE TABLE sessions (
   session_id TEXT NOT NULL,

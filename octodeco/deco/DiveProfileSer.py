@@ -8,7 +8,7 @@ import pytz
 
 from . import TissueStateNumpy, TissueStateCython, TissueStateClassic;
 
-CURRENT_VERSION = 7;
+CURRENT_VERSION = 8;
 
 
 #
@@ -17,6 +17,10 @@ CURRENT_VERSION = 7;
 def _migrate_up_to_current(from_version, diveprofile):
     if not hasattr(diveprofile, 'created'):
         diveprofile.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
+    if not hasattr(diveprofile, '_gas_switch_mins'):
+        diveprofile._gas_switch_mins = 3.0;
+    if not hasattr(diveprofile, '_max_pO2_deco'):
+        diveprofile._max_pO2_deco = 1.60;
 
     # None
     for attrname in [ 'custom_desc', 'add_custom_desc' ]:
@@ -30,14 +34,12 @@ def _migrate_up_to_current(from_version, diveprofile):
 
     # Tissue State
     if from_version < 5:
-        diveprofile._deco_model.TissueState = TissueStateNumpy.TissueState;
         constants = diveprofile.deco_model()._constants;
         for point in diveprofile.points():
             iptts = point.tissue_state._state if type(point.tissue_state) == TissueStateClassic.TissueState \
                     else point.tissue_state;
             point.tissue_state = TissueStateNumpy.construct_numpy_from_classic(iptts, constants);
     if from_version < 6:
-        diveprofile._deco_model.TissueState = TissueStateCython.TissueState;
         constants = diveprofile.deco_model()._constants;
         for point in diveprofile.points():
             point.tissue_state = TissueStateCython.construct_cython_from_numpy(point.tissue_state, constants);
@@ -47,7 +49,13 @@ def _migrate_up_to_current(from_version, diveprofile):
         if not hasattr(point, 'is_ascent_point'):
             point.is_ascent_point = False;
 
+    # v8
+    if hasattr(diveprofile, '_deco_model'):
+        diveprofile._deco_model = None;
+
     # Note that we upgraded
+    dive_id = getattr(diveprofile, 'dive_id', None);
+    print('Upgraded dive {} from v{} to v{}'.format(dive_id, from_version, CURRENT_VERSION));
     diveprofile.db_version = CURRENT_VERSION;
 
 
@@ -64,10 +72,17 @@ def _migrate(diveprofile):
         _migrate_up_to_current(version, diveprofile);
 
 
+def loads_with_version_info(blob):
+    dp = _loads_only(blob);
+    oldversion = getattr(dp, 'db_version', 0);
+    _migrate(dp);
+    newversion = dp.db_version;
+    return dp, oldversion, newversion;
+
+
 def loads(blob):
     # .. = load and migrate
-    dp = _loads_only(blob);
-    _migrate(dp);
+    dp, _, _ = loads_with_version_info(blob);
     return dp;
 
 

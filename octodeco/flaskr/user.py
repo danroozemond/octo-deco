@@ -22,6 +22,14 @@ class UserDetails(dict):
         return self['google_sub'] is not None and self['google_sub'] != '';
 
     @property
+    def user_id(self):
+        return self['user_id'];
+
+    @property
+    def is_admin(self):
+        return self['is_admin'] == 1;
+
+    @property
     def login_link(self):
         return auth.get_google_request_uri();
 

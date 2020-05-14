@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin info{% endblock %}
+
+{% block content %}
+    <header><h2>Admin</h2></header>
+    <ul>
+        <li><span class="fa fa-chevron-circle-right"></span>
+            <a href="{{url_for('admin.migrate_all')}}">Migrate all</a> (Pro-tip: backup first)
+        </li>
+    </ul>
+{% endblock %}
