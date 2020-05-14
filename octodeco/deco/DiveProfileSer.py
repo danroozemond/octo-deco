@@ -54,7 +54,7 @@ def _migrate_up_to_current(from_version, diveprofile):
         diveprofile._deco_model = None;
 
     # Note that we upgraded
-    dive_id = getattr(diveprofile, 'dive_id', -1);
+    dive_id = getattr(diveprofile, 'dive_id', None);
     print('Upgraded dive {} from v{} to v{}'.format(dive_id, from_version, CURRENT_VERSION));
     diveprofile.db_version = CURRENT_VERSION;
 
@@ -72,10 +72,17 @@ def _migrate(diveprofile):
         _migrate_up_to_current(version, diveprofile);
 
 
+def loads_with_version_info(blob):
+    dp = _loads_only(blob);
+    oldversion = getattr(dp, 'db_version', 0);
+    _migrate(dp);
+    newversion = dp.db_version;
+    return dp, oldversion, newversion;
+
+
 def loads(blob):
     # .. = load and migrate
-    dp = _loads_only(blob);
-    _migrate(dp);
+    dp, _, _ = loads_with_version_info(blob);
     return dp;
 
 

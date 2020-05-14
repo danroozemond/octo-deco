@@ -88,6 +88,8 @@ from . import user;
 app.register_blueprint(user.bp);
 from . import auth;
 app.register_blueprint(auth.bp);
+from . import admin;
+app.register_blueprint(admin.bp);
 
 
 #
