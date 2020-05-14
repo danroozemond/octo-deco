@@ -1,20 +1,36 @@
 # Please see LICENSE.md
 
-from octodeco.deco import Gas, Util;
+import sys
+import time
+
+from octodeco.deco import Gas;
 from octodeco.deco.DiveProfile import DiveProfile;
 
-dp = DiveProfile(gf_low=35, gf_high=65);
+t0 = time.perf_counter();
+
+dp = DiveProfile(gf_low=35, gf_high=85);
 # dp.append_section(50, 50, gas = Gas.Trimix(21,35));
 dp.append_section(30, 30, gas = Gas.Air());
-# dp.add_gas(Gas.Nitrox(50))
+dp.add_gas(Gas.Nitrox(50))
 dp.add_stops_to_surface();
-# dp.append_section(0,10);
-# dp.interpolate_points();
+dp.append_section(0,10);
+dp.interpolate_points();
 
 print(dp.dive_summary());
-
 for s in dp.runtimetable():
     print(s);
+
+dp.set_gf(55,65);
+
+print(dp.dive_summary());
+for s in dp.runtimetable():
+    print(s);
+
+t1 = time.perf_counter();
+print('Time taken {:.3f}'.format(t1-t0));
+
+sys.exit(0);
+
 
 for i in range(len(dp._points)):
     p = dp._points[i];
