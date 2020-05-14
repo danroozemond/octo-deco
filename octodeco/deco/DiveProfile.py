@@ -334,7 +334,8 @@ class DiveProfile:
     Modifying dive
     '''
     def set_gf( self, gf_low, gf_high, updateStops = False ):
-        self._deco_model.set_gf( gf_low, gf_high );
+        self.gf_low_display = gf_low;
+        self.gf_high_display = gf_high;
         if updateStops:
             self.update_stops();
         else:
@@ -397,7 +398,8 @@ class DiveProfile:
         cp = copy.deepcopy(self);
         cp.remove_surface_at_end();
         cp._remove_all_extra_points( update_deco_info = False );
-        cp._deco_model.set_gf(gf_low, gf_high);
+        cp.gf_low_display = gf_low;
+        cp.gf_high_display = gf_high;
         cp.add_stops_to_surface();
         return cp.decotime();
 
