@@ -121,6 +121,7 @@ def _pg_m_lines(diveprofile, constants):
 
 def _pg_m_line_gf_ceil(amb_to_gf, i, p_amb, tissue_state):
     gff = amb_to_gf(p_amb) / 100.0;
+    gff = 1; # for debugging
     a,b = tissue_state._get_coeffs_a_b();
     p_tissue = tissue_state.p_tissue(i);
     # Copied from TissueState[xx].p_ceiling_for_gf_now
@@ -148,7 +149,8 @@ def show_pressure_graph(diveprofile):
     max_x = max(x);
     customdata = [ p.time for p in pts ];
     max_y = 0;
-    pts_sorted = pts;
+    deepest_point = max( pts, key = lambda p: (p.p_amb, p.time) );
+    m_line_gf_points = [ pts[-1], deepest_point ];
     # For each tissue ..
     for i in range(n_tissues):
         # The actual line of inert gas pressures
@@ -181,16 +183,16 @@ def show_pressure_graph(diveprofile):
                                      ));
         # .. and add the resulting gradient factor line that resulted from the GF's
         if amb_to_gf is not None:
-            # x = ambient pressure allowed; y = tissue pressure
-            xx = [ _pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state) for p in pts_sorted ];
-            yy = [ p.tissue_state.p_tissue(i) for p in pts_sorted ];
-            customdata_gf_i = [ 'T:{:.1f}mins, GF:{.1f}%'.format(p.time, amb_to_gf(p.p_amb))];
+            xx = [ p.p_amb for p in m_line_gf_points ];
+            yy = [ _pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state) for p in m_line_gf_points ];
+            if i == 0:
+                print(i, [ (p.time, p.p_amb, amb_to_gf(p.p_amb),_pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state)) \
+                        for p in m_line_gf_points ]);
             fig.add_trace(go.Scatter(x = xx, y = yy,
                                      name = name + '_M_line_GF',
                                      mode = 'lines',
                                      legendgroup = name,
-                                     customdata = customdata_gf_i,
-                                     hovertemplate = '%{customdata}<extra>GF M-line</extra>',
+                                     hovertemplate = '<extra>GF M-line</extra>',
                                      line = {'color': 'red', 'dash' : 'dot'},
                                      showlegend = False,
                                      visible = "legendonly" if i > 0 else True
