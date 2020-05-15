@@ -108,10 +108,14 @@ def show_heatmap(diveprofile):
 
 
 def _pg_m_lines(diveprofile, constants):
-    def m_line_n2(i, p_amb):
-        return constants.N2_A_VALUES[i] + p_amb/constants.N2_B_VALUES[i];
-    def m_line_he(i, p_amb):
-        return constants.HE_A_VALUES[i] + p_amb/constants.HE_B_VALUES[i];
+    def m_line_n2(i):
+        a = constants.N2_A_VALUES[i];
+        b = constants.N2_B_VALUES[ i ];
+        return lambda p_amb : a + p_amb / b;
+    def m_line_he(i):
+        a = constants.HE_A_VALUES[i];
+        b = constants.HE_B_VALUES[ i ];
+        return lambda p_amb : a + p_amb / b;
     if any(map(lambda g:g['fHe'] > 0.0, diveprofile.gases_carried())):
         show_m_lines = [ ('N2', m_line_n2), ('He', m_line_he) ];
     else:
@@ -170,9 +174,9 @@ def show_pressure_graph(diveprofile):
                                  ));
         # Also add the M-value line(s)
         for t, m_line in show_m_lines:
-            xx = [0,1,2,10];
-            yy = [ m_line(i, x) for x in xx ];
-            fig.add_trace(go.Scatter(x = xx, y = yy,
+            p_amb = [0,1,2,10];
+            p_comp_max = [ m_line(i)(x) for x in p_amb ];
+            fig.add_trace(go.Scatter(x = p_amb, y = p_comp_max,
                                      name = name + '_M_line_' + t,
                                      mode = 'lines',
                                      legendgroup = name,
@@ -182,19 +186,20 @@ def show_pressure_graph(diveprofile):
                                      visible = "legendonly" if i != default_tissue_to_show else True
                                      ));
         # .. and add the resulting gradient factor line that resulted from the GF's
-        if amb_to_gf is not None:
-            # x = allowed ambient pressure for y = tissue pressure
-            xx = [ _pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state) for p in m_line_gf_points ];
-            yy = [ p.tissue_state.p_tissue(i) for p in m_line_gf_points ];
-            fig.add_trace(go.Scatter(x = xx, y = yy,
-                                     name = name + '_M_line_GF',
-                                     mode = 'lines',
-                                     legendgroup = name,
-                                     hovertemplate = '<extra>GF M-line</extra>',
-                                     line = {'color': colors[ i ], 'dash' : 'dash', 'width' : 1.5 },
-                                     showlegend = False,
-                                     visible = "legendonly" if i != default_tissue_to_show else True
-                                     ));
+        # if amb_to_gf is not None:
+        #     # x = allowed ambient pressure for y = tissue pressure
+        #     # m_line maps ambient pressure (x) to maximum allowed compartment pressure (y)
+        #     xx = [ _pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state) for p in m_line_gf_points ];
+        #     yy = [ p.tissue_state.p_tissue(i) for p in m_line_gf_points ];
+        #     fig.add_trace(go.Scatter(x = xx, y = yy,
+        #                              name = name + '_M_line_GF',
+        #                              mode = 'lines',
+        #                              legendgroup = name,
+        #                              hovertemplate = '<extra>GF M-line</extra>',
+        #                              line = {'color': colors[ i ], 'dash' : 'dash', 'width' : 1.5 },
+        #                              showlegend = False,
+        #                              visible = "legendonly" if i != default_tissue_to_show else True
+        #                              ));
     # The extra stuff
     max_x = max_x+0.5;
     max_y = max_y+0.5;
