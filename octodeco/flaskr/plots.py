@@ -176,7 +176,7 @@ def show_pressure_graph(diveprofile):
                                      mode = 'lines',
                                      legendgroup = name,
                                      hovertemplate = '<extra>M-line for '+name+' ('+t+')</extra>',
-                                     line = {'color': colors[ i ], 'dash' : 'dot'},
+                                     line = {'color': colors[ i ], 'dash' : 'dot', 'width' : 0.8 },
                                      showlegend = False,
                                      visible = "legendonly" if i > 0 else True
                                      ));
@@ -190,7 +190,7 @@ def show_pressure_graph(diveprofile):
                                      mode = 'lines',
                                      legendgroup = name,
                                      hovertemplate = '<extra>GF M-line</extra>',
-                                     line = {'color': 'red', 'dash' : 'dot'},
+                                     line = {'color': colors[ i ], 'dash' : 'dash', 'width' : 1.5 },
                                      showlegend = False,
                                      visible = "legendonly" if i > 0 else True
                                      ));
