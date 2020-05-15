@@ -123,13 +123,14 @@ def _pg_m_lines(diveprofile, constants):
     return show_m_lines;
 
 
-def _pg_m_line_gf_ceil(amb_to_gf, i, p_amb, tissue_state):
-    gff = amb_to_gf(p_amb) / 100.0;
-    a,b = tissue_state._get_coeffs_a_b();
-    p_tissue = tissue_state.p_tissue(i);
-    # Copied from TissueState[xx].p_ceiling_for_gf_now
-    p_ceil = (p_tissue - a[i] * gff) / (gff / b[i] - gff + 1);
-    return p_ceil;
+def _pg_m_line_gf(i, tissue_state_for_a_b):
+    a, b = tissue_state_for_a_b._get_coeffs_a_b();
+    ai = a[i]; bi = b[i];
+    def m_line(amb_to_gf, p_amb):
+        gff = amb_to_gf(p_amb) / 100.0;
+        M = ai + p_amb/bi;
+        return p_amb + gff*(M - p_amb);
+    return m_line;
 
 
 def show_pressure_graph(diveprofile):
@@ -152,8 +153,8 @@ def show_pressure_graph(diveprofile):
     max_x = max(x);
     customdata = [ p.time for p in pts ];
     max_y = 0;
-    deepest_point = max( pts, key = lambda p: (p.p_amb, p.time) );
-    m_line_gf_points = [ pts[-1], deepest_point ];
+    deepest_point = max( pts, key = lambda p: (p.p_amb, p.time) ); # TODO REMOVE
+    m_line_gf_points = [ pts[-1], deepest_point ]; #TODO REMOVE?
     default_tissue_to_show = 2;
     # For each tissue ..
     for i in range(n_tissues):
@@ -186,20 +187,19 @@ def show_pressure_graph(diveprofile):
                                      visible = "legendonly" if i != default_tissue_to_show else True
                                      ));
         # .. and add the resulting gradient factor line that resulted from the GF's
-        # if amb_to_gf is not None:
-        #     # x = allowed ambient pressure for y = tissue pressure
-        #     # m_line maps ambient pressure (x) to maximum allowed compartment pressure (y)
-        #     xx = [ _pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state) for p in m_line_gf_points ];
-        #     yy = [ p.tissue_state.p_tissue(i) for p in m_line_gf_points ];
-        #     fig.add_trace(go.Scatter(x = xx, y = yy,
-        #                              name = name + '_M_line_GF',
-        #                              mode = 'lines',
-        #                              legendgroup = name,
-        #                              hovertemplate = '<extra>GF M-line</extra>',
-        #                              line = {'color': colors[ i ], 'dash' : 'dash', 'width' : 1.5 },
-        #                              showlegend = False,
-        #                              visible = "legendonly" if i != default_tissue_to_show else True
-        #                              ));
+        if amb_to_gf is not None:
+            pts2 = [ p for p in pts if p.deco_info['amb_to_gf'] is not None ];
+            p_ambs = [ p.p_amb for p in pts2 ];
+            p_comp_max = [ _pg_m_line_gf(i, p.tissue_state)(amb_to_gf, p.p_amb) for p in pts2 ];
+            fig.add_trace(go.Scatter(x = p_ambs, y = p_comp_max,
+                                     name = name + '_M_line_GF',
+                                     mode = 'lines+markers',
+                                     legendgroup = name,
+                                     hovertemplate = '<extra>GF M-line</extra>',
+                                     line = {'color': colors[ i ], 'dash' : 'dash', 'width' : 1.5 },
+                                     showlegend = False,
+                                     visible = "legendonly" if i != default_tissue_to_show else True
+                                     ));
     # The extra stuff
     max_x = max_x+0.5;
     max_y = max_y+0.5;
