@@ -8,6 +8,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.subplots as sp
 
+from octodeco.deco import Util;
+
 
 def show_diveprofile(diveprofile):
     df = diveprofile.dataframe();
@@ -146,9 +148,7 @@ def show_pressure_graph(diveprofile):
     n_tissues = con.N_TISSUES;
     n2halftimes = con.N2_HALFTIMES;
     show_m_lines = _pg_m_lines(diveprofile, con);
-    amb_to_gf = pts[-1].deco_info.get('amb_to_gf', None);
     pts_for_m_line_gf = [ p for p in pts if p.is_deco_stop and not p.is_interpolated_point ];
-    pts_for_m_line_gf.sort(key = lambda p : (p.p_amb, p.time), reverse = True);
     # Get the rest of the reusable info
     colors = px.colors.qualitative.Dark24;
     x = [ p.p_amb for p in pts ];
@@ -175,7 +175,7 @@ def show_pressure_graph(diveprofile):
                                  ));
         # Also add the M-value line(s)
         for t, m_line in show_m_lines:
-            p_amb = [0,1,2,10];
+            p_amb = [0,1,2,max_x];
             p_comp_max = [ m_line(i)(x) for x in p_amb ];
             fig.add_trace(go.Scatter(x = p_amb, y = p_comp_max,
                                      name = name + '_M_line_' + t,
@@ -187,15 +187,19 @@ def show_pressure_graph(diveprofile):
                                      visible = "legendonly" if i != default_tissue_to_show else True
                                      ));
         # .. and add the resulting gradient factor line that resulted from the GF's
-        if amb_to_gf is not None and len(pts_for_m_line_gf) > 0:
-            p_ambs = [max_x] + [ p.p_amb for p in pts_for_m_line_gf ] + [1.0, 0.0];
-            amb_to_gfs = [ p.deco_info['amb_to_gf'] for p in pts_for_m_line_gf ];
-            funcs = [ _pg_m_line_gf(i, p.tissue_state) for p in pts_for_m_line_gf ];
-            funcs = [funcs[0]] + funcs + [ funcs[-1], funcs[-1] ];
-            amb_to_gfs = [amb_to_gfs[0]] + amb_to_gfs + [ amb_to_gfs[-1], amb_to_gfs[-1] ];
-            p_comp_max = [ funcs[j](amb_to_gfs[j], p_ambs[j]) for j in range(len(p_ambs)) ];
-            hovertemplate = '<extra>GF M-line ({}/{})</extra>'.format(diveprofile.gf_low_display,
-                                                                      diveprofile.gf_high_display);
+        if len(pts_for_m_line_gf) > 0:
+            # Use amb_to_gf and m_line function based on deepest deco stop
+            # This is not super precise (plotting all points would be), especially if you have multiple
+            # decos as in the demo dive, but it will give a more insightful picture, I believe.
+            # pts_for_m_line_gf only contains non-interpolated deco points.
+            pt = max(pts_for_m_line_gf, key=lambda p:p.p_amb);
+            amb_to_gf = pt.deco_info['amb_to_gf'];
+            m_line = _pg_m_line_gf(i, pt.tissue_state);
+            p_ambs = [0.0, 1.0, amb_to_gf.p_first_stop, max_x ];
+            p_comp_max = [ m_line(amb_to_gf, p) for p in p_ambs ];
+            hovertemplate = '<extra>GF M-line ({}/{}, first stop:{:.0f})</extra>'.\
+                format(diveprofile.gf_low_display, diveprofile.gf_high_display,
+                       Util.Pamb_to_depth(amb_to_gf.p_first_stop));
             fig.add_trace(go.Scatter(x = p_ambs, y = p_comp_max,
                                      name = name + '_M_line_GF',
                                      mode = 'lines+markers',
