@@ -197,7 +197,7 @@ class Buhlmann:
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
         # 'Walk' up
-        p_now = p_amb; gas_now = gas_prev = current_gas;
+        p_now = max(p_first_stop, p_amb); gas_now = gas_prev = current_gas;
         result = [ ];
         while p_now > p_target + 0.01:
             p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_now, p_first_stop, gas_now, gases);
