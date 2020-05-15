@@ -188,11 +188,11 @@ def show_pressure_graph(diveprofile):
                                      ));
         # .. and add the resulting gradient factor line that resulted from the GF's
         if len(pts_for_m_line_gf) > 0:
-            # Use amb_to_gf and m_line function based on deepest deco stop
+            # Use amb_to_gf and m_line function based on point with largest deco obligation
             # This is not super precise (plotting all points would be), especially if you have multiple
             # decos as in the demo dive, but it will give a more insightful picture, I believe.
             # pts_for_m_line_gf only contains non-interpolated deco points.
-            pt = max(pts_for_m_line_gf, key=lambda p:p.p_amb);
+            pt = max(pts_for_m_line_gf, key=lambda p: (p.deco_info['SurfaceGF'], p.p_amb));
             amb_to_gf = pt.deco_info['amb_to_gf'];
             m_line = _pg_m_line_gf(i, pt.tissue_state);
             p_ambs = [0.0, 1.0, amb_to_gf.p_first_stop, max_x ];
