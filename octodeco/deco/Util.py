@@ -30,4 +30,4 @@ def stops_to_string(stops):
 
 
 def stops_to_string_precise(stops):
-    return ' '.join([ '%.1f@%im[%s]' % ( s[1], s[0], s[2] ) for s in stops if s[1] >= 0.1 ]);
+    return ' '.join([ '%.1f@%im[%s]' % ( s[1], s[0], s[2] ) for s in stops ]);

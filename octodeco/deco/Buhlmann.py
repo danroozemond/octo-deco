@@ -173,7 +173,7 @@ class Buhlmann:
             p_avg = (p_amb + p_new_amb)/2.0;
             return state.updated_state(time, p_avg, gas);
 
-    def _deco_profile_p_amb_next_stop(self, p_now, p_first_stop, current_gas, gases):
+    def _deco_profile_p_amb_next_stop(self, p_now, p_first_stop, current_gas, gases, add_gas_switch = True):
         # returns p_amb for next stop, p_amb for gas switch, gas to use at next stop
         if p_now > p_first_stop:
             p_amb_next_stop = p_first_stop;
@@ -181,7 +181,7 @@ class Buhlmann:
             p_amb_next_stop = Util.next_stop_Pamb(p_now);
         # Do we need a gas switch?
         new_gas = self._best_deco_gas(p_amb_next_stop, gases);
-        if new_gas != current_gas and p_first_stop > 1.0:
+        if new_gas != current_gas and p_first_stop > 1.0 and add_gas_switch:
             p_amb_gas_switch = self._gas_switch_p_amb(new_gas);
             if p_amb_next_stop <= p_amb_gas_switch < p_now:
                 p_amb_next_stop = p_amb_gas_switch;
@@ -200,7 +200,8 @@ class Buhlmann:
         p_now = max(p_first_stop, p_amb); gas_now = gas_prev = current_gas;
         result = [ ];
         while p_now > p_target + 0.01:
-            p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_now, p_first_stop, gas_now, gases);
+            p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_now, p_first_stop, gas_now, gases,
+                                                                                add_gas_switch = add_gas_switch);
             stoplength, tissue_state = self._time_to_stay_at_stop(p_now, p_amb_next_stop, tissue_state, gas_now, amb_to_gf);
             if gas_prev != gas_now and add_gas_switch and stoplength < self.gas_switch_mins:
                 tissue_state = tissue_state.updated_state( self.gas_switch_mins - stoplength, p_now, gas_now );
