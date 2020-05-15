@@ -162,13 +162,15 @@ def show_pressure_graph(diveprofile):
         y = [ p.tissue_state.p_tissue(i) for p in pts ];
         max_y = max(max_y, max(y));
         name = 'T{:.1f}'.format(n2halftimes[i]);
-        hovertemplate = '%{customdata:.1f}mins: Ambient:%{x:.1f}, Comptmt:%{y:.1f}<extra>'+name+'</extra>';
+        customstrs = [ '{:.1f}mins: Ambient:{:.1f}, Comptmt:{:.1f}, GF:{:.1f}%'.\
+                           format( p.time, p.p_amb, p.tissue_state.p_tissue(i), p.deco_info['allGF99s'][i])
+                       for p in pts ];
         fig.add_trace(go.Scatter(x = x, y = y,
                                  name = name,
                                  mode = 'lines+markers',
                                  legendgroup = name,
-                                 customdata = customdata,
-                                 hovertemplate = hovertemplate,
+                                 customdata = customstrs,
+                                 hovertemplate = '%{customdata}<extra>'+name+'</extra>',
                                  line = { 'color' : colors[i] },
                                  marker = { 'symbol': 'circle', 'size' : 4, 'color' : colors[i] },
                                  visible = "legendonly" if i != default_tissue_to_show else True
@@ -197,7 +199,7 @@ def show_pressure_graph(diveprofile):
             m_line = _pg_m_line_gf(i, pt.tissue_state);
             p_ambs = [0.0, 1.0, amb_to_gf.p_first_stop, max_x ];
             p_comp_max = [ m_line(amb_to_gf, p) for p in p_ambs ];
-            hovertemplate = '<extra>GF M-line ({}/{}, first stop:{:.0f})</extra>'.\
+            hovertemplate = '<extra>GF M-line ({}/{}, first stop:{:.1f}m)</extra>'.\
                 format(diveprofile.gf_low_display, diveprofile.gf_high_display,
                        Util.Pamb_to_depth(amb_to_gf.p_first_stop));
             fig.add_trace(go.Scatter(x = p_ambs, y = p_comp_max,
