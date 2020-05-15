@@ -147,14 +147,14 @@ def show_pressure_graph(diveprofile):
     n2halftimes = con.N2_HALFTIMES;
     show_m_lines = _pg_m_lines(diveprofile, con);
     amb_to_gf = pts[-1].deco_info.get('amb_to_gf', None);
+    pts_for_m_line_gf = [ p for p in pts if p.is_deco_stop and not p.is_interpolated_point ];
+    pts_for_m_line_gf.sort(key = lambda p : (p.p_amb, p.time), reverse = True);
     # Get the rest of the reusable info
     colors = px.colors.qualitative.Dark24;
     x = [ p.p_amb for p in pts ];
     max_x = max(x);
     customdata = [ p.time for p in pts ];
     max_y = 0;
-    deepest_point = max( pts, key = lambda p: (p.p_amb, p.time) ); # TODO REMOVE
-    m_line_gf_points = [ pts[-1], deepest_point ]; #TODO REMOVE?
     default_tissue_to_show = 2;
     # For each tissue ..
     for i in range(n_tissues):
@@ -187,10 +187,11 @@ def show_pressure_graph(diveprofile):
                                      visible = "legendonly" if i != default_tissue_to_show else True
                                      ));
         # .. and add the resulting gradient factor line that resulted from the GF's
-        if amb_to_gf is not None:
-            pts2 = [ p for p in pts if p.deco_info['amb_to_gf'] is not None ];
-            p_ambs = [ p.p_amb for p in pts2 ];
-            p_comp_max = [ _pg_m_line_gf(i, p.tissue_state)(amb_to_gf, p.p_amb) for p in pts2 ];
+        if amb_to_gf is not None and len(pts_for_m_line_gf) > 0:
+            p_ambs = [max_x] + [ p.p_amb for p in pts_for_m_line_gf ] + [1.0, 0.0];
+            funcs = [ _pg_m_line_gf(i, p.tissue_state) for p in pts_for_m_line_gf ];
+            funcs = [funcs[0]] + funcs + [ funcs[-1], funcs[-1] ];
+            p_comp_max = [ funcs[j](amb_to_gf, p_ambs[j]) for j in range(len(p_ambs)) ];
             fig.add_trace(go.Scatter(x = p_ambs, y = p_comp_max,
                                      name = name + '_M_line_GF',
                                      mode = 'lines+markers',
