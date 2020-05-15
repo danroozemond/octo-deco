@@ -150,6 +150,7 @@ def show_pressure_graph(diveprofile):
     max_y = 0;
     deepest_point = max( pts, key = lambda p: (p.p_amb, p.time) );
     m_line_gf_points = [ pts[-1], deepest_point ];
+    default_tissue_to_show = 2;
     # For each tissue ..
     for i in range(n_tissues):
         # The actual line of inert gas pressures
@@ -165,7 +166,7 @@ def show_pressure_graph(diveprofile):
                                  hovertemplate = hovertemplate,
                                  line = { 'color' : colors[i] },
                                  marker = { 'symbol': 'circle', 'size' : 4, 'color' : colors[i] },
-                                 visible = "legendonly" if i > 0 else True
+                                 visible = "legendonly" if i != default_tissue_to_show else True
                                  ));
         # Also add the M-value line(s)
         for t, m_line in show_m_lines:
@@ -178,7 +179,7 @@ def show_pressure_graph(diveprofile):
                                      hovertemplate = '<extra>M-line for '+name+' ('+t+')</extra>',
                                      line = {'color': colors[ i ], 'dash' : 'dot', 'width' : 0.8 },
                                      showlegend = False,
-                                     visible = "legendonly" if i > 0 else True
+                                     visible = "legendonly" if i != default_tissue_to_show else True
                                      ));
         # .. and add the resulting gradient factor line that resulted from the GF's
         if amb_to_gf is not None:
@@ -192,14 +193,14 @@ def show_pressure_graph(diveprofile):
                                      hovertemplate = '<extra>GF M-line</extra>',
                                      line = {'color': colors[ i ], 'dash' : 'dash', 'width' : 1.5 },
                                      showlegend = False,
-                                     visible = "legendonly" if i > 0 else True
+                                     visible = "legendonly" if i != default_tissue_to_show else True
                                      ));
     # The extra stuff
     max_x = max_x+0.5;
     max_y = max_y+0.5;
     # Ambient = compartment
     fig.add_trace(go.Scatter(x = [0,max(max_x,max_y)],y=[0,max(max_x,max_y)],
-                             line = {'color':'grey', 'width':0.5},
+                             line = {'color': '#a0a0a0', 'width': 1.0},
                              showlegend=False));
     # Labels etc
     fig.update_yaxes(secondary_y = False, title_text = "Compartment pressure",
