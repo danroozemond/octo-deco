@@ -121,7 +121,6 @@ def _pg_m_lines(diveprofile, constants):
 
 def _pg_m_line_gf_ceil(amb_to_gf, i, p_amb, tissue_state):
     gff = amb_to_gf(p_amb) / 100.0;
-    gff = 1; # for debugging
     a,b = tissue_state._get_coeffs_a_b();
     p_tissue = tissue_state.p_tissue(i);
     # Copied from TissueState[xx].p_ceiling_for_gf_now
@@ -183,11 +182,9 @@ def show_pressure_graph(diveprofile):
                                      ));
         # .. and add the resulting gradient factor line that resulted from the GF's
         if amb_to_gf is not None:
-            xx = [ p.p_amb for p in m_line_gf_points ];
-            yy = [ _pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state) for p in m_line_gf_points ];
-            if i == 0:
-                print(i, [ (p.time, p.p_amb, amb_to_gf(p.p_amb),_pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state)) \
-                        for p in m_line_gf_points ]);
+            # x = allowed ambient pressure for y = tissue pressure
+            xx = [ _pg_m_line_gf_ceil(amb_to_gf, i, p.p_amb, p.tissue_state) for p in m_line_gf_points ];
+            yy = [ p.tissue_state.p_tissue(i) for p in m_line_gf_points ];
             fig.add_trace(go.Scatter(x = xx, y = yy,
                                      name = name + '_M_line_GF',
                                      mode = 'lines',
