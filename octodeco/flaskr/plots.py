@@ -189,14 +189,18 @@ def show_pressure_graph(diveprofile):
         # .. and add the resulting gradient factor line that resulted from the GF's
         if amb_to_gf is not None and len(pts_for_m_line_gf) > 0:
             p_ambs = [max_x] + [ p.p_amb for p in pts_for_m_line_gf ] + [1.0, 0.0];
+            amb_to_gfs = [ p.deco_info['amb_to_gf'] for p in pts_for_m_line_gf ];
             funcs = [ _pg_m_line_gf(i, p.tissue_state) for p in pts_for_m_line_gf ];
             funcs = [funcs[0]] + funcs + [ funcs[-1], funcs[-1] ];
-            p_comp_max = [ funcs[j](amb_to_gf, p_ambs[j]) for j in range(len(p_ambs)) ];
+            amb_to_gfs = [amb_to_gfs[0]] + amb_to_gfs + [ amb_to_gfs[-1], amb_to_gfs[-1] ];
+            p_comp_max = [ funcs[j](amb_to_gfs[j], p_ambs[j]) for j in range(len(p_ambs)) ];
+            hovertemplate = '<extra>GF M-line ({}/{})</extra>'.format(diveprofile.gf_low_display,
+                                                                      diveprofile.gf_high_display);
             fig.add_trace(go.Scatter(x = p_ambs, y = p_comp_max,
                                      name = name + '_M_line_GF',
                                      mode = 'lines+markers',
                                      legendgroup = name,
-                                     hovertemplate = '<extra>GF M-line</extra>',
+                                     hovertemplate = hovertemplate,
                                      line = {'color': colors[ i ], 'dash' : 'dash', 'width' : 1.5 },
                                      showlegend = False,
                                      visible = "legendonly" if i != default_tissue_to_show else True
@@ -206,7 +210,7 @@ def show_pressure_graph(diveprofile):
     max_y = max_y+0.5;
     # Ambient = compartment
     fig.add_trace(go.Scatter(x = [0,max(max_x,max_y)],y=[0,max(max_x,max_y)],
-                             line = {'color': '#a0a0a0', 'width': 1.0},
+                             line = {'color': '#a0a0a0', 'dash' : 'dot', 'width': 1.0},
                              showlegend=False));
     # Labels etc
     fig.update_yaxes(secondary_y = False, title_text = "Compartment pressure",
