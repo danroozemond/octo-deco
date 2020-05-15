@@ -148,7 +148,7 @@ def show_pressure_graph(diveprofile):
     n_tissues = con.N_TISSUES;
     n2halftimes = con.N2_HALFTIMES;
     show_m_lines = _pg_m_lines(diveprofile, con);
-    pts_for_m_line_gf = [ p for p in pts if p.is_deco_stop and not p.is_interpolated_point ];
+    pts_for_m_line_gf = [ p for p in pts if not p.is_interpolated_point and hasattr(p, 'deco_info') ];
     # Get the rest of the reusable info
     colors = px.colors.qualitative.Dark24;
     x = [ p.p_amb for p in pts ];
