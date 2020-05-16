@@ -113,6 +113,9 @@ class DiveProfile:
     def add_gas(self, gas):
         self._gases_carried.add( gas );
 
+    def gases_carried(self):
+        return self._gases_carried;
+
     def _append_point_abstime(self, new_time, new_depth, gas):
         p = DivePoint(new_time, new_depth, gas, self._points[-1]);
         self._points.append(p);

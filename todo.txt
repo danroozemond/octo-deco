@@ -5,22 +5,4 @@ TODO this list :) [also check TO-DOs in .py's]
 
 
 * (how to take into account alveolar? remove this detail again?)
-From https://github.com/torvalds/subsurface-for-dirk/blob/master/core/deco.c
-/* Inspired gas loading equations depend on the partial pressure of inert gas in the alveolar.
- * P_alv = (P_amb - P_H2O + (1 - Rq) / Rq * P_CO2) * f
- * where:
- * P_alv	alveolar partial pressure of inert gas
- * P_amb	ambient pressure
- * P_H2O	water vapour partial pressure = ~0.0627 bar
- * P_CO2	carbon dioxide partial pressure = ~0.0534 bar
- * Rq	respiratory quotient (O2 consumption / CO2 production)
- * f	fraction of inert gas
- *
- * In our calculations, we simplify this to use an effective water vapour pressure
- * WV = P_H20 - (1 - Rq) / Rq * P_CO2
- *
- * Buhlmann ignored the contribution of CO2 (i.e. Rq = 1.0), whereas Schreiner adopted Rq = 0.8.
- * WV_Buhlmann = PP_H2O = 0.0627 bar
- * WV_Schreiner = 0.0627 - (1 - 0.8) / Rq * 0.0534 = 0.0493 bar
- * Buhlmann calculations use the Buhlmann value, VPM-B calculations use the Schreiner value.
-*/
+See Deco for Divers, page 177/178.
