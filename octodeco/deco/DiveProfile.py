@@ -368,20 +368,26 @@ class DiveProfile:
         for p in self._points:
             d = p.duration();
             if remove_filter(p):
-                if fix_durations:
-                    removed_duration += d;
+                removed_duration += d;
             else:
-                p.time -= removed_duration;
                 p.prev = new_points[-1] if len(new_points) > 0 else None;
                 new_points.append(p);
+                if fix_durations:
+                    p.duration_to_remove = removed_duration;
         self._points = new_points;
+        if fix_durations:
+            for p in self._points:
+                p.time -= p.duration_to_remove;
+                del p.duration_to_remove;
         if update_deco_info:
             self.update_deco_info();
 
     def _remove_all_extra_points(self, update_deco_info = True):
-        self.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = update_deco_info)
-        self.remove_points(lambda x: x.is_ascent_point, fix_durations = True, update_deco_info = update_deco_info)
-        self.remove_points(lambda x: x.is_deco_stop, fix_durations = True, update_deco_info = update_deco_info)
+        self.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = False)
+        self.remove_points(lambda x: x.is_ascent_point, fix_durations = True, update_deco_info = False)
+        self.remove_points(lambda x: x.is_deco_stop, fix_durations = True, update_deco_info = False)
+        if update_deco_info:
+            self.update_deco_info();
 
     def update_stops( self, interpolate = True ):
         # Remove surface time
