@@ -56,6 +56,7 @@ class Buhlmann:
         self.descent_speed = descent_speed;
         self.ascent_speed = ascent_speed;
         self.gas_switch_mins = gas_swich_mins;
+        self.stop_length_precision = 0.08;
 
     def description(self):
         return 'ZHL-16C GF %s/%s' % (self.gf_low, self.gf_high);
@@ -129,14 +130,14 @@ class Buhlmann:
         #   max_over_supersat(t0) > 0
         #   max_over_supersat(t1) < 0
         t0 = 0.0;
-        t1 = 1440.0;
+        t1 = 14400.0;
         if max_over_supersat(t0) < 0:
             # Already OK
             return 0.0, tissue_state;
         if max_over_supersat(t1) > 0:
             # Still on-gassing
             return 0.0, tissue_state;
-        while t1 - t0 > 0.1:
+        while t1 - t0 > self.stop_length_precision:
             h = t0 + (t1 - t0) / 2;
             if max_over_supersat(h) > 0:
                 t0 = h;
@@ -183,7 +184,7 @@ class Buhlmann:
         new_gas = self._best_deco_gas(p_amb_next_stop, gases);
         if new_gas != current_gas and p_first_stop > 1.0 and add_gas_switch:
             p_amb_gas_switch = self._gas_switch_p_amb(new_gas);
-            if p_amb_next_stop <= p_amb_gas_switch < p_now:
+            if p_amb_next_stop-0.01 < p_amb_gas_switch < p_now-0.01:
                 p_amb_next_stop = p_amb_gas_switch;
             else:
                 new_gas = current_gas;
@@ -206,7 +207,7 @@ class Buhlmann:
             if gas_prev != gas_now and add_gas_switch and stoplength < self.gas_switch_mins:
                 tissue_state = tissue_state.updated_state( self.gas_switch_mins - stoplength, p_now, gas_now );
                 stoplength = self.gas_switch_mins;
-            if stoplength != 0:
+            if stoplength > self.stop_length_precision:
                 result.append((Util.Pamb_to_depth(p_now), stoplength, gas_now));
             tissue_state = self._update_tissue_state_travel(tissue_state, p_now, p_amb_next_stop, gas_now);
             p_now = p_amb_next_stop; gas_prev = gas_now; gas_now = gas_next_stop;
