@@ -130,7 +130,7 @@ class Buhlmann:
         #   max_over_supersat(t0) > 0
         #   max_over_supersat(t1) < 0
         t0 = 0.0;
-        t1 = 1440.0;
+        t1 = 14400.0;
         if max_over_supersat(t0) < 0:
             # Already OK
             return 0.0, tissue_state;
