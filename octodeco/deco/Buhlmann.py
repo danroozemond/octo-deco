@@ -183,7 +183,7 @@ class Buhlmann:
         new_gas = self._best_deco_gas(p_amb_next_stop, gases);
         if new_gas != current_gas and p_first_stop > 1.0 and add_gas_switch:
             p_amb_gas_switch = self._gas_switch_p_amb(new_gas);
-            if p_amb_next_stop <= p_amb_gas_switch < p_now:
+            if p_amb_next_stop <= p_amb_gas_switch < p_now-0.01:
                 p_amb_next_stop = p_amb_gas_switch;
             else:
                 new_gas = current_gas;
