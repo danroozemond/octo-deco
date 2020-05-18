@@ -136,7 +136,6 @@ class Buhlmann:
             return 0.0, tissue_state;
         if max_over_supersat(t1) > 0:
             # Still on-gassing
-            print('max_over_supersat({}) = {}'.format(t1, max_over_supersat(t1)))
             return 0.0, tissue_state;
         while t1 - t0 > self.stop_length_precision:
             h = t0 + (t1 - t0) / 2;
