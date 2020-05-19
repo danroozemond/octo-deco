@@ -186,8 +186,6 @@ class Buhlmann:
             p_amb_gas_switch = self._gas_switch_p_amb(new_gas);
             if p_amb_next_stop-0.01 < p_amb_gas_switch < p_now-0.01:
                 p_amb_next_stop = p_amb_gas_switch;
-            else:
-                new_gas = current_gas;
         return p_amb_next_stop, new_gas;
 
     def compute_deco_profile(self, tissue_state, p_amb, current_gas, gases, \
