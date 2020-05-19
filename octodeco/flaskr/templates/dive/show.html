@@ -193,6 +193,9 @@
     {
         var is_table_full_vis = $('#table_full').is(':visible');
         var is_pressure_graph_vis = $('#chart_pressure_graph').is(':visible');
+        // Update the text boxes
+        $('#show_gflow').text($('#ipt_gflow').val());
+        $('#show_gfhigh').text($('#ipt_gfhigh').val());
         // We load the diveprofile first, then the rest to benefit from caching (esp. with multiple workers present)
         spin_elt('#chart_diveprofile', true);
         spin_elt('#table_summary', true );
