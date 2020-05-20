@@ -256,13 +256,13 @@
             <!-- SLIDERS -->
             GF
             <label for="ipt_gflow">low</label>
-            <input type="range" min=0 max=100 value={{dive.gf_low_display}} class="slider" list="tickmarks"
+            <input type="range" min=5 max=100 step=5 value={{dive.gf_low_display}} class="slider" list="tickmarks"
                    id="ipt_gflow" name="gflow"
                    onmousemove="document.getElementById('show_gflow').innerHTML=this.value;"
                    onchange="reload_all();"/>
             /
             <label for="ipt_gfhigh">high</label>
-            <input type="range" min=0 max=100 value={{dive.gf_high_display}} class="slider" list="tickmarks"
+            <input type="range" min=5 max=100 step=5 value={{dive.gf_high_display}} class="slider" list="tickmarks"
                    id="ipt_gfhigh" name="gfhigh"
                    onmousemove="document.getElementById('show_gfhigh').innerHTML=this.value;"
                    onchange="reload_all();"/>
