@@ -8,8 +8,8 @@ from .DiveProfile import DiveProfile;
 #
 # Create: Demo dive
 #
-def create_demo_dive():
-    dp = DiveProfile(gf_low = 35, gf_high = 70);
+def create_demo_dive(gf_low = 35, gf_high = 70):
+    dp = DiveProfile(gf_low = gf_low, gf_high = gf_high);
     dp.is_demo_dive = True;
     dp.add_gas(Gas.Nitrox(50));
     dp.append_section(20, 45, Gas.Trimix(21, 35));

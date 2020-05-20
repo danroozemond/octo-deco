@@ -174,7 +174,7 @@ class Buhlmann:
             p_avg = (p_amb + p_new_amb)/2.0;
             return state.updated_state(time, p_avg, gas);
 
-    def _deco_profile_p_amb_next_stop(self, p_now, p_first_stop, current_gas, gases, add_gas_switch = True):
+    def _deco_profile_p_amb_next_stop(self, p_now, p_first_stop, current_gas, gases, add_gas_switch_time = True):
         # returns p_amb for next stop, p_amb for gas switch, gas to use at next stop
         if p_now > p_first_stop:
             p_amb_next_stop = p_first_stop;
@@ -182,29 +182,33 @@ class Buhlmann:
             p_amb_next_stop = Util.next_stop_Pamb(p_now);
         # Do we need a gas switch?
         new_gas = self._best_deco_gas(p_amb_next_stop, gases);
-        if new_gas != current_gas and p_first_stop > 1.0 and add_gas_switch:
+        if new_gas != current_gas and p_first_stop > 1.0 and add_gas_switch_time:
             p_amb_gas_switch = self._gas_switch_p_amb(new_gas);
             if p_amb_next_stop-0.01 < p_amb_gas_switch < p_now-0.01:
                 p_amb_next_stop = p_amb_gas_switch;
-            else:
-                new_gas = current_gas;
         return p_amb_next_stop, new_gas;
 
     def compute_deco_profile(self, tissue_state, p_amb, current_gas, gases, \
-                             p_target = 1.0, add_gas_switch = False, amb_to_gf = None):
+                             p_target = 1.0, add_gas_switch_time = False, amb_to_gf = None):
         # Returns triples depth, length, gas
         amb_to_gf = self._get_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
         p_ceiling = tissue_state.p_ceiling_for_amb_to_gf(amb_to_gf);
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
         p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
-        # 'Walk' up
-        p_now = max(p_first_stop, p_amb); gas_now = gas_prev = current_gas;
+        # Start at deepest point from first_stop at ambient
+        p_now = max(p_first_stop, p_amb);
+        # If we don't need to add gas_switch_time, instantly switch to the best gas
+        if add_gas_switch_time:
+            gas_now = gas_prev = current_gas;
+        else:
+            gas_now = gas_prev = self._best_deco_gas(p_now, gases);
+        # 'walk up'
         result = [ ];
         while p_now > p_target + 0.01:
             p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_now, p_first_stop, gas_now, gases,
-                                                                                add_gas_switch = add_gas_switch);
+                                                                                add_gas_switch_time = add_gas_switch_time);
             stoplength, tissue_state = self._time_to_stay_at_stop(p_now, p_amb_next_stop, tissue_state, gas_now, amb_to_gf);
-            if gas_prev != gas_now and add_gas_switch and stoplength < self.gas_switch_mins:
+            if gas_prev != gas_now and add_gas_switch_time and stoplength < self.gas_switch_mins:
                 tissue_state = tissue_state.updated_state( self.gas_switch_mins - stoplength, p_now, gas_now );
                 stoplength = self.gas_switch_mins;
             if stoplength > self.stop_length_precision:
