@@ -25,15 +25,15 @@
 
 
 {% block sidebaritems %}
-    <li><span class="fa fa-play"></span><a href="{{url_for('dive.new_show')}}">New dive..</a></li>
+    <li><span class="fa fa-plus-circle"></span><a href="{{url_for('dive.new_show')}}">New dive..</a></li>
     <li><span class="fa fa-chevron-circle-right"></span><a href="#chart_diveprofile">Dive profile</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#hdivesummary">Dive summary</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#hheatmap">Heatmap</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#hgfdeco">GF-Decotime table</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#hpressuregraph">Pressure graph</a></li>
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#hfulldata">Full dive data</a></li>
+    <li><span class="fa fa-chevron-circle-right"></span><a href="#hdivesummary">Summary</a></li>
+    <li><span class="fa fa-bar-chart-o"></span><a href="#hheatmap">Heatmap</a></li>
+    <li><span class="fa fa-bar-chart-o"></span><a href="#hpressuregraph">Pressure graph</a></li>
+    <li><span class="fa fa-table"></span><a href="#hgfdeco">GFs vs Decotime</a></li>
+    <li><span class="fa fa-download"></span><a href="#hfulldata">Full dive data</a></li>
     {% if modify_allowed %}
-    <li><span class="fa fa-chevron-circle-right"></span><a href="#hmodifydive">Modify</a></li>
+    <li><span class="fa fa-gear"></span><a href="#hmodifydive">Modify</a></li>
     {% endif %}
 {% endblock %}
 
@@ -185,6 +185,27 @@
         toggle_elt('#modify_dive', function() {} );
     }
 
+    /*
+     * Sliders, spans in sync
+     */
+    function set_gf_text_from_sliders()
+    {
+        $('#show_gflow').text($('#ipt_gflow').val());
+        $('#show_gfhigh').text($('#ipt_gfhigh').val());
+    }
+    function set_gf_sliders_from_text()
+    {
+        $('#ipt_gflow').val($('#show_gflow').text());
+        $('#ipt_gfhigh').val($('#show_gfhigh').text());
+    }
+    function set_gf_to_defaults()
+    {
+        $('#show_gflow').text({{dive.gf_low_profile}});
+        $('#ipt_gflow').val({{dive.gf_low_profile}});
+        $('#show_gfhigh').text({{dive.gf_high_profile}});
+        $('#ipt_gfhigh').val({{dive.gf_high_profile}});
+    }
+
 
     /*
      * On change of the sliders
@@ -193,9 +214,6 @@
     {
         var is_table_full_vis = $('#table_full').is(':visible');
         var is_pressure_graph_vis = $('#chart_pressure_graph').is(':visible');
-        // Update the text boxes
-        $('#show_gflow').text($('#ipt_gflow').val());
-        $('#show_gfhigh').text($('#ipt_gfhigh').val());
         // We load the diveprofile first, then the rest to benefit from caching (esp. with multiple workers present)
         spin_elt('#chart_diveprofile', true);
         spin_elt('#table_summary', true );
@@ -209,11 +227,41 @@
         // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
     }
 
+    /*
+     * changeable gf ipts
+     */
+    $(function () {
+        $("span.changeable").each(function () {
+            var label = $(this);
+            label.after("<input type='text' style='display:none' class='changeable'/>");
+            var input_text = label.next();
+            input_text[0].name = label[0].id.replace("show_", "ipttxt_");
+            // Click = show
+            label.click(function () {
+                $(this).next().val($(this).html());
+                $(this).hide();
+                $(this).next().show();
+                $(this).next().focus();
+                $(this).next().select();
+            });
+            //Focus lost = hide
+            input_text.focusout(function () {
+                $(this).hide();
+                $(this).prev().html($(this).val());
+                $(this).prev().show();
+                set_gf_sliders_from_text();
+                reload_all();
+            });
+        });
+    });
 
     /*
-     * On load
+     * On document ready
      */
-    reload_all();
+    $(function(){
+        set_gf_to_defaults();
+        reload_all();
+    });
     </script>
 
     <!--
@@ -229,6 +277,8 @@
       GF update sliders
     -->
     <form method="post" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
+        <!-- Don't want Enter to submit the form -->
+        <button type="submit" disabled style="display: none" aria-hidden="true"></button>
         <div class="adjust">
             <datalist id="tickmarks">
               <option value="0" label="0"></option>
@@ -244,31 +294,24 @@
               <option value="100" label="99"></option>
             </datalist>
             <!-- RESET -->
-            <a href="#" onclick="
-                document.getElementById('show_gfhigh').innerHTML
-                    = document.getElementById('ipt_gfhigh').value
-                    = {{dive.gf_high_profile}};
-                document.getElementById('show_gflow').innerHTML
-                    = document.getElementById('ipt_gflow').value
-                    = {{dive.gf_low_profile}};
-                reload_all();
-                return false;">[reset]</a>
+            <a href="#" onclick="set_gf_to_defaults();reload_all();return false;">[reset]</a>
             <!-- SLIDERS -->
             GF
             <label for="ipt_gflow">low</label>
-            <input type="range" min=0 max=100 value={{dive.gf_low_display}} class="slider" list="tickmarks"
+            <input type="range" min=5 max=100 step=5 class="slider" list="tickmarks"
                    id="ipt_gflow" name="gflow"
-                   onmousemove="document.getElementById('show_gflow').innerHTML=this.value;"
-                   onchange="reload_all();"/>
+                   onmousemove="set_gf_text_from_sliders();"
+                   onchange="set_gf_text_from_sliders();reload_all();"/>
             /
             <label for="ipt_gfhigh">high</label>
-            <input type="range" min=0 max=100 value={{dive.gf_high_display}} class="slider" list="tickmarks"
+            <input type="range" min=5 max=100 step=5 class="slider" list="tickmarks"
                    id="ipt_gfhigh" name="gfhigh"
-                   onmousemove="document.getElementById('show_gfhigh').innerHTML=this.value;"
-                   onchange="reload_all();"/>
-            = GF <span id="show_gflow">{{dive.gf_low_display}}</span> / <span id="show_gfhigh">{{dive.gf_high_display}}</span>
-            <img id="spinner" style="display:none" alt="spinner"
-                 src="{{ url_for('static', filename='images/spinner-51px.gif') }}">
+                   onmousemove="set_gf_text_from_sliders();"
+                   onchange="set_gf_text_from_sliders();reload_all();"/>
+            = GF
+            <span id="show_gflow" class="changeable">hello</span>
+            /
+            <span id="show_gfhigh" class="changeable">world</span>
         </div>
         {% if modify_allowed %}
         <div>
@@ -280,17 +323,19 @@
     <!--
       Dive summary
     -->
-    <h2 id="hdivesummary">Dive summary</h2>
+    <h2 id="hdivesummary">Summary</h2>
     <div id="table_summary" style="display:none;">
     </div>
     <div class="placeholder" id="table_summary_plh" style="display:block;">
         <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
 
+    <h2>Graphs</h2>
+
     <!--
       Heatmap
     -->
-    <h2 id="hheatmap">Tissue heatmap<span class="viztoggle" id="heatmap_toggle" onclick="toggle_div_heatmap()">[show]</span></h2>
+    <h3 id="hheatmap">Tissue heatmap<span class="viztoggle" id="heatmap_toggle" onclick="toggle_div_heatmap()">[show]</span></h3>
 
     <div id="heatmap" style="display: none">
         <p>Displays (scaled) compartment pressure (actually: GF99)</p>
@@ -301,25 +346,11 @@
         </div>
     </div>
 
-
-    <!--
-      GF-Decotime-Table
-    -->
-    <h2 id="hgfdeco">GFs vs Decotime<span class="viztoggle" id="table_gfdeco_toggle"
-                                          onclick="toggle_div_table_gfdeco()">[show]</span></h2>
-
-    <div id="table_gfdeco" style="display: none">
-    </div>
-    <div id="table_gfdeco_plh" class="placeholder" style="display: none">
-        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
-    </div>
-
-
     <!--
       Pressure graph
     -->
-    <h2 id="hpressuregraph">Pressure graph<span class="viztoggle" id="pressure_graph_toggle"
-                                                onclick="toggle_div_pressure_graph()">[show]</span></h2>
+    <h3 id="hpressuregraph">Pressure graph<span class="viztoggle" id="pressure_graph_toggle"
+                                                onclick="toggle_div_pressure_graph()">[show]</span></h3>
 
     <div id="pressure_graph" style="display: none">
         <div class="chart" id="chart_pressure_graph" style="display:none;">
@@ -329,14 +360,27 @@
         </div>
     </div>
 
+    <h2>Data</h2>
+
+    <!--
+      GF-Decotime-Table
+    -->
+    <h3 id="hgfdeco">GFs vs Decotime<span class="viztoggle" id="table_gfdeco_toggle"
+                                          onclick="toggle_div_table_gfdeco()">[show]</span></h3>
+
+    <div id="table_gfdeco" style="display: none">
+    </div>
+    <div id="table_gfdeco_plh" class="placeholder" style="display: none">
+        <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
+    </div>
 
     <!--
       Full data table
     -->
-    <h2 id="hfulldata">Full dive data
+    <h3 id="hfulldata">Full dive data
         <span class="viztoggle" id="table_full_toggle" onclick="toggle_div_table_full()">[show]</span>
         <span class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></span>
-    </h2>
+    </h3>
     <div id="table_full" class="bigtable" style="display: none">
     </div>
     <div id="table_full_plh" class="bigtable placeholder" style="display: none">
@@ -352,6 +396,7 @@
     <span class="viztoggle" id="modify_dive_toggle" onclick="toggle_div_modify_dive()">[show]</span>
     </h2>
     <div id="modify_dive" class="modifydive" style="display:none">
+    <h3>Change</h3>
     <form method="post" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
         <label for="ipt_surface_section">Add surface section to end of dive:</label>
         <input type="text" value="{{dive.length_of_surface_section()}}" name="ipt_surface_section" id="ipt_surface_section">
@@ -365,6 +410,7 @@
         <label for="action_update"></label>
         <input type="submit" name="action_update" id="action_update" value="Update">
     </form>
+    <h3>Delete</h3>
     <form method="post" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
         <label for="subm_delete">Delete:</label>
         <input type="submit" name="action_delete" id="subm_delete" value="Delete this dive" onclick="return confirm('Sure?');">

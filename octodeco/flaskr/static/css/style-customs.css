@@ -43,6 +43,13 @@ div.flash div.close a {
     margin-bottom: 1em;
 }
 
+#content h3 {
+    margin-bottom: 0.5em;
+    margin-left: 1em;
+    font-size:1.5em;
+    font-weight:bold;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 8px; height:8px; }
 ::-webkit-scrollbar-track { background: #f1f1f1;}
@@ -201,3 +208,9 @@ div.modifydive label
     text-align: right;
 }
 
+
+input[type="text"].changeable {
+    display:inline;
+    white-space:nowrap;
+    width: 2em;
+}
