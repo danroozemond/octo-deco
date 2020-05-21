@@ -106,7 +106,6 @@ class Buhlmann:
         # What is the best deco gas at this ambient pressure?
         suitable = [ gas for gas in gases if p_amb * gas[ 'fO2' ] <= self.max_pO2_deco ];
         if len(suitable) == 0:
-            print('_best_deco_gas: No suitable gases. p_amb = {}, gases = {}'.format(p_amb, gases));
             suitable = gases;
         gas = max(suitable, key = lambda g: ( g[ 'fO2' ], -g['fHe'] ) );
         return gas;
