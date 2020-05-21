@@ -125,6 +125,8 @@
 	.fa
 	{
 		text-decoration: none;
+		width:1.5em;
+		display:inline-block;
 	}
 
 		.fa.solo

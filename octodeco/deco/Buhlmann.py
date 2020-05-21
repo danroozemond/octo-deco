@@ -57,6 +57,8 @@ class Buhlmann:
         self.ascent_speed = ascent_speed;
         self.gas_switch_mins = gas_swich_mins;
         self.stop_length_precision = 0.08;
+        # After 8 halftimes, residual is less than 0.5%, so that's infinite enough.
+        self.stop_length_infinity = 8*self._constants.N2_HALFTIMES[-1];
 
     def description(self):
         return 'ZHL-16C GF %s/%s' % (self.gf_low, self.gf_high);
@@ -83,7 +85,7 @@ class Buhlmann:
             return ts3.GF99(1.0) - self.gf_high;
 
         t0 = 0.0;
-        t1 = 1440.0;
+        t1 = self.stop_length_infinity;
         if max_over_supersat(t0) > 0:
             # Already in deco
             return t0;
@@ -104,7 +106,6 @@ class Buhlmann:
         # What is the best deco gas at this ambient pressure?
         suitable = [ gas for gas in gases if p_amb * gas[ 'fO2' ] <= self.max_pO2_deco ];
         if len(suitable) == 0:
-            print('_best_deco_gas: No suitable gases. p_amb = {}, gases = {}'.format(p_amb, gases));
             suitable = gases;
         gas = max(suitable, key = lambda g: ( g[ 'fO2' ], -g['fHe'] ) );
         return gas;
@@ -130,7 +131,7 @@ class Buhlmann:
         #   max_over_supersat(t0) > 0
         #   max_over_supersat(t1) < 0
         t0 = 0.0;
-        t1 = 14400.0;
+        t1 = self.stop_length_infinity;
         if max_over_supersat(t0) < 0:
             # Already OK
             return 0.0, tissue_state;
