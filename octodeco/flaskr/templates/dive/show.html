@@ -193,6 +193,11 @@
         $('#show_gflow').text($('#ipt_gflow').val());
         $('#show_gfhigh').text($('#ipt_gfhigh').val());
     }
+    function set_gf_sliders_from_text()
+    {
+        $('#ipt_gflow').val($('#show_gflow').text());
+        $('#ipt_gfhigh').val($('#show_gfhigh').text());
+    }
     function set_gf_to_defaults()
     {
         $('#show_gflow').text({{dive.gf_low_profile}});
@@ -222,6 +227,33 @@
         // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
     }
 
+    /*
+     * changeable gf ipts
+     */
+    $(function () {
+        $("span.changeable").each(function () {
+            var label = $(this);
+            label.after("<input type='text' style='display:none' class='changeable'/>");
+            var input_text = label.next();
+            input_text[0].name = label[0].id.replace("show_", "ipttxt_");
+            // Click = show
+            label.click(function () {
+                $(this).next().val($(this).html());
+                $(this).hide();
+                $(this).next().show();
+                $(this).next().focus();
+                $(this).next().select();
+            });
+            //Focus lost = hide
+            input_text.focusout(function () {
+                $(this).hide();
+                $(this).prev().html($(this).val());
+                $(this).prev().show();
+                set_gf_sliders_from_text();
+                reload_all();
+            });
+        });
+    });
 
     /*
      * On document ready
@@ -245,6 +277,8 @@
       GF update sliders
     -->
     <form method="post" id="form_update" action="{{url_for('dive.update', dive_id=dive.dive_id)}}">
+        <!-- Don't want Enter to submit the form -->
+        <button type="submit" disabled style="display: none" aria-hidden="true"></button>
         <div class="adjust">
             <datalist id="tickmarks">
               <option value="0" label="0"></option>
@@ -274,7 +308,10 @@
                    id="ipt_gfhigh" name="gfhigh"
                    onmousemove="set_gf_text_from_sliders();"
                    onchange="set_gf_text_from_sliders();reload_all();"/>
-            = GF <span id="show_gflow">hello</span> / <span id="show_gfhigh">world</span>
+            = GF
+            <span id="show_gflow" class="changeable">hello</span>
+            /
+            <span id="show_gfhigh" class="changeable">world</span>
         </div>
         {% if modify_allowed %}
         <div>

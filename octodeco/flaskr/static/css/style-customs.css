@@ -201,3 +201,9 @@ div.modifydive label
     text-align: right;
 }
 
+
+input[type="text"].changeable {
+    display:inline;
+    white-space:nowrap;
+    width: 2em;
+}
