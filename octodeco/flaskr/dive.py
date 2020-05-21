@@ -27,6 +27,9 @@ def load_user_details():
 def get_gf_args_from_request():
     gflow = request.args.get('gflow', request.form.get('gflow', 101, type=int), type=int);
     gfhigh = request.args.get('gfhigh', request.form.get('gfhigh', 101, type=int), type=int);
+    # Do /some/ input sanitation..
+    gflow = min(200,max(0,gflow));
+    gfhigh = min(200, max(0, gfhigh));
     return gflow, gfhigh;
 
 
