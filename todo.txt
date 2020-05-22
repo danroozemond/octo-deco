@@ -4,9 +4,22 @@ TODO this list :) [also check TO-DOs in .py's]
 * CNS tracking
 ** remember half-time on surface: 90 mins (TSD PDF page 42)
 
-
 * Gas consumption
-
 
 * (how to take into account alveolar? remove this detail again?)
 See Deco for Divers, page 177/178.
+
+
+BEFORE:
+{'depth': 30, 'time': 36.5, 'gas': Air}
+{'depth': 21.0, 'time': 40.4, 'gas': Nx50}
+{'depth': 9.0, 'time': 45.165673828125}
+{'depth': 6.0, 'time': 52.4419921875}
+{'depth': 3.0, 'time': 68.94255371093749}
+{'depth': 0.0}
+    T   36.5  D  30.0  G Air    DD  35.0  FS  12.0  C  12.8   GF   0.0/35.0   SGF  148.8   2.2@12m[Nx50] 3.7@9m[Nx50] 6.9@6m[Nx50] 15.7@3m[Nx50]
+ D  T   37.4  D  21.0  G Nx50   DD   0.9  FS  12.0  C  12.5   GF   0.1/35.0   SGF  149.7   1.9@12m[Nx50] 3.7@9m[Nx50] 6.7@6m[Nx50] 15.6@3m[Nx50]
+ D  T   40.4  D  21.0  G Nx50   DD   3.0  FS   9.0  C   9.5   GF   0.0/35.0   SGF  139.4   3.6@9m[Nx50] 7.0@6m[Nx50] 16.2@3m[Nx50]
+ D  T   41.6  D   9.0  G Nx50   DD   1.2  FS   9.0  C   8.4   GF  40.6/43.8   SGF  135.0   3.6@9m[Nx50] 7.0@6m[Nx50] 16.2@3m[Nx50]
+ D  T   45.2  D   9.0  G Nx50   DD   3.6  FS   6.0  C   6.0   GF  24.1/43.8   SGF  122.7   7.0@6m[Nx50] 16.2@3m[Nx50]
+ D  T   45.5  D   6.0  G Nx50   DD   0.3  FS   6.0  C   5.8   GF  49.5/50.9   SGF  121.6   7.0@6m[Nx50] 16.2@3m[Nx50]
