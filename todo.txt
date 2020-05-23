@@ -12,6 +12,8 @@ See Deco for Divers, page 177/178.
 -> For both classic and cython
 -> And remove numpy if it's still there
 
+Increase major version number
+
 23/5
 Alveolar pressure (incl next db version)
 
