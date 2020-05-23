@@ -20,6 +20,18 @@ class DivePoint:
     def __repr__(self):
         return '%.1f:%dm' % (self.time, self.depth);
 
+    def debug_info(self):
+        fmt = '{}{}{} T {:6.1f}  D {:5.1f}  G {:5s}  DD {:5.1f}  FS {:5.1f}  ' +\
+               'C {:5.1f}   GF {:5.1f}/{:4.1f}   SGF {:6.1f}  {}';
+        return  fmt.format('I' if self.is_interpolated_point else ' ',\
+                      'D' if self.is_deco_stop else ' ',\
+                      'A' if self.is_ascent_point else ' ',\
+                        self.time, self.depth, str(self.gas), self.duration(),
+                        self.deco_info['FirstStop'],self.deco_info['Ceil'],
+                        self.deco_info['GF99'], self.deco_info['amb_to_gf'](self.p_amb),
+                        self.deco_info['SurfaceGF'],
+                        Util.stops_to_string_precise(self.deco_info['Stops']));
+
     @staticmethod
     def dataframe_columns_deco_info():
         return [ 'FirstStop', 'Ceil', 'Ceil99', 'GF99', 'SurfaceGF', 'LeadingTissueIndex', 'TTS', 'NDL' ];
