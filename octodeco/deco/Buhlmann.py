@@ -201,9 +201,9 @@ class Buhlmann:
         p_now = max(p_first_stop, p_amb);
         # If we don't need to add gas_switch_time, instantly switch to the best gas
         if add_gas_switch_time:
-            gas_now = gas_prev = current_gas;
+            gas_now = current_gas;
         else:
-            gas_now = gas_prev = self._best_deco_gas(p_now, gases);
+            gas_now = self._best_deco_gas(p_now, gases);
         # 'walk up'
         result = [ ];
         while p_now > p_target + 0.01:
@@ -220,7 +220,7 @@ class Buhlmann:
                 tissue_state = tissue_state.updated_state( self.gas_switch_mins, p_amb_next_stop, gas_now );
                 result.append((Util.Pamb_to_depth(p_amb_next_stop), 0.0, gas_next_stop));
             # Onto the next stop!
-            p_now = p_amb_next_stop; gas_prev = gas_now; gas_now = gas_next_stop;
+            p_now = p_amb_next_stop; gas_now = gas_next_stop;
         return result, p_ceiling, amb_to_gf;
 
     def deco_info(self, tissue_state, depth, gas, gases_carried, amb_to_gf = None):
