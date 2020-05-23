@@ -10,6 +10,8 @@ class TissueState:
         self._n_tissues = self._constants.N_TISSUES;
         p_alv = self._amb_to_alv(Util.SURFACE_PRESSURE);
         self._state = list(map( lambda i: (p_alv * gas[ 'fN2' ], p_alv * gas[ 'fHe' ]), range(self._n_tissues)));
+        # Careful, if you add a member here, think about existing divepoints with tissuestates stored in
+        # some database somewhere
 
     def __repr__(self):
         return self._state.__repr__();

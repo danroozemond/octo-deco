@@ -67,6 +67,7 @@ AFTER MODIFYING 3 MINS GAS SWITCH TO BE ON OLD GAS
     T   69.7  D   0.0  G Air    DD   0.9  FS   0.0  C   0.0   GF  63.3/65.0   SGF   63.3
 
 # After fixing depth/pressure conversions & surface pressure
+With interpolate points, took 0.1764s (measures vary 0.17-0.22)
 {'Deco model (display)': 'ZHL-16C GF 35/65', 'Deco model (profile)': 'ZHL-16C GF 35/65', 'Gases carried': {'Air', 'Nx50'}, 'Total dive time': '67.6 mins', 'Decompression time': '32.3 mins', 'Deco profile comp time': '0.01 secs'
 , 'Full info comp time': '0.01 secs'}
 {'depth': 30, 'time': 35.0, 'gas': Air}
