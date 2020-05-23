@@ -13,7 +13,7 @@ dp.add_gas(Gas.Nitrox(50))
 dp.add_stops_to_surface();
 dp.interpolate_points()
 
-dp.set_gf(35,65, updateStops = False);
+dp.set_gf(35,65, updateStops = True);
 dp.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = True)
 
 print(dp.dive_summary());
