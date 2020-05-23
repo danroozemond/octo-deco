@@ -8,7 +8,7 @@ from octodeco.deco.DiveProfile import DiveProfile;
 t0 = time.perf_counter();
 
 dp = DiveProfile(gf_low=35, gf_high=65);
-dp.append_section(30, 35, gas = Gas.Air());
+dp.append_section(30, 33.5, gas = Gas.Air());
 dp.add_gas(Gas.Nitrox(50))
 dp.add_stops_to_surface();
 

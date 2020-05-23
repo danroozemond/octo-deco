@@ -23,3 +23,30 @@ BEFORE:
  D  T   41.6  D   9.0  G Nx50   DD   1.2  FS   9.0  C   8.4   GF  40.6/43.8   SGF  135.0   3.6@9m[Nx50] 7.0@6m[Nx50] 16.2@3m[Nx50]
  D  T   45.2  D   9.0  G Nx50   DD   3.6  FS   6.0  C   6.0   GF  24.1/43.8   SGF  122.7   7.0@6m[Nx50] 16.2@3m[Nx50]
  D  T   45.5  D   6.0  G Nx50   DD   0.3  FS   6.0  C   5.8   GF  49.5/50.9   SGF  121.6   7.0@6m[Nx50] 16.2@3m[Nx50]
+
+AFTER MODIFYING 3 MINS GAS SWITCH TO BE ON OLD GAS
+{'depth': 30, 'time': 35.0, 'gas': Air}
+{'depth': 21.0, 'time': 38.9}
+{'depth': 21.0, 'time': 38.9, 'gas': Nx50}
+{'depth': 12.0, 'time': 40.885205078125}
+{'depth': 9.0, 'time': 44.905908203124994}
+{'depth': 6.0, 'time': 52.10471191406249}
+{'depth': 3.0, 'time': 68.45024414062499}
+{'depth': 0.0}
+    T    0.0  D   0.0  G Air    DD   0.0  FS   0.0  C   0.0   GF   0.0/35.0   SGF    0.0
+    T    1.5  D  30.0  G Air    DD   1.5  FS   0.0  C   0.0   GF   0.0/35.0   SGF    2.7
+    T   35.0  D  30.0  G Air    DD  33.5  FS  12.0  C  12.6   GF   0.0/35.0   SGF  145.3  1.9@12m[Nx50] 3.4@9m[Nx50] 6.4@6m[Nx50] 14.7@3m[Nx50]
+ D  T   35.9  D  21.0  G Air    DD   0.9  FS  12.0  C  12.4   GF   0.1/35.0   SGF  146.3  1.6@12m[Nx50] 3.3@9m[Nx50] 6.4@6m[Nx50] 14.7@3m[Nx50]
+ D  T   38.9  D  21.0  G Air    DD   3.0  FS  12.0  C  11.0   GF   0.0/35.0   SGF  145.6  1.1@12m[Nx50] 3.7@9m[Nx50] 7.0@6m[Nx50] 16.0@3m[Nx50]
+ D  T   38.9  D  21.0  G Nx50   DD   0.0  FS  12.0  C  11.0   GF   0.0/35.0   SGF  145.6  1.1@12m[Nx50] 3.7@9m[Nx50] 7.0@6m[Nx50] 16.0@3m[Nx50]
+ D  T   39.8  D  12.0  G Nx50   DD   0.9  FS  12.0  C  10.1   GF  28.2/36.5   SGF  141.9  1.1@12m[Nx50] 3.7@9m[Nx50] 7.0@6m[Nx50] 16.0@3m[Nx50]
+ D  T   40.9  D  12.0  G Nx50   DD   1.1  FS   9.0  C   8.9   GF  22.8/36.5   SGF  136.6  3.7@9m[Nx50] 7.0@6m[Nx50] 16.0@3m[Nx50]
+ D  T   41.2  D   9.0  G Nx50   DD   0.3  FS   9.0  C   8.6   GF  41.6/43.6   SGF  135.3  3.7@9m[Nx50] 7.0@6m[Nx50] 16.0@3m[Nx50]
+ D  T   44.9  D   9.0  G Nx50   DD   3.7  FS   6.0  C   6.0   GF  24.0/43.6   SGF  122.4  7.0@6m[Nx50] 16.0@3m[Nx50]
+ D  T   45.2  D   6.0  G Nx50   DD   0.3  FS   6.0  C   5.8   GF  49.4/50.8   SGF  121.4  7.0@6m[Nx50] 16.0@3m[Nx50]
+ D  T   52.1  D   6.0  G Nx50   DD   6.9  FS   3.0  C   3.0   GF  23.5/50.8   SGF  102.9  16.0@3m[Nx50]
+ D  T   52.4  D   3.0  G Nx50   DD   0.3  FS   3.0  C   2.9   GF  57.0/57.9   SGF  102.2  16.0@3m[Nx50]
+ D  T   68.5  D   3.0  G Nx50   DD  16.0  FS   0.0  C   0.0   GF  18.6/57.9   SGF   64.9
+  A T   68.7  D   1.0  G Air    DD   0.2  FS   0.0  C   0.0   GF  47.4/62.6   SGF   64.5
+    T   68.8  D   0.0  G Air    DD   0.1  FS   0.0  C   0.0   GF  64.4/65.0   SGF   64.4
+    T   69.7  D   0.0  G Air    DD   0.9  FS   0.0  C   0.0   GF  63.3/65.0   SGF   63.3

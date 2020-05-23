@@ -145,6 +145,7 @@ class Buhlmann:
             else:
                 t1 = h;
         stop_length = t1;
+        # TODO refactor take this out
         tissue_state_after_stop = tissue_state.updated_state( stop_length, p_amb, gas );
         return stop_length, tissue_state_after_stop;
 
@@ -209,12 +210,16 @@ class Buhlmann:
             p_amb_next_stop, gas_next_stop = self._deco_profile_p_amb_next_stop(p_now, p_first_stop, gas_now, gases,
                                                                                 add_gas_switch_time = add_gas_switch_time);
             stoplength, tissue_state = self._time_to_stay_at_stop(p_now, p_amb_next_stop, tissue_state, gas_now, amb_to_gf);
-            if gas_prev != gas_now and add_gas_switch_time and stoplength < self.gas_switch_mins:
-                tissue_state = tissue_state.updated_state( self.gas_switch_mins - stoplength, p_now, gas_now );
-                stoplength = self.gas_switch_mins;
             if stoplength > self.stop_length_precision:
                 result.append((Util.Pamb_to_depth(p_now), stoplength, gas_now));
+            # Travel to next stop
             tissue_state = self._update_tissue_state_travel(tissue_state, p_now, p_amb_next_stop, gas_now);
+            # Consider adding gas switch
+            if gas_now != gas_next_stop and add_gas_switch_time:
+                result.append((Util.Pamb_to_depth(p_amb_next_stop), self.gas_switch_mins, gas_now));
+                tissue_state = tissue_state.updated_state( self.gas_switch_mins, p_amb_next_stop, gas_now );
+                result.append((Util.Pamb_to_depth(p_amb_next_stop), 0.0, gas_next_stop));
+            # Onto the next stop!
             p_now = p_amb_next_stop; gas_prev = gas_now; gas_now = gas_next_stop;
         return result, p_ceiling, amb_to_gf;
 
