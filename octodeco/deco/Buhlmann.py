@@ -20,7 +20,7 @@ class AmbientToGF:
 
     def __init__(self, p_first_stop, p_target, gf_low, gf_high):
         self.p_first_stop = p_first_stop;
-        self.p_surface = 1.0;
+        self.p_surface = Util.SURFACE_PRESSURE;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.p_target = p_target;
@@ -81,8 +81,8 @@ class Buhlmann:
 
         def max_over_supersat(t):
             ts2 = tissue_state.updated_state(t, p_amb, gas);
-            ts3 = self._update_tissue_state_travel(ts2, p_amb, 1.0, gas);
-            return ts3.GF99(1.0) - self.gf_high;
+            ts3 = self._update_tissue_state_travel(ts2, p_amb, Util.SURFACE_PRESSURE, gas);
+            return ts3.GF99(Util.SURFACE_PRESSURE) - self.gf_high;
 
         t0 = 0.0;
         t1 = self.stop_length_infinity;
@@ -164,9 +164,9 @@ class Buhlmann:
     def _update_tissue_state_travel(self, state, p_amb, p_new_amb, gas):
         time = 0.0;
         if p_amb > p_new_amb:
-            time = (p_amb - p_new_amb) / (self.ascent_speed/10);
+            time = (p_amb - p_new_amb) / (self.ascent_speed * Util.BAR_PER_METER);
         elif p_amb < p_new_amb:
-            time = (p_new_amb - p_amb) / (self.descent_speed/10);
+            time = (p_new_amb - p_amb) / (self.descent_speed * Util.BAR_PER_METER);
         if time == 0.0:
             return state;
         else:
@@ -182,14 +182,15 @@ class Buhlmann:
             p_amb_next_stop = Util.next_stop_Pamb(p_now);
         # Do we need a gas switch?
         new_gas = self._best_deco_gas(p_amb_next_stop, gases);
-        if new_gas != current_gas and p_first_stop > 1.0 and add_gas_switch_time:
+        if new_gas != current_gas and p_first_stop > Util.SURFACE_PRESSURE and add_gas_switch_time:
             p_amb_gas_switch = self._gas_switch_p_amb(new_gas);
             if p_amb_next_stop-0.01 < p_amb_gas_switch < p_now-0.01:
                 p_amb_next_stop = p_amb_gas_switch;
         return p_amb_next_stop, new_gas;
 
     def compute_deco_profile(self, tissue_state, p_amb, current_gas, gases, \
-                             p_target = 1.0, add_gas_switch_time = False, amb_to_gf = None):
+                             p_target = Util.SURFACE_PRESSURE,
+                             add_gas_switch_time = False, amb_to_gf = None):
         # Returns triples depth, length, gas
         amb_to_gf = self._get_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
         p_ceiling = tissue_state.p_ceiling_for_amb_to_gf(amb_to_gf);
@@ -229,7 +230,7 @@ class Buhlmann:
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
         gf99s, gf99, leading_tissue_i = tissue_state.GF99_all_info(p_amb);
-        surfacegf = tissue_state.GF99(1.0);
+        surfacegf = tissue_state.GF99(Util.SURFACE_PRESSURE);
         result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
                   'GF99': round(gf99, 1),
                   'SurfaceGF': round(surfacegf, 1),
