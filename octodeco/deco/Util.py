@@ -13,7 +13,7 @@ import math;
 # 10 m fresh water    = 0.980638 bar
 # So that seems to work out just about right.
 
-SURFACE_PRESSURE = 1.0132;       # in bar
+SURFACE_PRESSURE = 1.01325;      # in bar
 BAR_PER_METER = 1020*9.80*1e-5;  # = 0.09996
 METER_PER_BAR = 1/BAR_PER_METER; # = 10.0040
 
