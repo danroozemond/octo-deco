@@ -6,31 +6,43 @@ TODO this list :) [also check TO-DOs in .py's]
 
 * Gas consumption
 
-* (how to take into account alveolar? remove this detail again?)
+* how to take into account alveolar?
 See Deco for Divers, page 177/178.
+-> New version
+-> For both classic and cython
+-> And remove numpy if it's still there
+
+23/5
+Gas switch
++ Debug_print on DivePoint
+Meter to bar (incl next db version)
+Alveolar pressure (incl next db version)
+
+test case: NDL dive on air with nitrox50 as gas, then more aggressive GFs. See if 3m stop uses nx50
+
 
 
 BEFORE:
-{'depth': 30, 'time': 36.5, 'gas': Air}
-{'depth': 21.0, 'time': 40.4, 'gas': Nx50}
-{'depth': 9.0, 'time': 45.165673828125}
-{'depth': 6.0, 'time': 52.4419921875}
-{'depth': 3.0, 'time': 68.94255371093749}
+{'depth': 30, 'time': 35.0, 'gas': Air}
+{'depth': 21.0, 'time': 38.9, 'gas': Nx50}
+{'depth': 9.0, 'time': 43.1230712890625}
+{'depth': 6.0, 'time': 49.9343017578125}
+{'depth': 3.0, 'time': 65.19462890624999}
 {'depth': 0.0}
     T    0.0  D   0.0  G Air    DD   0.0  FS   0.0  C   0.0   GF   0.0/35.0   SGF    0.0
     T    1.5  D  30.0  G Air    DD   1.5  FS   0.0  C   0.0   GF   0.0/35.0   SGF    2.7
-    T   36.5  D  30.0  G Air    DD  35.0  FS  12.0  C  12.8   GF   0.0/35.0   SGF  148.8   2.2@12m[Nx50] 3.7@9m[Nx50] 6.9@6m[Nx50] 15.7@3m[Nx50]
- D  T   37.4  D  21.0  G Nx50   DD   0.9  FS  12.0  C  12.5   GF   0.1/35.0   SGF  149.7   1.9@12m[Nx50] 3.7@9m[Nx50] 6.7@6m[Nx50] 15.6@3m[Nx50]
- D  T   40.4  D  21.0  G Nx50   DD   3.0  FS   9.0  C   9.5   GF   0.0/35.0   SGF  139.4   3.6@9m[Nx50] 7.0@6m[Nx50] 16.2@3m[Nx50]
- D  T   41.6  D   9.0  G Nx50   DD   1.2  FS   9.0  C   8.4   GF  40.6/43.8   SGF  135.0   3.6@9m[Nx50] 7.0@6m[Nx50] 16.2@3m[Nx50]
- D  T   45.2  D   9.0  G Nx50   DD   3.6  FS   6.0  C   6.0   GF  24.1/43.8   SGF  122.7   7.0@6m[Nx50] 16.2@3m[Nx50]
- D  T   45.5  D   6.0  G Nx50   DD   0.3  FS   6.0  C   5.8   GF  49.5/50.9   SGF  121.6   7.0@6m[Nx50] 16.2@3m[Nx50]
- D  T   52.4  D   6.0  G Nx50   DD   7.0  FS   3.0  C   3.0   GF  23.5/50.9   SGF  103.1   16.2@3m[Nx50]
- D  T   52.7  D   3.0  G Nx50   DD   0.3  FS   3.0  C   2.9   GF  56.9/57.9   SGF  102.4   16.2@3m[Nx50]
- D  T   68.9  D   3.0  G Nx50   DD  16.2  FS   0.0  C   0.0   GF  18.5/57.9   SGF   64.9
-  A T   69.1  D   1.0  G Air    DD   0.2  FS   0.0  C   0.0   GF  47.2/62.6   SGF   64.6
-    T   69.2  D   0.0  G Air    DD   0.1  FS   0.0  C   0.0   GF  64.5/65.0   SGF   64.5
-    T   69.6  D   0.0  G Air    DD   0.4  FS   0.0  C   0.0   GF  63.9/65.0   SGF   63.9
+    T   35.0  D  30.0  G Air    DD  33.5  FS  12.0  C  12.6   GF   0.0/35.0   SGF  145.3   1.9@12m[Nx50] 3.4@9m[Nx50] 6.4@6m[Nx50] 14.7@3m[Nx50]
+ D  T   35.9  D  21.0  G Nx50   DD   0.9  FS  12.0  C  12.4   GF   0.1/35.0   SGF  146.3   1.6@12m[Nx50] 3.3@9m[Nx50] 6.4@6m[Nx50] 14.7@3m[Nx50]
+ D  T   38.9  D  21.0  G Nx50   DD   3.0  FS   9.0  C   9.2   GF   0.0/35.0   SGF  136.4   3.0@9m[Nx50] 6.5@6m[Nx50] 15.0@3m[Nx50]
+ D  T   40.1  D   9.0  G Nx50   DD   1.2  FS   9.0  C   8.1   GF  39.2/43.6   SGF  131.5   3.0@9m[Nx50] 6.5@6m[Nx50] 15.0@3m[Nx50]
+ D  T   43.1  D   9.0  G Nx50   DD   3.0  FS   6.0  C   6.0   GF  24.0/43.6   SGF  120.9   6.5@6m[Nx50] 15.0@3m[Nx50]
+ D  T   43.4  D   6.0  G Nx50   DD   0.3  FS   6.0  C   5.8   GF  49.4/50.8   SGF  119.9   6.5@6m[Nx50] 15.0@3m[Nx50]
+ D  T   49.9  D   6.0  G Nx50   DD   6.5  FS   3.0  C   3.0   GF  24.3/50.8   SGF  101.6   15.0@3m[Nx50]
+ D  T   50.2  D   3.0  G Nx50   DD   0.3  FS   3.0  C   2.9   GF  56.9/57.9   SGF  100.8   15.0@3m[Nx50]
+ D  T   65.2  D   3.0  G Nx50   DD  15.0  FS   0.0  C   0.0   GF  19.8/57.9   SGF   64.9
+  A T   65.4  D   1.0  G Air    DD   0.2  FS   0.0  C   0.0   GF  48.6/62.6   SGF   64.4
+    T   65.5  D   0.0  G Air    DD   0.1  FS   0.0  C   0.0   GF  64.3/65.0   SGF   64.3
+    T   66.4  D   0.0  G Air    DD   0.9  FS   0.0  C   0.0   GF  63.2/65.0   SGF   63.2
 
 AFTER MODIFYING 3 MINS GAS SWITCH TO BE ON OLD GAS
 {'depth': 30, 'time': 35.0, 'gas': Air}
