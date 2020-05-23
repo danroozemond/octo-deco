@@ -17,12 +17,20 @@ BEFORE:
 {'depth': 6.0, 'time': 52.4419921875}
 {'depth': 3.0, 'time': 68.94255371093749}
 {'depth': 0.0}
+    T    0.0  D   0.0  G Air    DD   0.0  FS   0.0  C   0.0   GF   0.0/35.0   SGF    0.0
+    T    1.5  D  30.0  G Air    DD   1.5  FS   0.0  C   0.0   GF   0.0/35.0   SGF    2.7
     T   36.5  D  30.0  G Air    DD  35.0  FS  12.0  C  12.8   GF   0.0/35.0   SGF  148.8   2.2@12m[Nx50] 3.7@9m[Nx50] 6.9@6m[Nx50] 15.7@3m[Nx50]
  D  T   37.4  D  21.0  G Nx50   DD   0.9  FS  12.0  C  12.5   GF   0.1/35.0   SGF  149.7   1.9@12m[Nx50] 3.7@9m[Nx50] 6.7@6m[Nx50] 15.6@3m[Nx50]
  D  T   40.4  D  21.0  G Nx50   DD   3.0  FS   9.0  C   9.5   GF   0.0/35.0   SGF  139.4   3.6@9m[Nx50] 7.0@6m[Nx50] 16.2@3m[Nx50]
  D  T   41.6  D   9.0  G Nx50   DD   1.2  FS   9.0  C   8.4   GF  40.6/43.8   SGF  135.0   3.6@9m[Nx50] 7.0@6m[Nx50] 16.2@3m[Nx50]
  D  T   45.2  D   9.0  G Nx50   DD   3.6  FS   6.0  C   6.0   GF  24.1/43.8   SGF  122.7   7.0@6m[Nx50] 16.2@3m[Nx50]
  D  T   45.5  D   6.0  G Nx50   DD   0.3  FS   6.0  C   5.8   GF  49.5/50.9   SGF  121.6   7.0@6m[Nx50] 16.2@3m[Nx50]
+ D  T   52.4  D   6.0  G Nx50   DD   7.0  FS   3.0  C   3.0   GF  23.5/50.9   SGF  103.1   16.2@3m[Nx50]
+ D  T   52.7  D   3.0  G Nx50   DD   0.3  FS   3.0  C   2.9   GF  56.9/57.9   SGF  102.4   16.2@3m[Nx50]
+ D  T   68.9  D   3.0  G Nx50   DD  16.2  FS   0.0  C   0.0   GF  18.5/57.9   SGF   64.9
+  A T   69.1  D   1.0  G Air    DD   0.2  FS   0.0  C   0.0   GF  47.2/62.6   SGF   64.6
+    T   69.2  D   0.0  G Air    DD   0.1  FS   0.0  C   0.0   GF  64.5/65.0   SGF   64.5
+    T   69.6  D   0.0  G Air    DD   0.4  FS   0.0  C   0.0   GF  63.9/65.0   SGF   63.9
 
 AFTER MODIFYING 3 MINS GAS SWITCH TO BE ON OLD GAS
 {'depth': 30, 'time': 35.0, 'gas': Air}
