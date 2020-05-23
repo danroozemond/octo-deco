@@ -281,6 +281,7 @@ class DiveProfile:
         old_points = self._points;
         self._points = [ old_points[0] ];
         self._points[0].set_cleared_tissue_state( deco_model );
+        self._points[0].set_updated_deco_info(deco_model, self._gases_carried);
         amb_to_gf = None;
         i = 1;
         while i < len(old_points):
