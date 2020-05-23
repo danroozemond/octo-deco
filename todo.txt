@@ -19,7 +19,7 @@ Meter to bar (incl next db version)
 Alveolar pressure (incl next db version)
 
 test case: NDL dive on air with nitrox50 as gas, then more aggressive GFs. See if 3m stop uses nx50
-
+test case: actually need a longer stop on 21m
 
 
 BEFORE:
