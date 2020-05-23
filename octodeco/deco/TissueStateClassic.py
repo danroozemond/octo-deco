@@ -1,5 +1,5 @@
 # Please see LICENSE.md
-from . import Gas;
+from . import Gas, Util;
 
 
 # TissueState is represented as a list of current tissue loadings (N2, He)
@@ -103,10 +103,10 @@ class TissueState:
         def too_high_gf(p_amb):
             gf_now = amb_to_gf(p_amb);
             return self.GF99(p_amb) - gf_now;
-        p0 = 1.0;
+        p0 = Util.SURFACE_PRESSURE;
         p1 = 99.0;
         if too_high_gf(p0) < 0.0:
-            return 1.0;
+            return p0;
         while p1 - p0 > 0.001:
             h = p0 + ( p1-p0 )/2;
             if too_high_gf(h) > 0:
