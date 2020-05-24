@@ -3,10 +3,11 @@ from datetime import timedelta
 
 import click;
 import flask;
-from flask import Flask, session, url_for;
+from flask import Flask, session, url_for, g;
 from flask_caching import Cache
 
 from . import db;
+from . import util;
 
 
 # Define navigation row
@@ -74,6 +75,8 @@ app.cli.add_command(migrate_db_command);
 def init_session():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=365);
+    g.current_git_commit = util.CURRENT_GIT_COMMIT;
+    g.current_git_branch = util.CURRENT_GIT_BRANCH;
 
 
 @app.teardown_appcontext

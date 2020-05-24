@@ -235,6 +235,9 @@ class DiveProfile:
             np = self._points[i+1];
             if p.is_interpolated_point or p.is_ascent_point or p.depth == 0.0:
                 continue;
+            if p.depth == np.depth and p.gas != np.gas:
+                # This is a gas switch stop
+                continue;
             if p.depth != np.depth or p.gas != np.gas:
                 points.append(p)
             # When importing CSV's, this doesn't make sense
@@ -281,6 +284,7 @@ class DiveProfile:
         old_points = self._points;
         self._points = [ old_points[0] ];
         self._points[0].set_cleared_tissue_state( deco_model );
+        self._points[0].set_updated_deco_info(deco_model, self._gases_carried);
         amb_to_gf = None;
         i = 1;
         while i < len(old_points):

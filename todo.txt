@@ -4,9 +4,4 @@ TODO this list :) [also check TO-DOs in .py's]
 * CNS tracking
 ** remember half-time on surface: 90 mins (TSD PDF page 42)
 
-
 * Gas consumption
-
-
-* (how to take into account alveolar? remove this detail again?)
-See Deco for Divers, page 177/178.

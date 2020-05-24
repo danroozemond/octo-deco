@@ -8,3 +8,4 @@ oauthlib
 requests
 Flask-Caching
 cython
+gitpython
