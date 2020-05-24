@@ -6,8 +6,8 @@ from . import TissueStateCython;
 
 
 class TissueState(TissueStateCython.TissueState):
-    def __init__(self, constants):
-        super().__init__(constants);
+    def __init__(self, constants, rq):
+        super().__init__(constants, rq);
         self._n_tissues = constants.N_TISSUES;
         self._old_style_constants = constants;
 
@@ -34,7 +34,7 @@ class TissueState(TissueStateCython.TissueState):
     def GF99(self, p_amb):
         r1 = super().GF99(p_amb);
         r2 = self.construct_classic().GF99(p_amb);
-        assert abs(r1-r2) < 1e-4;
+        assert abs(r1-r2) < 1e-3;
         return r1;
 
     def p_ceiling_for_amb_to_gf(self, amb_to_gf):
