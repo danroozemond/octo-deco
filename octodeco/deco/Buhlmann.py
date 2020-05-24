@@ -49,9 +49,8 @@ class Buhlmann:
         self._constants = BuhlmannConstants.ZHL_16C_1a;
         self._rq = 0.9; # Respiratory Quotient.
         self._n_tissues = self._constants.N_TISSUES;
-        # self.TissueState = TissueStateCython.TissueState if not debugTissueState \
-        #             else   TissueStateVerify.TissueState;
-        self.TissueState = TissueStateClassic.TissueState;
+        self.TissueState = TissueStateCython.TissueState if not debugTissueState \
+                    else   TissueStateVerify.TissueState;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = max_pO2_deco;

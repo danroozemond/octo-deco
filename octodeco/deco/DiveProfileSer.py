@@ -32,12 +32,6 @@ def _migrate_up_to_current(from_version, diveprofile):
         if not hasattr(diveprofile, attrname):
             setattr(diveprofile, attrname, False);
 
-    # Tissue State
-    if from_version < 6:
-        constants = diveprofile.deco_model()._constants;
-        for point in diveprofile.points():
-            point.tissue_state = TissueStateCython.construct_cython_from_numpy(point.tissue_state, constants);
-
     # Point attributes
     for point in diveprofile.points():
         if not hasattr(point, 'is_ascent_point'):
