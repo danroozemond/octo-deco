@@ -6,17 +6,7 @@ TODO this list :) [also check TO-DOs in .py's]
 
 * Gas consumption
 
-23/5
-Alveolar pressure (incl next db version)
-
-* how to take into account alveolar?
-See Deco for Divers, page 177/178.
--> New version
--> For both classic and cython
--> And remove numpy if it's still there
--> In update / add stops (of update deco info?) ook de initial tissue state resetten. Dan hoef je ook geen zorgen te maken om de serialization van de tissue state (wellicht?)
 Increase major version number
-
 
 BEFORE:
 {'depth': 30, 'time': 35.0, 'gas': Air}
@@ -97,4 +87,32 @@ With interpolate points, took 0.1764s (measures vary 0.17-0.22)
     T   67.6  D   0.0  P  1.0  G Air    DD   0.1  FS   0.0  C   0.0   GF  64.5/65.0   SGF   64.5
     T   68.5  D   0.0  P  1.0  G Air    DD   0.9  FS   0.0  C   0.0   GF  63.3/65.0   SGF   63.3
 
+# After introducing alveolar pressure, with RQ = 0.9
+With interpolate points, took 0.2038s
+{'Deco model (display)': 'ZHL-16C GF 35/65', 'Deco model (profile)': 'ZHL-16C GF 35/65', 'Gases carried': {'Air', 'Nx50'}, 'Total dive time': '64.7 mins', 'Decompression time': '29.4 mins', 'Deco profile comp time': '0.01 secs', 'Full info comp time': '0.01 secs'}
+{'depth': 30, 'time': 35.0, 'gas': Air}
+{'depth': 21.0, 'time': 38.9}
+{'depth': 21.0, 'time': 38.9, 'gas': Nx50}
+{'depth': 12.0, 'time': 40.4201171875}
+{'depth': 9.0, 'time': 43.975732421874994}
+{'depth': 6.0, 'time': 50.32187499999999}
+{'depth': 3.0, 'time': 64.41948242187499}
+{'depth': 0.0}
+    T    0.0  D   0.0  P 1.0=1.0  G Air    DD   0.0  FS   0.0  C   0.0   GF   0.0/35.0   SGF    0.0
+    T    1.5  D  30.0  P 4.0=4.0  G Air    DD   1.5  FS   0.0  C   0.0   GF   0.0/35.0   SGF    0.6
+    T   35.0  D  30.0  P 4.0=4.0  G Air    DD  33.5  FS  12.0  C  12.2   GF   0.0/35.0   SGF  140.3  1.5@12m[Nx50] 2.9@9m[Nx50] 5.5@6m[Nx50] 13.1@3m[Nx50]
+ D  T   35.9  D  21.0  P 3.1=3.1  G Air    DD   0.9  FS  12.0  C  12.0   GF   0.0/35.0   SGF  141.1  1.2@12m[Nx50] 2.9@9m[Nx50] 5.4@6m[Nx50] 12.9@3m[Nx50]
+ D  T   38.9  D  21.0  P 3.1=3.1  G Air    DD   3.0  FS  12.0  C  10.6   GF   0.0/35.0   SGF  140.5  0.6@12m[Nx50] 3.3@9m[Nx50] 6.0@6m[Nx50] 13.8@3m[Nx50]
+ D  T   38.9  D  21.0  P 3.1=3.1  G Nx50   DD   0.0  FS  12.0  C  10.6   GF   0.0/35.0   SGF  140.5  0.6@12m[Nx50] 3.3@9m[Nx50] 6.0@6m[Nx50] 13.8@3m[Nx50]
+ D  T   39.8  D  12.0  P 2.2=2.2  G Nx50   DD   0.9  FS  12.0  C   9.6   GF  25.3/35.5   SGF  136.7  0.6@12m[Nx50] 3.3@9m[Nx50] 6.0@6m[Nx50] 13.8@3m[Nx50]
+ D  T   40.4  D  12.0  P 2.2=2.2  G Nx50   DD   0.6  FS   9.0  C   8.9   GF  22.2/35.5   SGF  133.7  3.3@9m[Nx50] 6.0@6m[Nx50] 13.8@3m[Nx50]
+ D  T   40.7  D   9.0  P 1.9=1.9  G Nx50   DD   0.3  FS   9.0  C   8.6   GF  41.0/42.9   SGF  132.2  3.3@9m[Nx50] 6.0@6m[Nx50] 13.8@3m[Nx50]
+ D  T   44.0  D   9.0  P 1.9=1.9  G Nx50   DD   3.3  FS   6.0  C   6.0   GF  24.0/42.9   SGF  119.4  6.0@6m[Nx50] 13.8@3m[Nx50]
+ D  T   44.3  D   6.0  P 1.6=1.6  G Nx50   DD   0.3  FS   6.0  C   5.8   GF  49.0/50.3   SGF  118.4  6.0@6m[Nx50] 13.8@3m[Nx50]
+ D  T   50.3  D   6.0  P 1.6=1.6  G Nx50   DD   6.0  FS   3.0  C   3.0   GF  25.0/50.3   SGF   99.8  13.8@3m[Nx50]
+ D  T   50.6  D   3.0  P 1.3=1.3  G Nx50   DD   0.3  FS   3.0  C   2.9   GF  56.6/57.6   SGF   99.0  13.8@3m[Nx50]
+ D  T   64.4  D   3.0  P 1.3=1.3  G Nx50   DD  13.8  FS   0.0  C   0.0   GF  19.9/57.6   SGF   64.8
+  A T   64.6  D   1.0  P 1.1=1.1  G Air    DD   0.2  FS   0.0  C   0.0   GF  48.6/62.5   SGF   64.4
+    T   64.7  D   0.0  P 1.0=1.0  G Air    DD   0.1  FS   0.0  C   0.0   GF  64.2/65.0   SGF   64.2
+    T   65.6  D   0.0  P 1.0=1.0  G Air    DD   0.9  FS   0.0  C   0.0   GF  62.6/65.0   SGF   62.6
 
