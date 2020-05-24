@@ -11,10 +11,12 @@ dp = DiveProfile(gf_low=35, gf_high=65);
 dp.append_section(30, 33.5, gas = Gas.Air());
 dp.add_gas(Gas.Nitrox(50))
 dp.add_stops_to_surface();
-#dp.interpolate_points()
+dp.interpolate_points()
 
 #dp.set_gf(35,65, updateStops = True);
 dp.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = True)
+
+print('With interpolate points, took {:.4f}s'.format(time.perf_counter()-t0));
 
 print(dp.dive_summary());
 for s in dp.runtimetable():

@@ -6,7 +6,7 @@ import pickle;
 
 import pytz
 
-from . import TissueStateNumpy, TissueStateCython, TissueStateClassic;
+from . import TissueStateCython, TissueStateClassic;
 
 CURRENT_VERSION = 8;
 
@@ -31,18 +31,6 @@ def _migrate_up_to_current(from_version, diveprofile):
     for attrname in [ 'is_demo_dive', 'is_public'  ]:
         if not hasattr(diveprofile, attrname):
             setattr(diveprofile, attrname, False);
-
-    # Tissue State
-    if from_version < 5:
-        constants = diveprofile.deco_model()._constants;
-        for point in diveprofile.points():
-            iptts = point.tissue_state._state if type(point.tissue_state) == TissueStateClassic.TissueState \
-                    else point.tissue_state;
-            point.tissue_state = TissueStateNumpy.construct_numpy_from_classic(iptts, constants);
-    if from_version < 6:
-        constants = diveprofile.deco_model()._constants;
-        for point in diveprofile.points():
-            point.tissue_state = TissueStateCython.construct_cython_from_numpy(point.tissue_state, constants);
 
     # Point attributes
     for point in diveprofile.points():
