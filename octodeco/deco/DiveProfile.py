@@ -235,6 +235,9 @@ class DiveProfile:
             np = self._points[i+1];
             if p.is_interpolated_point or p.is_ascent_point or p.depth == 0.0:
                 continue;
+            if p.depth == np.depth and p.gas != np.gas:
+                # This is a gas switch stop
+                continue;
             if p.depth != np.depth or p.gas != np.gas:
                 points.append(p)
             # When importing CSV's, this doesn't make sense
