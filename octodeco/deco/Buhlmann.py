@@ -1,6 +1,6 @@
 # Please see LICENSE.md
 from . import BuhlmannConstants;
-from . import TissueStateCython, TissueStateVerify;
+from . import TissueStateClassic, TissueStateCython, TissueStateVerify;
 from . import Util;
 
 
@@ -47,9 +47,11 @@ class Buhlmann:
                  max_pO2_deco, gas_swich_mins,
                  debugTissueState = False):
         self._constants = BuhlmannConstants.ZHL_16C_1a;
+        self._rq = 0.9; # Respiratory Quotient.
         self._n_tissues = self._constants.N_TISSUES;
-        self.TissueState = TissueStateCython.TissueState if not debugTissueState \
-                    else   TissueStateVerify.TissueState;
+        # self.TissueState = TissueStateCython.TissueState if not debugTissueState \
+        #             else   TissueStateVerify.TissueState;
+        self.TissueState = TissueStateClassic.TissueState;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = max_pO2_deco;
@@ -68,7 +70,7 @@ class Buhlmann:
         self.gf_high = gf_high;
 
     def cleared_tissue_state(self):
-        return self.TissueState(self._constants);
+        return self.TissueState(self._constants, self._rq);
 
     #
     # NDL, deco stop, deco profile computations

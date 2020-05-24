@@ -20,13 +20,17 @@ class DivePoint:
     def __repr__(self):
         return '%.1f:%dm' % (self.time, self.depth);
 
+    @property
+    def p_alv(self):
+        return self.tissue_state.amb_to_alv(self.p_amb);
+
     def debug_info(self):
-        fmt = '{}{}{} T {:6.1f}  D {:5.1f}  P {:4.1f}  G {:5s}  DD {:5.1f}  FS {:5.1f}  ' +\
+        fmt = '{}{}{} T {:6.1f}  D {:5.1f}  P {:3.1f}={:3.1f}  G {:5s}  DD {:5.1f}  FS {:5.1f}  ' +\
                'C {:5.1f}   GF {:5.1f}/{:4.1f}   SGF {:6.1f}  {}';
         return fmt.format('I' if self.is_interpolated_point else ' ',\
                           'D' if self.is_deco_stop else ' ',\
                           'A' if self.is_ascent_point else ' ',\
-                          self.time, self.depth, self.p_amb, str(self.gas), self.duration(),
+                          self.time, self.depth, self.p_amb, self.p_alv, str(self.gas), self.duration(),
                           self.deco_info['FirstStop'],self.deco_info['Ceil'],
                           self.deco_info['GF99'], self.deco_info['amb_to_gf'](self.p_amb),
                           self.deco_info['SurfaceGF'],

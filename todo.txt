@@ -6,16 +6,17 @@ TODO this list :) [also check TO-DOs in .py's]
 
 * Gas consumption
 
+23/5
+Alveolar pressure (incl next db version)
+
 * how to take into account alveolar?
 See Deco for Divers, page 177/178.
 -> New version
 -> For both classic and cython
 -> And remove numpy if it's still there
-
+-> In update / add stops (of update deco info?) ook de initial tissue state resetten. Dan hoef je ook geen zorgen te maken om de serialization van de tissue state (wellicht?)
 Increase major version number
 
-23/5
-Alveolar pressure (incl next db version)
 
 BEFORE:
 {'depth': 30, 'time': 35.0, 'gas': Air}

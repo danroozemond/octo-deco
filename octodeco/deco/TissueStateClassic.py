@@ -4,11 +4,12 @@ from . import Gas, Util;
 
 # TissueState is represented as a list of current tissue loadings (N2, He)
 class TissueState:
-    def __init__(self, constants):
+    def __init__(self, constants, rq):
         gas = Gas.Air();
         self._constants = constants;
+        self._rq = rq;
         self._n_tissues = self._constants.N_TISSUES;
-        p_alv = self._amb_to_alv(Util.SURFACE_PRESSURE);
+        p_alv = self.amb_to_alv(Util.SURFACE_PRESSURE);
         self._state = list(map( lambda i: (p_alv * gas[ 'fN2' ], p_alv * gas[ 'fHe' ]), range(self._n_tissues)));
         # Careful, if you add a member here, think about existing divepoints with tissuestates stored in
         # some database somewhere
@@ -17,7 +18,7 @@ class TissueState:
         return self._state.__repr__();
 
     def __copy__(self):
-        r = TissueState(self._constants);
+        r = TissueState(self._constants, self._rq);
         r._state = self._state;
         return r;
 
@@ -28,21 +29,19 @@ class TissueState:
     # Updating the tissue states
     # p_alv = p_amb - p_h2o - (1-RQ)/RQ * p_co2
     # where p_h2o = 0.0627, p_co2 = 0.0534, and RQ = 0.8, 0.9, or 1.0 depending on conservatism
-    # See Deco for Diivers, pages 177/178
+    # See Deco for Divers, pages 177/178
     #
     @staticmethod
     def _updated_partial_pressure(pp_tissue, pp_alveolar, halftime, duration):
         return pp_tissue + (1 - pow(.5, duration / halftime)) * (pp_alveolar - pp_tissue);
 
-    @staticmethod
-    def _amb_to_alv(p_amb):
-        rq = 1.0;
-        p_alv = p_amb - 0.0627 + ((1-rq)/rq)*0.0534;
+    def amb_to_alv(self, p_amb):
+        p_alv = p_amb - 0.0627 + ((1-self._rq)/self._rq)*0.0534;
         return p_alv;
 
     def updated_state(self, duration, p_amb, gas):
         r = self.copy();
-        p_alv = self._amb_to_alv(p_amb);
+        p_alv = self.amb_to_alv(p_amb);
         pp_amb_n2 = p_alv * gas[ 'fN2' ];
         pp_amb_he = p_alv * gas[ 'fHe' ];
         r._state = [ (

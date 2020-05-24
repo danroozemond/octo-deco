@@ -12,7 +12,7 @@ class TissueState(TissueStateCython.TissueState):
         self._old_style_constants = constants;
 
     def construct_classic(self):
-        r = TissueStateClassic.TissueState(self._old_style_constants);
+        r = TissueStateClassic.TissueState(self._old_style_constants, self._rq);
         r._state = [ ( self._state[2*i], self._state[2*i+1]) for i in range(self._n_tissues)];
         return r;
 
