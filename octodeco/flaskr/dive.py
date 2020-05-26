@@ -317,8 +317,8 @@ def delete(dive_id):
     return redirect(url_for('dive.show_any'));
 
 
-@bp.route('/modify/<int:dive_id>', methods = [ 'POST' ])
-def modify(dive_id):
+@bp.route('/modify/meta/<int:dive_id>', methods = [ 'POST' ])
+def modify_meta(dive_id):
     if request.form.get('action_update', '') != '':
         # Some input sanitation
         ipt_surface_section = max(0, min(120, request.form.get('ipt_surface_section', 0, type=int)));

@@ -396,8 +396,8 @@
     <span class="viztoggle" id="modify_dive_toggle" onclick="toggle_div_modify_dive()">[show]</span>
     </h2>
     <div id="modify_dive" class="modifydive" style="display:none">
-    <h3>Change</h3>
-    <form method="post" action="{{url_for('dive.modify',dive_id=dive.dive_id)}}">
+    <h3>Properties</h3>
+    <form method="post" action="{{url_for('dive.modify_meta',dive_id=dive.dive_id)}}">
         <label for="ipt_surface_section">Add surface section to end of dive:</label>
         <input type="text" value="{{dive.length_of_surface_section()}}" name="ipt_surface_section" id="ipt_surface_section">
         <br/>
