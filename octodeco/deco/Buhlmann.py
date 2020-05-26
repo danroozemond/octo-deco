@@ -45,6 +45,7 @@ class Buhlmann:
                  gf_low, gf_high,
                  descent_speed, ascent_speed,
                  max_pO2_deco, gas_swich_mins,
+                 last_stop_depth,
                  debugTissueState = False):
         self._constants = BuhlmannConstants.ZHL_16C_1a;
         self._rq = 0.9; # Respiratory Quotient.
@@ -57,6 +58,7 @@ class Buhlmann:
         self.descent_speed = descent_speed;
         self.ascent_speed = ascent_speed;
         self.gas_switch_mins = gas_swich_mins;
+        self.last_stop_depth = last_stop_depth;
         self.stop_length_precision = 0.08;
         # After 8 halftimes, residual is less than 0.5%, so that's infinite enough.
         self.stop_length_infinity = 8*self._constants.N2_HALFTIMES[-1];
@@ -113,7 +115,7 @@ class Buhlmann:
 
     def _gas_switch_p_amb(self, gas):
         p_amb = self.max_pO2_deco / gas['fO2'];
-        p_amb = Util.Pamb_to_Pamb_stop(p_amb, direction='up');
+        p_amb = Util.Pamb_to_Pamb_stop(p_amb, direction='up', last_stop_depth = self.last_stop_depth);
         return p_amb;
 
     def _time_to_stay_at_stop(self, p_amb, p_amb_next_stop, tissue_state, gas, amb_to_gf):
@@ -180,7 +182,7 @@ class Buhlmann:
         if p_now > p_first_stop:
             p_amb_next_stop = p_first_stop;
         else:
-            p_amb_next_stop = Util.next_stop_Pamb(p_now);
+            p_amb_next_stop = Util.next_stop_Pamb(p_now, last_stop_depth = self.last_stop_depth);
         # Do we need a gas switch?
         new_gas = self._best_deco_gas(p_amb_next_stop, gases);
         if new_gas != current_gas and p_first_stop > Util.SURFACE_PRESSURE and add_gas_switch_time:
@@ -196,7 +198,7 @@ class Buhlmann:
         amb_to_gf = self._get_ambtogf(tissue_state, p_amb, p_target, amb_to_gf);
         p_ceiling = tissue_state.p_ceiling_for_amb_to_gf(amb_to_gf);
         assert p_ceiling < 100.0;  # Otherwise something very weird is happening
-        p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling);  # First stop is rounded (to 3m)
+        p_first_stop = Util.Pamb_to_Pamb_stop(p_ceiling, last_stop_depth = self.last_stop_depth);
         # Start at deepest point from first_stop at ambient
         p_now = max(p_first_stop, p_amb);
         # If we don't need to add gas_switch_time, instantly switch to the best gas
