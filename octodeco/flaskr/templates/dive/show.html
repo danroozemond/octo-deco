@@ -410,6 +410,14 @@
         <label for="action_update"></label>
         <input type="submit" name="action_update" id="action_update" value="Update">
     </form>
+    <h3>Settings</h3>
+    <form method="post" action="{{url_for('dive.modify_settings',dive_id=dive.dive_id)}}">
+        <label for="ipt_last_stop_depth">Last stop depth:</label>
+        <input type="text" value="{{dive._last_stop_depth}}" name="ipt_last_stop_depth" id="ipt_last_stop_depth">
+        <br/>
+        <label for="action_update_settings"></label>
+        <input type="submit" name="action_update_settings" id="action_update_settings" value="Update">
+    </form>
     <h3>Delete</h3>
     <form method="post" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
         <label for="subm_delete">Delete:</label>
