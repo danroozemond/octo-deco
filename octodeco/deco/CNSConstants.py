@@ -1,5 +1,7 @@
 # Please see LICENSE.md
 
+from . import Util;
+
 # Constants: map ppO2 to %(CNS build-up per minute)
 CNS_PER_MIN = \
 [ (0.60,0.14), (0.64,0.15), (0.68,0.17), (0.70,0.18), (0.72,0.18), (0.76,0.20), (0.80,0.22), (0.84,0.24), (0.86,0.25), \
@@ -11,6 +13,7 @@ CNS_PER_MIN = \
 (1.59,1.90), (1.60,2.22), (1.65,3.40), (1.70,5.80), (1.75,8.70), (1.80,10.20), (1.85,14.50), (1.90,19.50), \
 (1.95,26.60), (2.00,100.00) ];
 CNS_HALFTIME_SURFACE = 90;  # 90 minutes
+PP_SURFACE = Util.SURFACE_PRESSURE * 0.21;
 
 
 def _cns_perc_update_surface(cns_perc_before, duration):
@@ -24,7 +27,7 @@ def _cns_per_min(pp_o2):
     if CNS_PER_MIN[i0][0] > pp_o2:
         # Linearly interpolate between surface and this
         # 0.21 < pp_o2 < pp_min (=0.60)
-        pp_surf = 0.21;
+        pp_surf = PP_SURFACE;
         pp_min, cpm_min = CNS_PER_MIN[0];
         f = max(0.0, ( pp_o2 - pp_surf ) / ( pp_min - pp_surf ));
         return f * cpm_min;
@@ -45,8 +48,8 @@ def _cns_per_min(pp_o2):
     return CNS_PER_MIN[h][1];
 
 
-def cns_perc_update(cns_perc_before, pp_o2, duration):
-    if pp_o2 <= 0.21:
+def cns_perc_update(cns_perc_before, p_amb, pp_o2, duration):
+    if p_amb < Util.SURFACE_PRESSURE:
         # Update using halftime
         return _cns_perc_update_surface( cns_perc_before, duration );
     else:
