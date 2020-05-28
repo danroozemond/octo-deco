@@ -8,7 +8,11 @@ import pytz
 
 from . import TissueStateCython, TissueStateClassic;
 
+#TODO: Make v11 after merging two open branches into develop,
+#  otherwise we get into trouble because some of the upgrades
+#  will have skipped upgrades partly
 CURRENT_VERSION = 9;
+
 
 
 #
