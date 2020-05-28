@@ -49,7 +49,7 @@ def _cns_per_min(pp_o2):
 
 
 def cns_perc_update(cns_perc_before, p_amb, pp_o2, duration):
-    if p_amb < Util.SURFACE_PRESSURE:
+    if p_amb < Util.SURFACE_PRESSURE+0.01:
         # Update using halftime
         return _cns_perc_update_surface( cns_perc_before, duration );
     else:
