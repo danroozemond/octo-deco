@@ -41,6 +41,12 @@ def show_diveprofile(diveprofile):
                              line = {'color': 'rgb(176,42,143)', 'dash': 'dot', 'width': 1},
                              visible = "legendonly"),
                   secondary_y = True);
+    # CNS
+    fig.add_trace(go.Scatter(x = df[ "time" ], y = df[ "CNS" ], name = 'CNS',
+                             hovertemplate = 'CNS: %{y:.1f}% @ %{x:.1f}mins<extra></extra>',
+                             line = {'color': 'rgb(176,42,143)', 'width': 2},
+                             visible = "legendonly"),
+                  secondary_y = True);
     # TTS (scaled to make visible, using customdata)
     fig.add_trace(go.Scatter(x = df[ "time" ], y = 2*df[ "TTS" ], name = 'TTS',
                              hovertemplate = 'TTS: %{customdata:.1f}mins @ %{x:.1f}mins<extra></extra>',
