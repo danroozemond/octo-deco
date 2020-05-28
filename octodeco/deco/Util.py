@@ -27,18 +27,30 @@ def depth_to_Pamb(depth):
     return (depth * BAR_PER_METER) + SURFACE_PRESSURE;
 
 
-def Pamb_to_Pamb_stop(p_amb, direction = 'down'):
+def Pamb_to_Pamb_stop(p_amb, direction = 'down', last_stop_depth = 3):
     t = Pamb_to_depth(p_amb);
     if (t % 3) > 0.01:
         if direction == 'down':
             t = 3*(math.floor(t/3) + 1);
         elif direction == 'up':
             t = 3 * (math.ceil(t / 3) - 1);
+    if t < 0:
+        t = 0;
+    elif 0 < t < last_stop_depth - 0.1:
+        if direction == 'down':
+            t = last_stop_depth;
+        elif direction == 'up':
+            t = 0;
     return depth_to_Pamb(t);
 
 
-def next_stop_Pamb(p_amb):
-    return p_amb - 3*BAR_PER_METER;
+def next_stop_Pamb(p_amb, last_stop_depth = 3):
+    r = p_amb - 3*BAR_PER_METER;
+    if r < depth_to_Pamb(last_stop_depth) - 0.01:
+        r = SURFACE_PRESSURE;
+    elif r < SURFACE_PRESSURE:
+        r = SURFACE_PRESSURE;
+    return r;
 
 
 def stops_to_string(stops):

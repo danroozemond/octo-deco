@@ -5,3 +5,4 @@ TODO this list :) [also check TO-DOs in .py's]
 ** remember half-time on surface: 90 mins (TSD PDF page 42)
 
 * Gas consumption
+** incl. lost gas
