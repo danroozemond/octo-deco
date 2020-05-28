@@ -11,8 +11,7 @@ from . import TissueStateCython, TissueStateClassic;
 #TODO: Make v11 after merging two open branches into develop,
 #  otherwise we get into trouble because some of the upgrades
 #  will have skipped upgrades partly
-CURRENT_VERSION = 9;
-
+CURRENT_VERSION = 10;
 
 
 #
@@ -42,6 +41,8 @@ def _migrate_up_to_current(from_version, diveprofile):
     for point in diveprofile.points():
         if not hasattr(point, 'is_ascent_point'):
             point.is_ascent_point = False;
+        if not hasattr(point, 'cns_perc'):
+            point.cns_perc = 0.0;
 
     # v8
     if hasattr(diveprofile, '_deco_model'):
@@ -51,6 +52,7 @@ def _migrate_up_to_current(from_version, diveprofile):
     dive_id = getattr(diveprofile, 'dive_id', None);
     print('Upgraded dive {} from v{} to v{}'.format(dive_id, from_version, CURRENT_VERSION));
     diveprofile.db_version = CURRENT_VERSION;
+    diveprofile.update_deco_info();
 
 
 #

@@ -78,6 +78,7 @@ class DiveProfile:
              'Last stop': '%i m' % self._last_stop_depth,
              'Total dive time': '%.1f mins' % self.divetime(),
              'Decompression time': '%.1f mins' % self.decotime(),
+             'CNS max': '%.1f%%' % self.cns_max(),
              'Deco profile comp time': '%.2f secs' % self._deco_stops_computation_time,
              'Full info comp time': '%.2f secs' % self._full_info_computation_time
              };
@@ -89,6 +90,9 @@ class DiveProfile:
 
     def divetime(self):
         return sum(map(lambda p: p.duration_diving_only(), self._points));
+
+    def cns_max(self):
+        return max(map(lambda p: p.cns_perc, self._points));
 
     def description(self):
         if self.custom_desc is not None:
@@ -295,7 +299,7 @@ class DiveProfile:
             op = old_points[i];
             oldlen = len(self._points);
             # Potentially prepend extra point to cover ascent speed; append original point
-            p, extra_added = self._append_point_fix_ascent( op.duration(), op.depth, op.gas );
+            p, extra_added = self._append_point_fix_ascent( op.duration, op.depth, op.gas );
             # Update tissues, based on last point considered
             for j in range(oldlen, len(self._points)):
                 self._points[j].set_updated_tissue_state( );
@@ -374,7 +378,7 @@ class DiveProfile:
         new_points = [];
         removed_duration = 0.0;
         for p in self._points:
-            d = p.duration();
+            d = p.duration;
             if remove_filter(p):
                 removed_duration += d;
             else:

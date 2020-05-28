@@ -1,5 +1,5 @@
 # Please see LICENSE.md
-from . import Util
+from . import Util, CNSConstants;
 
 
 class DivePoint:
@@ -13,6 +13,7 @@ class DivePoint:
         self.is_deco_stop = False;
         self.is_ascent_point = False;
         self.is_interpolated_point = False;
+        self.cns_perc = 0.0;
         self.prev = prev;
         # NOTE - If you add attributes here, also add migration code to DiveProfileSer
         #
@@ -25,12 +26,13 @@ class DivePoint:
         return self.tissue_state.amb_to_alv(self.p_amb);
 
     def debug_info(self):
-        fmt = '{}{}{} T {:6.1f}  D {:5.1f}  P {:3.1f}={:3.1f}  G {:5s}  DD {:5.1f}  FS {:5.1f}  ' +\
+        fmt = '{}{}{} T {:6.1f}  D {:5.1f}  P {:3.1f}={:3.1f}  G {:5s}  DD {:5.1f}  CNS {:5.1f}  FS {:5.1f}  ' +\
                'C {:5.1f}   GF {:5.1f}/{:4.1f}   SGF {:6.1f}  {}';
         return fmt.format('I' if self.is_interpolated_point else ' ',\
                           'D' if self.is_deco_stop else ' ',\
                           'A' if self.is_ascent_point else ' ',\
-                          self.time, self.depth, self.p_amb, self.p_alv, str(self.gas), self.duration(),
+                          self.time, self.depth, self.p_amb, self.p_alv, str(self.gas), self.duration,
+                          self.cns_perc,
                           self.deco_info['FirstStop'],self.deco_info['Ceil'],
                           self.deco_info['GF99'], self.deco_info['amb_to_gf'](self.p_amb),
                           self.deco_info['SurfaceGF'],
@@ -42,13 +44,13 @@ class DivePoint:
 
     @staticmethod
     def dataframe_columns():
-        return [ 'time', 'depth', 'gas', 'ppO2' ]         \
+        return [ 'time', 'depth', 'gas', 'ppO2', 'CNS' ]  \
                 + DivePoint.dataframe_columns_deco_info() \
                 + [ 'Stops' ]                             \
                 + [ 'IsDecoStop', 'IsAscent', 'IsInterpolated', 'DiveGFLow', 'DiveGFHigh'];
 
     def repr_for_dataframe(self, diveprofile = None):
-        r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * self.p_amb ];
+        r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * self.p_amb, self.cns_perc ];
         if self.deco_info is not None:
             r += [ self.deco_info[n] for n in DivePoint.dataframe_columns_deco_info() ];
             r += [ Util.stops_to_string( self.deco_info['Stops'] ) ]
@@ -58,21 +60,22 @@ class DivePoint:
         r += [ diveprofile.gf_low_profile, diveprofile.gf_high_profile ] if diveprofile is not None else [100,100];
         return r;
 
+    @property
     def duration(self):
         if self.prev is None:
             return 0.0;
         return self.time - self.prev.time;
 
     def duration_deco_only(self):
-        return self.duration() if self.is_deco_stop and self.depth > 0 else 0.0;
+        return self.duration if self.is_deco_stop and self.depth > 0 else 0.0;
 
     def duration_diving_only(self):
         if self.depth <= 0 and self.prev is not None and self.prev.depth <= 0:
             return 0.0;
-        return self.duration();
+        return self.duration;
 
     def ascent_speed(self):
-        d = self.duration();
+        d = self.duration;
         if d == 0.0:
             return 0.0;
         assert self.prev is not None;
@@ -84,10 +87,11 @@ class DivePoint:
     def set_updated_tissue_state(self):
         assert self.time >= self.prev.time;  # Otherwise divepoints are in a broken sequence
         assert self.prev is not None;
+        p_amb_section = ( self.p_amb + self.prev.p_amb ) / 2;
         self.tissue_state = self.prev.tissue_state.updated_state(
-            self.duration(),
-            ( self.p_amb + self.prev.p_amb ) / 2,
-            self.prev.gas );
+            self.duration, p_amb_section, self.prev.gas );
+        ppo2 = self.prev.gas['fO2'] * p_amb_section;
+        self.cns_perc = CNSConstants.cns_perc_update(self.prev.cns_perc, p_amb_section, ppo2, self.duration);
 
     def set_updated_deco_info(self, deco_model, gases, amb_to_gf = None ):
         self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, self.gas, gases, amb_to_gf = amb_to_gf );
