@@ -6,7 +6,11 @@
     <header><h2>Admin</h2></header>
     <ul>
         <li><span class="fa fa-chevron-circle-right"></span>
-            <a href="{{url_for('admin.migrate_all')}}">Migrate all</a> (Pro-tip: backup first)
+        <form method="post" action="{{url_for('admin.migrate_all')}}" style="display:inline">
+            <input type="submit" name="action_migrate_all" id="action_migrate_all"
+                   value="Migrate all" onclick="return confirm('Sure?');">
+            (Pro-tip: backup first)
+        </form>
         </li>
     </ul>
 {% endblock %}
