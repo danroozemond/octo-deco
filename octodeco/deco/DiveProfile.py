@@ -291,7 +291,7 @@ class DiveProfile:
             op = old_points[i];
             oldlen = len(self._points);
             # Potentially prepend extra point to cover ascent speed; append original point
-            p, extra_added = self._append_point_fix_ascent( op.duration(), op.depth, op.gas );
+            p, extra_added = self._append_point_fix_ascent( op.duration, op.depth, op.gas );
             # Update tissues, based on last point considered
             for j in range(oldlen, len(self._points)):
                 self._points[j].set_updated_tissue_state( );
@@ -370,7 +370,7 @@ class DiveProfile:
         new_points = [];
         removed_duration = 0.0;
         for p in self._points:
-            d = p.duration();
+            d = p.duration;
             if remove_filter(p):
                 removed_duration += d;
             else:

@@ -30,7 +30,7 @@ class DivePoint:
         return fmt.format('I' if self.is_interpolated_point else ' ',\
                           'D' if self.is_deco_stop else ' ',\
                           'A' if self.is_ascent_point else ' ',\
-                          self.time, self.depth, self.p_amb, self.p_alv, str(self.gas), self.duration(),
+                          self.time, self.depth, self.p_amb, self.p_alv, str(self.gas), self.duration,
                           self.deco_info['FirstStop'],self.deco_info['Ceil'],
                           self.deco_info['GF99'], self.deco_info['amb_to_gf'](self.p_amb),
                           self.deco_info['SurfaceGF'],
@@ -58,21 +58,22 @@ class DivePoint:
         r += [ diveprofile.gf_low_profile, diveprofile.gf_high_profile ] if diveprofile is not None else [100,100];
         return r;
 
+    @property
     def duration(self):
         if self.prev is None:
             return 0.0;
         return self.time - self.prev.time;
 
     def duration_deco_only(self):
-        return self.duration() if self.is_deco_stop and self.depth > 0 else 0.0;
+        return self.duration if self.is_deco_stop and self.depth > 0 else 0.0;
 
     def duration_diving_only(self):
         if self.depth <= 0 and self.prev is not None and self.prev.depth <= 0:
             return 0.0;
-        return self.duration();
+        return self.duration;
 
     def ascent_speed(self):
-        d = self.duration();
+        d = self.duration;
         if d == 0.0:
             return 0.0;
         assert self.prev is not None;
@@ -85,7 +86,7 @@ class DivePoint:
         assert self.time >= self.prev.time;  # Otherwise divepoints are in a broken sequence
         assert self.prev is not None;
         self.tissue_state = self.prev.tissue_state.updated_state(
-            self.duration(),
+            self.duration,
             ( self.p_amb + self.prev.p_amb ) / 2,
             self.prev.gas );
 
