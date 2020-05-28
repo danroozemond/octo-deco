@@ -21,7 +21,7 @@ def info():
     return render_template('admin/info.html');
 
 
-@bp.route('/migrate/all')
+@bp.route('/migrate/all', methods = [ 'POST' ])
 def migrate_all():
     res = db_dive.migrate_all_profiles_to_latest();
     flash('Migrate all: ' + str(res));

@@ -1,7 +1,4 @@
 TODO this list :) [also check TO-DOs in .py's]
 
-* Last stop at 6m
-* CNS tracking
-** remember half-time on surface: 90 mins (TSD PDF page 42)
-
 * Gas consumption
+** incl. lost gas

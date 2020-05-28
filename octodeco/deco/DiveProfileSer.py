@@ -8,7 +8,7 @@ import pytz
 
 from . import TissueStateCython, TissueStateClassic;
 
-CURRENT_VERSION = 8;
+CURRENT_VERSION = 11;
 
 
 #
@@ -19,6 +19,8 @@ def _migrate_up_to_current(from_version, diveprofile):
         diveprofile.created = datetime.datetime.now(tz = pytz.timezone('Europe/Amsterdam'));
     if not hasattr(diveprofile, '_gas_switch_mins'):
         diveprofile._gas_switch_mins = 3.0;
+    if not hasattr(diveprofile, '_last_stop_depth'):
+        diveprofile._last_stop_depth = 3;
     if not hasattr(diveprofile, '_max_pO2_deco'):
         diveprofile._max_pO2_deco = 1.60;
 
@@ -36,6 +38,8 @@ def _migrate_up_to_current(from_version, diveprofile):
     for point in diveprofile.points():
         if not hasattr(point, 'is_ascent_point'):
             point.is_ascent_point = False;
+        if not hasattr(point, 'cns_perc'):
+            point.cns_perc = 0.0;
 
     # v8
     if hasattr(diveprofile, '_deco_model'):
@@ -45,6 +49,7 @@ def _migrate_up_to_current(from_version, diveprofile):
     dive_id = getattr(diveprofile, 'dive_id', None);
     print('Upgraded dive {} from v{} to v{}'.format(dive_id, from_version, CURRENT_VERSION));
     diveprofile.db_version = CURRENT_VERSION;
+    diveprofile.update_deco_info();
 
 
 #

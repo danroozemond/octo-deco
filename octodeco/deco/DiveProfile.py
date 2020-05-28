@@ -23,12 +23,14 @@ class DiveProfile:
     def __init__(self,
                  descent_speed = 20, ascent_speed = 10,
                  max_pO2_deco = 1.60, gas_switch_mins = 3.0,
+                 last_stop_depth = 3,
                  gf_low = 35, gf_high = 70):
         self._points = [ DivePoint(0, 0, Gas.Air(), None) ];
         self._descent_speed = descent_speed;
         self._ascent_speed = ascent_speed;
         self._max_pO2_deco = max_pO2_deco;
         self._gas_switch_mins = gas_switch_mins;
+        self._last_stop_depth = last_stop_depth;
         self._gases_carried = set();
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;
@@ -62,7 +64,8 @@ class DiveProfile:
         gf_high = gf_high if gf_high is not None else self.gf_high_display;
         dm = Buhlmann.Buhlmann(gf_low, gf_high,
                                self._descent_speed, self._ascent_speed,
-                               self._max_pO2_deco, self._gas_switch_mins );
+                               self._max_pO2_deco, self._gas_switch_mins,
+                               self._last_stop_depth);
         return dm;
 
     '''
@@ -72,8 +75,10 @@ class DiveProfile:
         v = {'Deco model (display)': self._desc_deco_model_display,
              'Deco model (profile)': self._desc_deco_model_profile,
              'Gases carried': {str(g) for g in self._gases_carried},
+             'Last stop': '%i m' % self._last_stop_depth,
              'Total dive time': '%.1f mins' % self.divetime(),
              'Decompression time': '%.1f mins' % self.decotime(),
+             'CNS max': '%.1f%%' % self.cns_max(),
              'Deco profile comp time': '%.2f secs' % self._deco_stops_computation_time,
              'Full info comp time': '%.2f secs' % self._full_info_computation_time
              };
@@ -85,6 +90,9 @@ class DiveProfile:
 
     def divetime(self):
         return sum(map(lambda p: p.duration_diving_only(), self._points));
+
+    def cns_max(self):
+        return max(map(lambda p: p.cns_perc, self._points));
 
     def description(self):
         if self.custom_desc is not None:
@@ -291,7 +299,7 @@ class DiveProfile:
             op = old_points[i];
             oldlen = len(self._points);
             # Potentially prepend extra point to cover ascent speed; append original point
-            p, extra_added = self._append_point_fix_ascent( op.duration(), op.depth, op.gas );
+            p, extra_added = self._append_point_fix_ascent( op.duration, op.depth, op.gas );
             # Update tissues, based on last point considered
             for j in range(oldlen, len(self._points)):
                 self._points[j].set_updated_tissue_state( );
@@ -370,7 +378,7 @@ class DiveProfile:
         new_points = [];
         removed_duration = 0.0;
         for p in self._points:
-            d = p.duration();
+            d = p.duration;
             if remove_filter(p):
                 removed_duration += d;
             else:
