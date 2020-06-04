@@ -19,8 +19,8 @@ class AmbientToGF:
     """
 
     def __init__(self, p_first_stop, p_target, gf_low, gf_high):
-        self.p_first_stop = p_first_stop;
         self.p_surface = Util.SURFACE_PRESSURE;
+        self.p_first_stop = max( p_first_stop, self.p_surface );
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.p_target = p_target;
