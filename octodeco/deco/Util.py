@@ -20,7 +20,7 @@ METER_PER_BAR = 1/BAR_PER_METER; # = 10.0040
 
 def Pamb_to_depth(Pamb):
     d = METER_PER_BAR*( Pamb - SURFACE_PRESSURE );
-    return round(d, 1);
+    return d;
 
 
 def depth_to_Pamb(depth):
