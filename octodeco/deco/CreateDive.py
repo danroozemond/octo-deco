@@ -28,7 +28,7 @@ def _ipt_check_depth_time(depth, time):
     try:
         depth = int(depth);
         time = int(time);
-        return depth is not None and 0 < depth < 200 and time is not None and 0 < time < 200;
+        return depth is not None and 0 <= depth < 200 and time is not None and 0 < time < 200;
     except:
         return False;
 

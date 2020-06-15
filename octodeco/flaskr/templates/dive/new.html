@@ -76,7 +76,7 @@
 					var d = document.getElementById('depth['+i+']');
 					var t = document.getElementById('time['+i+']');
 					var g = document.getElementById('gas['+i+']');
-					var ok2 = check_and_mark(d, check_input_nr( d.value, 1, 200, i != 0 ) );
+					var ok2 = check_and_mark(d, check_input_nr( d.value, 0, 200, i != 0 ) );
 					var ok3 = check_and_mark(t, check_input_nr( t.value, 1, 200, i != 0 ) );
 					var ok4 = check_and_mark(g, check_gas(g.value, false) );
 					ok = ok && ok2 && ok3 && ok4;
