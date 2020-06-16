@@ -198,12 +198,19 @@
         $('#ipt_gflow').val($('#show_gflow').text());
         $('#ipt_gfhigh').val($('#show_gfhigh').text());
     }
+    function urlParam(name, defaultval) {
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)')
+                          .exec(window.location.search);
+        return (results !== null) ? results[1] || 0 : defaultval;
+    }
     function set_gf_to_defaults()
     {
-        $('#show_gflow').text({{dive.gf_low_profile}});
-        $('#ipt_gflow').val({{dive.gf_low_profile}});
-        $('#show_gfhigh').text({{dive.gf_high_profile}});
-        $('#ipt_gfhigh').val({{dive.gf_high_profile}});
+        default_gf_low = urlParam('gflow', {{dive.gf_low_profile}});
+        default_gf_high = urlParam('gfhigh', {{dive.gf_high_profile}});
+        $('#show_gflow').text(default_gf_low);
+        $('#ipt_gflow').val(default_gf_low);
+        $('#show_gfhigh').text(default_gf_high);
+        $('#ipt_gfhigh').val(default_gf_high);
     }
 
 
