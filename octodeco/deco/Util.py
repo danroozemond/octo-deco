@@ -54,7 +54,7 @@ def next_stop_Pamb(p_amb, last_stop_depth = 3):
 
 
 def stops_to_string(stops):
-    return ' '.join([ '%i@%im' % ( round(s[1]), s[0] ) for s in stops if round(s[1]) >= 0.1 ]);
+    return ' '.join([ '%i@%im' % ( round(s[1]), s[0] ) for s in stops if s[1] >= 0.1 ]);
 
 
 def stops_to_string_precise(stops):
