@@ -352,13 +352,21 @@ def modify_meta(dive_id):
 @bp.route('/modify/settings/<int:dive_id>', methods = [ 'POST' ])
 def modify_settings(dive_id):
     if request.form.get('action_update_settings', '') != '':
-        # Some input sanitation
-        ipt_last_stop_depth = max(3, min(21, request.form.get('ipt_last_stop_depth', 3, type=int)));
         dp = get_diveprofile_for_display(dive_id);
+        # Update depth of last stop
+        ipt_last_stop_depth = max(3, min(21, request.form.get('ipt_last_stop_depth', 3, type=int)));
         if ipt_last_stop_depth != dp._last_stop_depth:
             dp._last_stop_depth = ipt_last_stop_depth;
             dp.update_deco_info();
             flash("Change last stop to %i m" % ipt_last_stop_depth);
+        # Update gas consumption settings
+        ipt_gas_consmp_bottom = max(1, min(50, request.form.get('ipt_gas_consmp_bottom', 20, type=int)));
+        ipt_gas_consmp_deco = max(1, min(50, request.form.get('ipt_gas_consmp_deco', 20, type=int)));
+        if ipt_gas_consmp_bottom != dp._gas_consmp_bottom or ipt_gas_consmp_deco != dp._gas_consmp_deco:
+            dp._gas_consmp_bottom = ipt_gas_consmp_bottom;
+            dp._gas_consmp_deco = ipt_gas_consmp_deco;
+            flash("Updated gas consumption figures");
+        # Update database and invalidate cache
         db_dive.store_dive(dp);
         _invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
