@@ -115,6 +115,21 @@ class CachedDiveProfile:
         return dsdf_table;
 
     @cache.memoize()
+    def gas_consumption_table(self):
+        dp = self.profile_base();
+        gct = dp.gas_consumption_analysis();
+        gct_formatted = { 'planned' if s['lost'] is None else 'lost {}'.format(s['lost']) :
+            {'decotime': '{:.1f}mins'.format(s[ 'decotime' ]),
+             **{str(k): '{:.0f}L'.format(v) for k, v in s[ 'gas_consmp' ].items()}}
+            for s in gct };
+        dsdf = pandas.DataFrame(gct_formatted);
+        dsdf_table = dsdf.to_html(classes="smalltable", na_rep='');
+        info = 'Computed with bottom: {:.1f}L/min, deco: {:.1f}L/min.'.\
+            format(dp._gas_consmp_bottom, dp._gas_consmp_deco);
+        warning = 'These computations do not check for max pO2.';
+        return dsdf_table + '<br/>'+ info + warning;
+
+    @cache.memoize()
     def full_table(self, gflow, gfhigh):
         dp = self.profile_gf(gflow, gfhigh);
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
@@ -204,7 +219,8 @@ def show_elt_summary_table(dive_id):
     gflow, gfhigh = get_gf_args_from_request();
     r1 = cdp.summary_table(gflow, gfhigh);
     r2 = cdp.runtime_table();
-    return r1 + r2;
+    r3 = cdp.gas_consumption_table();
+    return '{}\n<h3>Runtime</h3>\n{}\n<h3>Gas consumption</h3>\n{}\n'.format(r1,r2,r3);
 
 
 @bp.route('/show/<int:dive_id>/fulldata', methods = ['GET'])
