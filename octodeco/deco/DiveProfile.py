@@ -453,7 +453,32 @@ class DiveProfile:
     def gas_consumption(self):
         r = {};
         for p in self._points:
-            if p.duration > 0:
+            if p.duration > 0 and p.depth > 0:
                 rate = self._gas_consmp_deco if p.is_deco_stop else self._gas_consmp_bottom;
                 r[p.gas] = r.get(p.gas, 0.0) + p.duration * p.p_amb * rate;
+        return r;
+
+    def _gas_consumption_info(self):
+        return { 'decotime' : self.decotime(), 'gas_consmp': self.gas_consumption() };
+
+    def _gas_consumption_info_lost_gas(self, lost_gas):
+        self._gases_carried.remove( lost_gas );
+        for p in self._points:
+            if p.gas not in self._gases_carried:
+                p.gas = Gas.best_gas( self._gases_carried, p.p_amb, self._max_pO2_deco );
+        self.update_stops( interpolate = False );
+        return {'lost': str(lost_gas), **self._gas_consumption_info()};
+
+    def gas_consumption_analysis(self):
+        # First, everything as planned
+        gci = self._gas_consumption_info();
+        r = [ { 'lost': None, **gci} ];
+        # Identify bottom gas / deco gas
+        gc = self.gas_consumption();
+        bottom_gas = max(gc, key=lambda k: gc[k]);
+        deco_gases = self.gases_carried().copy();
+        deco_gases.remove(bottom_gas);
+        # Then, for each deco gas ..
+        for gas in deco_gases:
+            r.append(self.clean_copy()._gas_consumption_info_lost_gas(gas));
         return r;
