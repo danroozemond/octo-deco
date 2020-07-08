@@ -444,3 +444,14 @@ class DiveProfile:
             for gfhigh in gfhighs:
                 res[ gflow ][ gfhigh ] = cp.decotime_for_gf( gflow, gfhigh );
         return res;
+
+    '''
+    Gas consumption computations
+    '''
+    def gas_consumption(self):
+        r = {};
+        for p in self._points:
+            if p.duration > 0:
+                rate = self._gas_consmp_deco if p.is_deco_stop else self._gas_consmp_bottom;
+                r[p.gas] = r.get(p.gas, 0.0) + p.duration * p.p_amb * rate;
+        return r;
