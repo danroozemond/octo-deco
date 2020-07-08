@@ -136,19 +136,19 @@ class DiveProfile:
         new_time = self._points[ -1 ].time + time_diff;
         return self._append_point_abstime(new_time, new_depth, gas);
 
-    def _append_point_fix_ascent(self, new_duration, new_depth, gas):
+    def _append_point_fix_ascent(self, op):
         # Returns new point, and whether or not one was added
         have_point_added = False;
-        time_needed = ( self._points[-1].depth - new_depth ) / self._ascent_speed;
-        if time_needed > new_duration:
+        time_needed = ( self._points[-1].depth - op.depth ) / self._ascent_speed;
+        if time_needed > op.duration:
             # Add deco point
-            transit_point_duration = time_needed - new_duration;
+            transit_point_duration = time_needed - op.duration;
             transit_point_depth = self._points[-1].depth - self._ascent_speed*transit_point_duration;
-            tp = self._append_point( transit_point_duration, transit_point_depth, gas );
+            tp = self._append_point( transit_point_duration, transit_point_depth, self._points[-1].gas );
             tp.is_ascent_point = True;
             have_point_added = True;
         # Add the original point
-        p = self._append_point(new_duration, new_depth, gas);
+        p = self._append_point(op.duration, op.depth, op.gas);
         return p, have_point_added;
 
     def _append_transit(self, new_depth, gas, round_to_mins = False):
@@ -302,7 +302,7 @@ class DiveProfile:
             op = old_points[i];
             oldlen = len(self._points);
             # Potentially prepend extra point to cover ascent speed; append original point
-            p, extra_added = self._append_point_fix_ascent( op.duration, op.depth, op.gas );
+            p, extra_added = self._append_point_fix_ascent( op );
             # Update tissues, based on last point considered
             for j in range(oldlen, len(self._points)):
                 self._points[j].set_updated_tissue_state( );
