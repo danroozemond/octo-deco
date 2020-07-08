@@ -24,6 +24,7 @@ class DiveProfile:
                  descent_speed = 20, ascent_speed = 10,
                  max_pO2_deco = 1.60, gas_switch_mins = 3.0,
                  last_stop_depth = 3,
+                 gas_consmp_bottom = 20.0, gas_consmp_deco = 20.0,
                  gf_low = 35, gf_high = 70):
         self._points = [ DivePoint(0, 0, Gas.Air(), None) ];
         self._descent_speed = descent_speed;
@@ -31,6 +32,8 @@ class DiveProfile:
         self._max_pO2_deco = max_pO2_deco;
         self._gas_switch_mins = gas_switch_mins;
         self._last_stop_depth = last_stop_depth;
+        self._gas_consmp_bottom = gas_consmp_bottom;
+        self._gas_consmp_deco = gas_consmp_deco;
         self._gases_carried = set();
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;

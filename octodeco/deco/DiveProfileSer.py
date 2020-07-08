@@ -8,7 +8,7 @@ import pytz
 
 from . import TissueStateCython, TissueStateClassic;
 
-CURRENT_VERSION = 11;
+CURRENT_VERSION = 12;
 
 
 #
@@ -23,6 +23,10 @@ def _migrate_up_to_current(from_version, diveprofile):
         diveprofile._last_stop_depth = 3;
     if not hasattr(diveprofile, '_max_pO2_deco'):
         diveprofile._max_pO2_deco = 1.60;
+    if not hasattr(diveprofile, '_gas_consmp_bottom'):
+        diveprofile._gas_consmp_bottom = 20.0;
+    if not hasattr(diveprofile, '_gas_consmp_deco'):
+        diveprofile._gas_consmp_deco = 20.0;
 
     # None
     for attrname in [ 'custom_desc', 'add_custom_desc' ]:
