@@ -57,6 +57,12 @@ class DiveProfile:
     def points(self):
         return self._points;
 
+    def clean_copy(self):
+        cp = copy.deepcopy(self);
+        cp.remove_surface_at_end();
+        cp._remove_all_extra_points( update_deco_info = False );
+        return cp;
+
     def dataframe(self):
         return pd.DataFrame([ p.repr_for_dataframe(diveprofile = self)
                               for p in self._points ],
@@ -419,9 +425,7 @@ class DiveProfile:
     Evaluating various GF's and impact on deco time
     '''
     def decotime_for_gf(self, gf_low, gf_high):
-        cp = copy.deepcopy(self);
-        cp.remove_surface_at_end();
-        cp._remove_all_extra_points( update_deco_info = False );
+        cp = self.clean_copy();
         cp.gf_low_display = gf_low;
         cp.gf_high_display = gf_high;
         cp.add_stops_to_surface();
@@ -434,9 +438,7 @@ class DiveProfile:
             # => also gfdecotable does not make sense
             return None;
         # Prepare template
-        cp = copy.deepcopy(self);
-        cp.remove_surface_at_end();
-        cp._remove_all_extra_points( update_deco_info = False );
+        cp = self.clean_copy();
         # Do the math
         res = dict();
         for gflow in gflows:
