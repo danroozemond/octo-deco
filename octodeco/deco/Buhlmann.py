@@ -1,5 +1,6 @@
 # Please see LICENSE.md
 from . import BuhlmannConstants;
+from . import Gas;
 from . import TissueStateClassic, TissueStateCython, TissueStateVerify;
 from . import Util;
 
@@ -106,12 +107,7 @@ class Buhlmann:
         return t0;
 
     def _best_deco_gas(self, p_amb, gases):
-        # What is the best deco gas at this ambient pressure?
-        suitable = [ gas for gas in gases if p_amb * gas[ 'fO2' ] <= self.max_pO2_deco ];
-        if len(suitable) == 0:
-            suitable = gases;
-        gas = max(suitable, key = lambda g: ( g[ 'fO2' ], -g['fHe'] ) );
-        return gas;
+        return Gas.best_gas( gases, p_amb, self.max_pO2_deco );
 
     def _gas_switch_p_amb(self, gas):
         p_amb = self.max_pO2_deco / gas['fO2'];

@@ -60,3 +60,11 @@ def many_from_string(s):
     r = [ g for g in r if g is not None ];
     return r;
 
+
+def best_gas(gases, p_amb, max_pO2):
+    # What is the best deco gas at this ambient pressure?
+    suitable = [ gas for gas in gases if p_amb * gas[ 'fO2' ] <= max_pO2 ];
+    if len(suitable) == 0:
+        suitable = gases;
+    gas = max(suitable, key = lambda g: ( g[ 'fO2' ], g['fHe'] ) );
+    return gas;
