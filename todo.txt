@@ -2,3 +2,5 @@ TODO this list :) [also check TO-DOs in .py's]
 
 * Gas consumption
 ** incl. lost gas
+-> mostly done
+-> but add a link so that you can click on a lost gas scenario, and it generates the dive without that gas.
