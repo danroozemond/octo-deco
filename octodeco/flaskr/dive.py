@@ -119,7 +119,7 @@ class CachedDiveProfile:
         dp = self.profile_base();
         gct = dp.gas_consumption_analysis();
         gct_formatted = { 'planned' if s['lost'] is None else 'lost {}'.format(s['lost']) :
-            {'decotime': '{:.1f}mins'.format(s[ 'decotime' ]),
+            {' deco time': '{:.1f}mins'.format(s[ 'decotime' ]),
              **{str(k): '{:.0f}L'.format(v) for k, v in s[ 'gas_consmp' ].items()}}
             for s in gct };
         dsdf = pandas.DataFrame(gct_formatted);
