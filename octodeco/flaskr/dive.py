@@ -126,7 +126,7 @@ class CachedDiveProfile:
         dsdf_table = dsdf.to_html(classes="smalltable", na_rep='');
         info = 'Computed with bottom: {:.1f}L/min, deco: {:.1f}L/min.'.\
             format(dp._gas_consmp_bottom, dp._gas_consmp_deco);
-        warning = 'These computations do not check for max pO2.';
+        warning = ' This does not always fully take max pO2 into account.';
         return dsdf_table + '<br/>'+ info + warning;
 
     @cache.memoize()
