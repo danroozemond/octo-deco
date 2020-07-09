@@ -479,6 +479,7 @@ class DiveProfile:
         deco_gases = self.gases_carried().copy();
         deco_gases.remove(bottom_gas);
         # Then, for each deco gas ..
+        cp = self.clean_copy()
         for gas in deco_gases:
-            r.append(self.clean_copy()._gas_consumption_info_lost_gas(gas));
+            r.append(cp.clean_copy()._gas_consumption_info_lost_gas(gas));
         return r;
