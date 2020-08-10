@@ -24,13 +24,15 @@ def load_user_details():
 #
 # Getting info
 #
-def get_gf_args_from_request():
+def get_all_args_from_request():
+    # GFs
     gflow = request.args.get('gflow', request.form.get('gflow', 101, type=int), type=int);
     gfhigh = request.args.get('gfhigh', request.form.get('gfhigh', 101, type=int), type=int);
-    # Do /some/ input sanitation..
     gflow = min(200,max(0,gflow));
     gfhigh = min(200, max(0, gfhigh));
-    return gflow, gfhigh;
+    # Done
+    return {'gflow' : gflow,
+            'gfhigh' : gfhigh };
 
 
 # Using this pattern as it enables invalidation of dive cache as a whole
@@ -50,8 +52,11 @@ class CachedDiveProfile:
         return dp;
 
     @cache.memoize()
-    def profile_gf(self, gflow, gfhigh):
+    def profile_args(self, req_args):
         dp = self.profile_base();
+        # Gradient factors
+        gflow = req_args['gflow'];
+        gfhigh = req_args['gfhigh'];
         if dp is None:
             return None;
         if (gflow, gfhigh) == (101, 101):
@@ -65,8 +70,8 @@ class CachedDiveProfile:
         return self.profile_base().user_id;
 
     @cache.memoize()
-    def plot_profile(self, gflow, gfhigh):
-        dp = self.profile_gf(gflow, gfhigh);
+    def plot_profile(self, req_args):
+        dp = self.profile_args(req_args);
         try:
             jp = plots.show_diveprofile(dp);
         except TypeError:
@@ -74,8 +79,8 @@ class CachedDiveProfile:
         return jsonify(jp);
 
     @cache.memoize()
-    def plot_heatmap(self):
-        dp = self.profile_base();
+    def plot_heatmap(self, req_args):
+        dp = self.profile_args(req_args);
         try:
             jp = plots.show_heatmap(dp);
         except TypeError:
@@ -83,8 +88,8 @@ class CachedDiveProfile:
         return jsonify(jp);
 
     @cache.memoize()
-    def plot_pressure_graph(self, gflow, gfhigh):
-        dp = self.profile_gf(gflow, gfhigh);
+    def plot_pressure_graph(self, req_args):
+        dp = self.profile_args(req_args);
         try:
             jp = plots.show_pressure_graph(dp);
         except TypeError:
@@ -92,15 +97,15 @@ class CachedDiveProfile:
         return jsonify(jp);
 
     @cache.memoize()
-    def summary_table(self, gflow, gfhigh):
-        dp = self.profile_gf(gflow, gfhigh);
+    def summary_table(self, req_args):
+        dp = self.profile_args(req_args)
         dsdf = pandas.DataFrame([ [ k, v ] for k, v in dp.dive_summary().items() ]);
         dsdf_table = dsdf.to_html(classes="smalltable", header="true");
         return dsdf_table;
 
     @cache.memoize()
-    def runtime_table(self):
-        dp = self.profile_base();
+    def runtime_table(self, req_args):
+        dp = self.profile_args(req_args);
         rtt = dp.runtimetable();
         if rtt is None:
             return 'A runtime table is unfortunately not available for this dive.';
@@ -115,14 +120,14 @@ class CachedDiveProfile:
         return dsdf_table;
 
     @cache.memoize()
-    def full_table(self, gflow, gfhigh):
-        dp = self.profile_gf(gflow, gfhigh);
+    def full_table(self, req_args):
+        dp = self.profile_args(req_args);
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
         return fulldata_table;
 
     @cache.memoize()
-    def gfdeco_table(self):
-        dp = self.profile_base()
+    def gfdeco_table(self, req_args):
+        dp = self.profile_args(req_args)
         t0 = time.perf_counter();
         dtt = dp.decotimes_for_gfs();
         t1 = time.perf_counter();
@@ -178,8 +183,7 @@ def _invalidate_cached_dive(dive_id: int):
 
 
 def get_diveprofile_for_display(dive_id: int):
-    gflow, gfhigh = get_gf_args_from_request();
-    return get_cached_dive(dive_id).profile_gf(gflow, gfhigh);
+    return get_cached_dive(dive_id).profile_args(get_all_args_from_request());
 
 
 #
@@ -187,47 +191,40 @@ def get_diveprofile_for_display(dive_id: int):
 #
 @bp.route('/show/<int:dive_id>/plot/profile', methods = ['GET'])
 def show_elt_plot_profile(dive_id):
-    cdp = get_cached_dive(dive_id);
-    gflow, gfhigh = get_gf_args_from_request();
-    return cdp.plot_profile(gflow, gfhigh);
+    return get_cached_dive(dive_id).plot_profile(get_all_args_from_request());
 
 
 @bp.route('/show/<int:dive_id>/plot/heatmap', methods = ['GET'])
 def show_elt_plot_heatmap(dive_id):
-    cdp = get_cached_dive(dive_id);
-    return cdp.plot_heatmap();
+    return get_cached_dive(dive_id).plot_heatmap(get_all_args_from_request());
 
 
 @bp.route('/show/<int:dive_id>/summary', methods = ['GET'])
 def show_elt_summary_table(dive_id):
     cdp = get_cached_dive(dive_id);
-    gflow, gfhigh = get_gf_args_from_request();
-    r1 = cdp.summary_table(gflow, gfhigh);
-    r2 = cdp.runtime_table();
+    reqargs = get_all_args_from_request();
+    r1 = cdp.summary_table(reqargs);
+    r2 = cdp.runtime_table(reqargs);
     return r1 + r2;
 
 
 @bp.route('/show/<int:dive_id>/fulldata', methods = ['GET'])
 def show_elt_full_table(dive_id):
-    cdp = get_cached_dive(dive_id);
-    gflow, gfhigh = get_gf_args_from_request();
-    return cdp.full_table(gflow, gfhigh);
+    return get_cached_dive(dive_id).full_table(get_all_args_from_request());
 
 
 @bp.route('/show/<int:dive_id>/gfdecodata', methods = ['GET'])
 def show_elt_gfdeco_table(dive_id):
     cdp = get_cached_dive(dive_id);
     if user.get_user_details().is_logged_in():
-        return cdp.gfdeco_table();
+        return cdp.gfdeco_table(get_all_args_from_request());
     else:
         return render_template('dive/elt_login_please.html');
 
 
 @bp.route('/show/<int:dive_id>/plot/pressuregraph', methods = ['GET'])
 def show_elt_pressure_graph(dive_id):
-    cdp = get_cached_dive(dive_id);
-    gflow, gfhigh = get_gf_args_from_request();
-    return cdp.plot_pressure_graph(gflow,gfhigh);
+    return get_cached_dive(dive_id).plot_pressure_graph(get_all_args_from_request());
 
 
 #
@@ -291,13 +288,12 @@ def csv(dive_id):
 @bp.route('/update/<int:dive_id>', methods = [ 'POST' ])
 def update(dive_id):
     action = request.form.get('action');
-    gflow, gfhigh = get_gf_args_from_request();
     dp = get_diveprofile_for_display(dive_id);
     if dp is None:
         abort(405);
     if action == 'Update Stops':
         olddecotime = dp.decotime();
-        dp.set_gf(gflow, gfhigh, updateStops = True);
+        dp.set_gf(dp.gf_low_display, dp.gf_high_display, updateStops = True);
         flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
         db_dive.store_dive(dp);
         _invalidate_cached_dive(dive_id);
