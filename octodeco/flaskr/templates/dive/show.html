@@ -44,7 +44,7 @@
     /*
      * Utility functions
      */
-    function get_gf_url_params() {
+    function get_args_url_params() {
         r =  $('#form_update').serialize();
         if (r == undefined || r == '')
         {
@@ -71,7 +71,7 @@
     {
         spin_elt('#chart_diveprofile', true);
         $.getJSON({
-        url: "{{url_for('dive.show_elt_plot_profile', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        url: "{{url_for('dive.show_elt_plot_profile', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             spin_elt('#chart_diveprofile', false);
             Plotly.react('chart_diveprofile',JSON.parse(result),{});
@@ -84,7 +84,7 @@
     {
         spin_elt( '#table_summary', true );
         $.ajax({
-        url: "{{url_for('dive.show_elt_summary_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        url: "{{url_for('dive.show_elt_summary_table', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             $('#table_summary').html(result);
             spin_elt( '#table_summary', false );
@@ -115,7 +115,7 @@
     {
         spin_elt( '#table_full', true );
         $.ajax({
-        url: "{{url_for('dive.show_elt_full_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        url: "{{url_for('dive.show_elt_full_table', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             $('#table_full').html(result);
             spin_elt( '#table_full', false );
@@ -147,7 +147,7 @@
     {
         spin_elt( '#chart_pressure_graph', true );
         $.getJSON({
-        url: "{{url_for('dive.show_elt_pressure_graph', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        url: "{{url_for('dive.show_elt_pressure_graph', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             spin_elt( '#chart_pressure_graph', false );
             Plotly.react('chart_pressure_graph',JSON.parse(result),{});
