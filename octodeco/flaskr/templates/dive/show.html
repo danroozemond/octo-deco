@@ -97,7 +97,7 @@
     {
         spin_elt( '#chart_heatmap', true );
         $.getJSON({
-        url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}",
+        url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             spin_elt( '#chart_heatmap', false );
             Plotly.react('chart_heatmap',JSON.parse(result),{});
@@ -133,7 +133,7 @@
     {
         spin_elt( '#table_gfdeco', true );
         $.ajax({
-        url: "{{url_for('dive.show_elt_gfdeco_table', dive_id=dive.dive_id)}}",
+        url: "{{url_for('dive.show_elt_gfdeco_table', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             $('#table_gfdeco').html(result);
             spin_elt( '#table_gfdeco', false );
@@ -215,6 +215,12 @@
         $('#ipt_gfhigh').val(default_gf_high);
     }
 
+    /*
+     * Update link to CSV based on url params
+     */
+    function set_csv_link() {
+        $('#link_csv').attr('href', '{{url_for('dive.csv', dive_id=dive.dive_id)}}?' + get_args_url_params());
+    }
 
     /*
      * On change of the sliders
@@ -234,6 +240,7 @@
             if (is_pressure_graph_vis) load_pressure_graph(); else unload_pressure_graph();
         });
         // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
+        // same for gf_deco_table
     }
 
     /*
@@ -269,6 +276,7 @@
      */
     $(function(){
         set_gf_to_defaults();
+        set_csv_link();
         reload_all();
     });
     </script>
@@ -388,7 +396,7 @@
     -->
     <h3 id="hfulldata">Full dive data
         <span class="viztoggle" id="table_full_toggle" onclick="toggle_div_table_full()">[show]</span>
-        <span class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></span>
+        <span class="viztoggle"><a href="" id="link_csv">[csv]</a></span>
     </h3>
     <div id="table_full" class="bigtable" style="display: none">
     </div>
