@@ -5,6 +5,7 @@ from flask import (
     redirect, url_for, request, abort, session, render_template, Response
 )
 
+
 #
 # Showing the dive: separate elements
 #
