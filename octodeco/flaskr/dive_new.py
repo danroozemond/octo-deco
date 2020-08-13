@@ -11,7 +11,7 @@ from octodeco.deco import CreateDive;
 
 
 #
-# New (show the page, new from spec, new demo, new from
+# New (show the page, new from spec, new demo, new from CSV)
 #
 @bp.route('/new', methods = [ 'GET' ])
 def new_show():
@@ -81,3 +81,26 @@ def new_shearwater_csv():
 @bp.route('/new/od_csv', methods = [ 'POST' ])
 def new_octodeco_csv():
     return new_csv( CreateDive.create_from_octodeco_csv );
+
+
+#
+# Create ephemeral/temp dives as variant of existing ones
+#
+@bp.route('/new/lost/<int:dive_id>', methods = ['GET'])
+def new_ephm_lost_gas(dive_id):
+    req_args = dive.get_all_args_from_request();
+    lost_gases = req_args['lostgas'];
+    if len(lost_gases) == 0:
+        flash('Incorrect lost gas parameter');
+        return redirect(url_for('dive.show', dive_id = dive_id));
+    dp = dive.get_cached_dive(dive_id).profile_args(req_args);
+    cp = dp.copy_profile_lost_gases(lost_gases);
+    cp.is_ephemeral = True;
+    cp.is_public = False;
+    cp.parent_dive_id = dive_id;
+    # Store the dive
+    db_dive.store_dive_new(cp);
+    dive_id = cp.dive_id;
+    flash('Created .. %s' % cp.description());
+    # Done.
+    return redirect(url_for('dive.show', dive_id = dive_id))
