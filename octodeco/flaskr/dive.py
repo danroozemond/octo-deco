@@ -3,7 +3,7 @@ import time;
 
 import pandas;
 from flask import (
-    Blueprint, flash, redirect, url_for, request, abort, jsonify, session
+    g, Blueprint, flash, redirect, url_for, request, abort, jsonify, session
 )
 
 from . import db_dive;
@@ -36,20 +36,20 @@ def _get_arg_multikey(args, tp, keys, default):
 
 
 def get_all_args_from_request():
-    # GFs
-    args = dict(request.args);
-    args.update(request.form);
-    gflow = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gflow', 'gflow'], 101)));
-    gfhigh = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gfhigh', 'gfhigh' ], 101)));
-    # Lost gas
-    lostgasstr = str(args.get('lostgas', ''));
-    lostgas = Gas.many_from_string(lostgasstr) if lostgasstr != '' else [];
-    # Done
-    r = { 'gflow': gflow,
-          'gfhigh': gfhigh,
-          'lostgas': lostgas };
-    print(r);
-    return r;
+    if 'dive_args' not in g:
+        # GFs
+        args = dict(request.args);
+        args.update(request.form);
+        gflow = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gflow', 'gflow'], 101)));
+        gfhigh = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gfhigh', 'gfhigh' ], 101)));
+        # Lost gas
+        lostgasstr = str(args.get('lostgas', ''));
+        lostgas = Gas.many_from_string(lostgasstr) if lostgasstr != '' else [];
+        # Done
+        g.dive_args = { 'gflow': gflow,
+              'gfhigh': gfhigh,
+              'lostgas': lostgas };
+    return g.dive_args;
 
 
 # Using this pattern as it enables invalidation of dive cache as a whole
