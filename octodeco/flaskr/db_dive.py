@@ -3,6 +3,7 @@ from flask import abort;
 
 from . import db;
 from .user import get_user_details;
+from .app import cache;
 
 from octodeco.deco import DiveProfileSer;
 
@@ -29,7 +30,7 @@ def get_all_dives():
     cur.execute('''
         SELECT dive_id, dive_desc, is_public
         FROM dives
-        WHERE user_id = ?
+        WHERE user_id = ? AND NOT is_ephemeral
         ''', [ get_user_details().user_id ]
                 );
     rows = cur.fetchall();
@@ -74,7 +75,7 @@ def get_one_dive(dive_id:int):
 #
 # Store/modify
 #
-def store_dive_update(diveprofile):
+def _store_dive_update(diveprofile):
     # Check dive_id
     dive_id = int(diveprofile.dive_id);
     # Check user_id
@@ -85,16 +86,16 @@ def store_dive_update(diveprofile):
     cur = db.get_db().cursor();
     cur.execute('''
         UPDATE dives
-        SET dive = ?, dive_desc = ?, is_demo = ?, last_update = datetime('now'), is_public = ?
+        SET dive = ?, dive_desc = ?, is_demo = ?, is_ephemeral = ?,  is_public = ?, last_update = datetime('now')
         WHERE dive_id = ? AND user_id = ?;
         ''', [ DiveProfileSer.dumps(diveprofile), diveprofile.description(),
-               diveprofile.is_demo_dive, diveprofile.is_public,
+               diveprofile.is_demo_dive, diveprofile.is_ephemeral, diveprofile.is_public,
                dive_id, get_user_details().user_id ]
                );
     assert cur.rowcount == 1;
 
 
-def store_dive_new(diveprofile):
+def _store_dive_new(diveprofile):
     cur = db.get_db().cursor();
     cur.execute('''
         INSERT INTO dives(user_id, dive)
@@ -102,14 +103,16 @@ def store_dive_new(diveprofile):
         ''', [ get_user_details().user_id ] );
     diveprofile.dive_id = cur.lastrowid;
     diveprofile.user_id = get_user_details().user_id;
-    return store_dive_update(diveprofile);
+    return _store_dive_update(diveprofile);
 
 
 def store_dive(diveprofile):
     try:
-        store_dive_update(diveprofile);
+        _store_dive_update(diveprofile);
     except AttributeError:
-        store_dive_new(diveprofile);
+        _store_dive_new(diveprofile);
+    # A nice hook to call a cleanup function
+    cleanup_stale_dives();
 
 
 #
@@ -173,3 +176,26 @@ def migrate_all_profiles_to_latest():
             break;
     # Done
     return result;
+
+
+@cache.memoize(timeout = 300)
+def cleanup_stale_dives():
+    # Every now and then, find old ephemeral dives and clean them up
+    # Settings
+    age_to_remove = 0.2;  # days (=~5 hrs)
+    max_nr_to_remove = 10;
+    # Do
+    cur = db.get_db().cursor();
+    cur.execute("""
+                SELECT d.dive_id, julianday()-julianday(d.last_update) as age
+                FROM dives d 
+                WHERE d.is_ephemeral AND age > ?
+                ORDER BY last_update
+                LIMIT ?;
+                """, [ age_to_remove, max_nr_to_remove ]);
+    cur2 = db.get_db().cursor();
+    for row in cur:
+        dive_id = row['dive_id'];
+        cur2.execute("DELETE FROM dives WHERE dive_id = ?", [ dive_id ] );
+        print('Removed stale dive %i' % dive_id)
+    return True;

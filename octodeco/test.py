@@ -7,6 +7,14 @@ from octodeco.deco.DiveProfile import DiveProfile;
 
 t0 = time.perf_counter();
 
+s1 = set([Gas.Trimix(21,30), Gas.Nitrox(50)]);
+print(s1);
+s2 = set('Nx50');
+s1.difference_update(s2);
+print(s1);
+
+sys.exit(0);
+
 dp = DiveProfile(gf_low=35, gf_high=65);
 dp.append_section(30, 33.5, gas = Gas.Air());
 dp.add_gas(Gas.Nitrox(50))

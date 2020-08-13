@@ -5,23 +5,24 @@ from flask import (
     redirect, url_for, request, abort, session, render_template, Response
 )
 
+
 #
 # Showing the dive: separate elements
 #
 @bp.route('/show/<int:dive_id>/plot/profile', methods = ['GET'])
 def show_elt_plot_profile(dive_id):
-    return dive.get_cached_dive(dive_id).plot_profile(dive.get_all_args_from_request());
+    return dive.get_cached_dive(dive_id).plot_profile(dive.get_gf_args_from_request());
 
 
 @bp.route('/show/<int:dive_id>/plot/heatmap', methods = ['GET'])
 def show_elt_plot_heatmap(dive_id):
-    return dive.get_cached_dive(dive_id).plot_heatmap(dive.get_all_args_from_request());
+    return dive.get_cached_dive(dive_id).plot_heatmap(dive.get_gf_args_from_request());
 
 
 @bp.route('/show/<int:dive_id>/summary', methods = ['GET'])
 def show_elt_summary_table(dive_id):
     cdp = dive.get_cached_dive(dive_id);
-    reqargs = dive.get_all_args_from_request();
+    reqargs = dive.get_gf_args_from_request();
     r1 = cdp.summary_table(reqargs);
     r2 = cdp.runtime_table(reqargs);
     r3 = cdp.gas_consumption_table();
@@ -30,21 +31,21 @@ def show_elt_summary_table(dive_id):
 
 @bp.route('/show/<int:dive_id>/fulldata', methods = ['GET'])
 def show_elt_full_table(dive_id):
-    return dive.get_cached_dive(dive_id).full_table(dive.get_all_args_from_request());
+    return dive.get_cached_dive(dive_id).full_table(dive.get_gf_args_from_request());
 
 
 @bp.route('/show/<int:dive_id>/gfdecodata', methods = ['GET'])
 def show_elt_gfdeco_table(dive_id):
     cdp = dive.get_cached_dive(dive_id);
     if user.get_user_details().is_logged_in():
-        return cdp.gfdeco_table(dive.get_all_args_from_request());
+        return cdp.gfdeco_table(dive.get_gf_args_from_request());
     else:
         return render_template('dive/elt_login_please.html');
 
 
 @bp.route('/show/<int:dive_id>/plot/pressuregraph', methods = ['GET'])
 def show_elt_pressure_graph(dive_id):
-    return dive.get_cached_dive(dive_id).plot_pressure_graph(dive.get_all_args_from_request());
+    return dive.get_cached_dive(dive_id).plot_pressure_graph(dive.get_gf_args_from_request());
 
 
 #

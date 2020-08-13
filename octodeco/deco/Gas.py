@@ -23,6 +23,12 @@ class Gas(dict):
     def __hash__(self):
         return hash( self['fO2'] ) + 3 * hash(self['fHe']);
 
+    def __eq__(self, other):
+        if hasattr(self, 'cython_array') and hasattr(other, 'cython_array'):
+            return self.cython_array == other.cython_array;
+        else:
+            return all([ self[g] == other[g] for g in [ 'fO2', 'fN2', 'fHe' ]]);
+
 
 def Air():
     return Gas({ 'fO2': 0.21, 'fN2': 0.79, 'fHe': 0.0 });
@@ -60,3 +66,11 @@ def many_from_string(s):
     r = [ g for g in r if g is not None ];
     return r;
 
+
+def best_gas(gases, p_amb, max_pO2):
+    # What is the best deco gas at this ambient pressure?
+    suitable = [ gas for gas in gases if p_amb * gas[ 'fO2' ] <= max_pO2 ];
+    if len(suitable) == 0:
+        suitable = gases;
+    gas = max(suitable, key = lambda g: ( g[ 'fO2' ], g['fHe'] ) );
+    return gas;

@@ -10,7 +10,7 @@ extensions = [ Extension("octodeco.deco.TissueStateCython", ["octodeco/deco/Tiss
 
 setup(
     name="Octo-Deco",
-    version="0.9.0",
+    version="1.0.0",
     packages=find_packages(),
     author="Dan Roozemond",
     author_email="dan.roozemond@gmail.com",

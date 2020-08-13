@@ -3,13 +3,14 @@ import time;
 
 import pandas;
 from flask import (
-    Blueprint, flash, redirect, url_for, request, abort, jsonify, session
+    g, Blueprint, flash, redirect, url_for, request, abort, jsonify, session
 )
 
 from . import db_dive;
 from . import plots;
 from . import user;
 from .app import cache;
+
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
@@ -22,15 +23,28 @@ def load_user_details():
 #
 # Getting info
 #
-def get_all_args_from_request():
-    # GFs
-    gflow = request.args.get('gflow', request.form.get('gflow', 101, type=int), type=int);
-    gfhigh = request.args.get('gfhigh', request.form.get('gfhigh', 101, type=int), type=int);
-    gflow = min(200,max(0,gflow));
-    gfhigh = min(200, max(0, gfhigh));
-    # Done
-    return {'gflow' : gflow,
-            'gfhigh' : gfhigh };
+def _get_arg_multikey(args, tp, keys, default):
+    r = None;
+    try:
+        for k in keys:
+            r = args.get(k);
+            if r is not None and r != '':
+                return tp(r);
+    except ValueError:
+        pass;
+    return default;
+
+
+def get_gf_args_from_request():
+    if 'gf_args' not in g:
+        # GFs
+        args = dict(request.args);
+        args.update(request.form);
+        gflow = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gflow', 'gflow'], 101)));
+        gfhigh = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gfhigh', 'gfhigh' ], 101)));
+        # Done
+        g.gf_args = { 'gflow': gflow, 'gfhigh': gfhigh };
+    return g.gf_args;
 
 
 # Using this pattern as it enables invalidation of dive cache as a whole
@@ -118,6 +132,29 @@ class CachedDiveProfile:
         return dsdf_table;
 
     @cache.memoize()
+    def gas_consumption_table(self):
+        def format_lost_gas_link(slost):
+            if slost is None:
+                return 'planned';
+            else:
+                return '<a href="{}?lostgas={}">lost {}</a>'.\
+                    format(url_for('dive.new_ephm_lost_gas', dive_id=self.dive_id), slost, slost);
+        dp = self.profile_base();
+        gct = dp.gas_consumption_analysis();
+        gct_formatted = {
+            format_lost_gas_link(s['lost'])
+            :
+            { ' deco time': '{:.1f}mins'.format(s[ 'decotime' ]),
+              **{str(k): '{:.0f}L'.format(v) for k, v in s[ 'gas_consmp' ].items()}}
+            for s in gct };
+        dsdf = pandas.DataFrame(gct_formatted);
+        dsdf_table = dsdf.to_html(classes="smalltable", na_rep='', escape=False);
+        info = 'Computed with bottom: {:.1f}L/min, deco: {:.1f}L/min.'.\
+            format(dp._gas_consmp_bottom, dp._gas_consmp_deco);
+        warning = ' This does not always fully take max pO2 into account.';
+        return dsdf_table + '<br/>'+ info + warning;
+
+    @cache.memoize()
     def full_table(self, req_args):
         dp = self.profile_args(req_args);
         fulldata_table = dp.dataframe().to_html(classes = "bigtable", header = "true");
@@ -181,7 +218,7 @@ def invalidate_cached_dive(dive_id: int):
 
 
 def get_diveprofile_for_display(dive_id: int):
-    return get_cached_dive(dive_id).profile_args(get_all_args_from_request());
+    return get_cached_dive(dive_id).profile_args(get_gf_args_from_request());
 
 
 #
