@@ -302,7 +302,7 @@
     -->
     {% if dive.is_ephemeral %}
     <div class="adjust">
-        This dive will expire automatically in a couple of hours.
+        This scenario will expire automatically in a couple of hours.
         {% if dive['parent_dive_id'] %}
         <form style="display:inline" method="GET" action="{{url_for('dive.show', dive_id=dive.parent_dive_id)}}">
             <input type="submit" value="Go back to original"/>
