@@ -194,6 +194,8 @@
     {
         $('#show_gflow').text($('#ipt_gflow').val());
         $('#show_gfhigh').text($('#ipt_gfhigh').val());
+        $('#ipttxt_gflow').val($('#ipt_gflow').val());
+        $('#ipttxt_gfhigh').val($('#ipt_gfhigh').val());
     }
     function set_gf_sliders_from_text()
     {
@@ -211,8 +213,10 @@
         default_gf_high = urlParam('gfhigh', {{dive.gf_high_profile}});
         $('#show_gflow').text(default_gf_low);
         $('#ipt_gflow').val(default_gf_low);
+        $('#ipttxt_gflow').val(default_gf_low);
         $('#show_gfhigh').text(default_gf_high);
         $('#ipt_gfhigh').val(default_gf_high);
+        $('#ipttxt_gfhigh').val(default_gf_high);
     }
 
     /*
@@ -246,12 +250,14 @@
     /*
      * changeable gf ipts
      */
-    $(function () {
+    function make_changeable_gf_ipts()
+    {
         $("span.changeable").each(function () {
             var label = $(this);
             label.after("<input type='text' style='display:none' class='changeable'/>");
             var input_text = label.next();
             input_text[0].name = label[0].id.replace("show_", "ipttxt_");
+            input_text[0].id = input_text[0].name;
             // Click = show
             label.click(function () {
                 $(this).next().val($(this).html());
@@ -269,12 +275,13 @@
                 reload_all();
             });
         });
-    });
+    }
 
     /*
      * On document ready
      */
     $(function(){
+        make_changeable_gf_ipts();
         set_gf_to_defaults();
         set_csv_link();
         reload_all();
