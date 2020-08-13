@@ -124,14 +124,22 @@ class CachedDiveProfile:
 
     @cache.memoize()
     def gas_consumption_table(self):
+        def format_lost_gas_link(slost):
+            if slost is None:
+                return 'planned';
+            else:
+                return '<a href="{}?lostgas={}">lost {}</a>'.\
+                    format(url_for('dive.new_ephm_lost_gas', dive_id=self.dive_id), slost, slost);
         dp = self.profile_base();
         gct = dp.gas_consumption_analysis();
-        gct_formatted = { 'planned' if s['lost'] is None else 'lost {}'.format(s['lost']) :
-            {' deco time': '{:.1f}mins'.format(s[ 'decotime' ]),
-             **{str(k): '{:.0f}L'.format(v) for k, v in s[ 'gas_consmp' ].items()}}
+        gct_formatted = {
+            format_lost_gas_link(s['lost'])
+            :
+            { ' deco time': '{:.1f}mins'.format(s[ 'decotime' ]),
+              **{str(k): '{:.0f}L'.format(v) for k, v in s[ 'gas_consmp' ].items()}}
             for s in gct };
         dsdf = pandas.DataFrame(gct_formatted);
-        dsdf_table = dsdf.to_html(classes="smalltable", na_rep='');
+        dsdf_table = dsdf.to_html(classes="smalltable", na_rep='', escape=False);
         info = 'Computed with bottom: {:.1f}L/min, deco: {:.1f}L/min.'.\
             format(dp._gas_consmp_bottom, dp._gas_consmp_deco);
         warning = ' This does not always fully take max pO2 into account.';

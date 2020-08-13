@@ -101,6 +101,6 @@ def new_ephm_lost_gas(dive_id):
     # Store the dive
     db_dive.store_dive_new(cp);
     dive_id = cp.dive_id;
-    flash('Created .. %s' % cp.description());
+    flash('Created scenario: %s' % cp.description());
     # Done.
     return redirect(url_for('dive.show', dive_id = dive_id))
