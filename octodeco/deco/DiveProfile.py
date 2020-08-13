@@ -462,13 +462,18 @@ class DiveProfile:
     def _gas_consumption_info(self):
         return { 'decotime' : self.decotime(), 'gas_consmp': self.gas_consumption() };
 
-    def _gas_consumption_info_lost_gas(self, lost_gas):
-        self._gases_carried.remove( lost_gas );
+    def _update_profile_lost_gases(self, lost_gases, interpolate = True):
+        self._gases_carried.difference_update(set(lost_gases));
         for p in self._points:
             if p.gas not in self._gases_carried:
                 p.gas = Gas.best_gas( self._gases_carried, p.p_amb, self._max_pO2_deco );
-        self.update_stops( interpolate = False );
-        return {'lost': str(lost_gas), **self._gas_consumption_info()};
+        self.update_stops( interpolate = interpolate );
+
+    def copy_profile_lost_gases(self, lost_gases, interpolate = True):
+        cp = self.clean_copy();
+        cp.custom_desc = self.description() + ' - lost {}'.format(lost_gases);
+        cp._update_profile_lost_gases(lost_gases, interpolate = interpolate);
+        return cp;
 
     def gas_consumption_analysis(self):
         # First, everything as planned
@@ -482,5 +487,6 @@ class DiveProfile:
         # Then, for each deco gas ..
         cp = self.clean_copy()
         for gas in deco_gases:
-            r.append(cp.clean_copy()._gas_consumption_info_lost_gas(gas));
+            ccp = cp.copy_profile_lost_gases([gas], interpolate = False);
+            r.append({'lost': str(gas), **ccp._gas_consumption_info()});
         return r;
