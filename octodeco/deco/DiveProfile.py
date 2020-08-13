@@ -469,9 +469,14 @@ class DiveProfile:
 
     def _update_profile_lost_gases(self, lost_gases, interpolate = True):
         self._gases_carried.difference_update(set(lost_gases));
-        for p in self._points:
-            if p.gas not in self._gases_carried:
-                p.gas = Gas.best_gas( self._gases_carried, p.p_amb, self._max_pO2_deco );
+        for i in range(len(self._points)):
+            p = self._points[i];
+            if p.gas not in self._gases_carried and p.depth > 0:
+                # The gas is considered to be breathed from this point to the next, so pO2 should be
+                # OK for both.
+                p_amb = max(p.p_amb, self._points[i+1].p_amb) if i < len(self._points) - 1 \
+                    else p.p_amb;
+                p.gas = Gas.best_gas( self._gases_carried, p_amb, self._max_pO2_deco );
         self.update_stops( interpolate = interpolate );
 
     def copy_profile_lost_gases(self, lost_gases, interpolate = True):
