@@ -10,6 +10,7 @@ from . import db_dive;
 from . import plots;
 from . import user;
 from .app import cache;
+from octodeco.deco import Gas;
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
@@ -26,11 +27,15 @@ def get_all_args_from_request():
     # GFs
     gflow = request.args.get('gflow', request.form.get('gflow', 101, type=int), type=int);
     gfhigh = request.args.get('gfhigh', request.form.get('gfhigh', 101, type=int), type=int);
-    gflow = min(200,max(0,gflow));
+    gflow = min(200, max(0,gflow));
     gfhigh = min(200, max(0, gfhigh));
+    # Lost gas
+    lostgasstr = request.args.get('lostgas', '', type=str);
+    lostgas = Gas.many_from_string(lostgasstr) if lostgasstr != '' else [];
     # Done
     return {'gflow' : gflow,
-            'gfhigh' : gfhigh };
+            'gfhigh' : gfhigh,
+            'lostgas' : lostgas };
 
 
 # Using this pattern as it enables invalidation of dive cache as a whole
