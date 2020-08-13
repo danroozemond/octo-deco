@@ -139,6 +139,8 @@ class DiveProfile:
         return self._gases_carried;
 
     def _append_point_abstime(self, new_time, new_depth, gas):
+        if len(self._points) == 1:
+            self._points[0].gas = gas;
         p = DivePoint(new_time, new_depth, gas, self._points[-1]);
         self._points.append(p);
         return p;

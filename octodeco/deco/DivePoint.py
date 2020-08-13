@@ -88,8 +88,7 @@ class DivePoint:
         assert self.time >= self.prev.time;  # Otherwise divepoints are in a broken sequence
         assert self.prev is not None;
         p_amb_section = ( self.p_amb + self.prev.p_amb ) / 2;
-        self.tissue_state = self.prev.tissue_state.updated_state(
-            self.duration, p_amb_section, self.prev.gas );
+        self.tissue_state = self.prev.tissue_state.updated_state( self.duration, p_amb_section, self.prev.gas );
         ppo2 = self.prev.gas['fO2'] * p_amb_section;
         self.cns_perc = CNSConstants.cns_perc_update(self.prev.cns_perc, p_amb_section, ppo2, self.duration);
 
