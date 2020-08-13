@@ -47,6 +47,7 @@ class DiveProfile:
         self.add_custom_desc = None;
         self.custom_desc = None;
         self.is_demo_dive = False;
+        self.is_ephemeral = False;
         self.is_public = False;
         self.db_version = DiveProfileSer.CURRENT_VERSION;
 

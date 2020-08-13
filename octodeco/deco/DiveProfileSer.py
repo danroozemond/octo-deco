@@ -8,7 +8,7 @@ import pytz
 
 from . import TissueStateCython, TissueStateClassic;
 
-CURRENT_VERSION = 12;
+CURRENT_VERSION = 13;
 
 
 #
@@ -34,7 +34,7 @@ def _migrate_up_to_current(from_version, diveprofile):
             setattr(diveprofile, attrname, None);
 
     # Bool
-    for attrname in [ 'is_demo_dive', 'is_public'  ]:
+    for attrname in [ 'is_demo_dive', 'is_public', 'is_ephemeral'  ]:
         if not hasattr(diveprofile, attrname):
             setattr(diveprofile, attrname, False);
 

@@ -5,7 +5,8 @@ CREATE TABLE dives (
   is_demo BOOL,
   dive BLOB NOT NULL,
   last_update DATETIME,
-  is_public BOOL
+  is_public BOOL,
+  is_ephemeral BOOL
 );
 CREATE TABLE users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT,

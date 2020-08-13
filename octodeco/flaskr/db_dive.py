@@ -29,7 +29,7 @@ def get_all_dives():
     cur.execute('''
         SELECT dive_id, dive_desc, is_public
         FROM dives
-        WHERE user_id = ?
+        WHERE user_id = ? AND NOT is_ephemeral
         ''', [ get_user_details().user_id ]
                 );
     rows = cur.fetchall();
@@ -85,10 +85,10 @@ def store_dive_update(diveprofile):
     cur = db.get_db().cursor();
     cur.execute('''
         UPDATE dives
-        SET dive = ?, dive_desc = ?, is_demo = ?, last_update = datetime('now'), is_public = ?
+        SET dive = ?, dive_desc = ?, is_demo = ?, is_ephemeral = ?,  is_public = ?, last_update = datetime('now')
         WHERE dive_id = ? AND user_id = ?;
         ''', [ DiveProfileSer.dumps(diveprofile), diveprofile.description(),
-               diveprofile.is_demo_dive, diveprofile.is_public,
+               diveprofile.is_demo_dive, diveprofile.is_ephemeral, diveprofile.is_public,
                dive_id, get_user_details().user_id ]
                );
     assert cur.rowcount == 1;
