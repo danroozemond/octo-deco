@@ -14,7 +14,7 @@
         <form method="get" action="{{url_for('dive.show_get')}}">
         <label for="dives" style="display:none">Display:</label>
         <select id="dives" name="dive_id" onchange="this.form.submit()">
-            <option disabled>{{dive.description()}}</option>
+            <option disabled selected>{{dive.description()}}</option>
             <option style="font-size: 1pt; background-color: #000000;" disabled>&nbsp;</option>
             {% for x in alldives %}
               <option value="{{x['dive_id']}}"{%
@@ -44,7 +44,7 @@
     /*
      * Utility functions
      */
-    function get_gf_url_params() {
+    function get_args_url_params() {
         r =  $('#form_update').serialize();
         if (r == undefined || r == '')
         {
@@ -71,7 +71,7 @@
     {
         spin_elt('#chart_diveprofile', true);
         $.getJSON({
-        url: "{{url_for('dive.show_elt_plot_profile', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        url: "{{url_for('dive.show_elt_plot_profile', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             spin_elt('#chart_diveprofile', false);
             Plotly.react('chart_diveprofile',JSON.parse(result),{});
@@ -84,7 +84,7 @@
     {
         spin_elt( '#table_summary', true );
         $.ajax({
-        url: "{{url_for('dive.show_elt_summary_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        url: "{{url_for('dive.show_elt_summary_table', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             $('#table_summary').html(result);
             spin_elt( '#table_summary', false );
@@ -97,7 +97,7 @@
     {
         spin_elt( '#chart_heatmap', true );
         $.getJSON({
-        url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}",
+        url: "{{url_for('dive.show_elt_plot_heatmap', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             spin_elt( '#chart_heatmap', false );
             Plotly.react('chart_heatmap',JSON.parse(result),{});
@@ -115,7 +115,7 @@
     {
         spin_elt( '#table_full', true );
         $.ajax({
-        url: "{{url_for('dive.show_elt_full_table', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        url: "{{url_for('dive.show_elt_full_table', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             $('#table_full').html(result);
             spin_elt( '#table_full', false );
@@ -133,7 +133,7 @@
     {
         spin_elt( '#table_gfdeco', true );
         $.ajax({
-        url: "{{url_for('dive.show_elt_gfdeco_table', dive_id=dive.dive_id)}}",
+        url: "{{url_for('dive.show_elt_gfdeco_table', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             $('#table_gfdeco').html(result);
             spin_elt( '#table_gfdeco', false );
@@ -147,7 +147,7 @@
     {
         spin_elt( '#chart_pressure_graph', true );
         $.getJSON({
-        url: "{{url_for('dive.show_elt_pressure_graph', dive_id=dive.dive_id)}}?" + get_gf_url_params(),
+        url: "{{url_for('dive.show_elt_pressure_graph', dive_id=dive.dive_id)}}?" + get_args_url_params(),
         success: function(result) {
             spin_elt( '#chart_pressure_graph', false );
             Plotly.react('chart_pressure_graph',JSON.parse(result),{});
@@ -194,6 +194,8 @@
     {
         $('#show_gflow').text($('#ipt_gflow').val());
         $('#show_gfhigh').text($('#ipt_gfhigh').val());
+        $('#ipttxt_gflow').val($('#ipt_gflow').val());
+        $('#ipttxt_gfhigh').val($('#ipt_gfhigh').val());
     }
     function set_gf_sliders_from_text()
     {
@@ -211,10 +213,18 @@
         default_gf_high = urlParam('gfhigh', {{dive.gf_high_profile}});
         $('#show_gflow').text(default_gf_low);
         $('#ipt_gflow').val(default_gf_low);
+        $('#ipttxt_gflow').val(default_gf_low);
         $('#show_gfhigh').text(default_gf_high);
         $('#ipt_gfhigh').val(default_gf_high);
+        $('#ipttxt_gfhigh').val(default_gf_high);
     }
 
+    /*
+     * Update link to CSV based on url params
+     */
+    function set_csv_link() {
+        $('#link_csv').attr('href', '{{url_for('dive.csv', dive_id=dive.dive_id)}}?' + get_args_url_params());
+    }
 
     /*
      * On change of the sliders
@@ -234,17 +244,20 @@
             if (is_pressure_graph_vis) load_pressure_graph(); else unload_pressure_graph();
         });
         // heatmap does not need to be redrawn, it's only dependent on profile, not on display GF
+        // same for gf_deco_table
     }
 
     /*
      * changeable gf ipts
      */
-    $(function () {
+    function make_changeable_gf_ipts()
+    {
         $("span.changeable").each(function () {
             var label = $(this);
             label.after("<input type='text' style='display:none' class='changeable'/>");
             var input_text = label.next();
             input_text[0].name = label[0].id.replace("show_", "ipttxt_");
+            input_text[0].id = input_text[0].name;
             // Click = show
             label.click(function () {
                 $(this).next().val($(this).html());
@@ -262,13 +275,15 @@
                 reload_all();
             });
         });
-    });
+    }
 
     /*
      * On document ready
      */
     $(function(){
+        make_changeable_gf_ipts();
         set_gf_to_defaults();
+        set_csv_link();
         reload_all();
     });
     </script>
@@ -281,6 +296,23 @@
     <div class="chart placeholder" id="chart_diveprofile_plh" style="display:block;">
         <img src="{{url_for('static',filename='images/spinner-grey-211px.gif')}}" alt="spinner">
     </div>
+
+    <!--
+      Ephemeral dive profile options
+    -->
+    {% if dive.is_ephemeral %}
+    <div class="adjust">
+        This scenario will expire automatically in a couple of hours.
+        {% if dive['parent_dive_id'] %}
+        <form style="display:inline" method="GET" action="{{url_for('dive.show', dive_id=dive.parent_dive_id)}}">
+            <input type="submit" value="Go back to original"/>
+        </form>
+        {% endif %}
+        <form style="display:inline" method="POST" action="{{url_for('dive.update_keep', dive_id=dive.dive_id)}}">
+            <input type="submit" value="Keep"/>
+        </form>
+    </div>
+    {% endif %}
 
     <!--
       GF update sliders
@@ -309,21 +341,19 @@
             <label for="ipt_gflow">low</label>
             <input type="range" min=5 max=100 step=5 class="slider" list="tickmarks"
                    id="ipt_gflow" name="gflow"
-                   onmousemove="set_gf_text_from_sliders();"
+                   onmousemove="if (event.which == 1) { set_gf_text_from_sliders(); }"
                    onchange="set_gf_text_from_sliders();reload_all();"/>
             /
             <label for="ipt_gfhigh">high</label>
             <input type="range" min=5 max=100 step=5 class="slider" list="tickmarks"
                    id="ipt_gfhigh" name="gfhigh"
-                   onmousemove="set_gf_text_from_sliders();"
+                   onmousemove="if (event.which == 1) { set_gf_text_from_sliders(); }"
                    onchange="set_gf_text_from_sliders();reload_all();"/>
             = GF
             <span id="show_gflow" class="changeable">hello</span>
             /
             <span id="show_gfhigh" class="changeable">world</span>
-        </div>
         {% if modify_allowed %}
-        <div>
             <input type="submit" name="action" value="Update Stops">
         </div>
         {% endif %}
@@ -388,7 +418,7 @@
     -->
     <h3 id="hfulldata">Full dive data
         <span class="viztoggle" id="table_full_toggle" onclick="toggle_div_table_full()">[show]</span>
-        <span class="viztoggle"><a href="{{url_for('dive.csv',dive_id=dive.dive_id)}}">[csv]</a></span>
+        <span class="viztoggle"><a href="" id="link_csv">[csv]</a></span>
     </h3>
     <div id="table_full" class="bigtable" style="display: none">
     </div>
@@ -423,6 +453,12 @@
     <form method="post" action="{{url_for('dive.modify_settings',dive_id=dive.dive_id)}}">
         <label for="ipt_last_stop_depth">Last stop depth:</label>
         <input type="text" value="{{dive._last_stop_depth}}" name="ipt_last_stop_depth" id="ipt_last_stop_depth">
+        <br/>
+        <label for="ipt_gas_consmp_bottom">Gas consumption (bottom, L/min):</label>
+        <input type="text" value="{{dive._gas_consmp_bottom}}" name="ipt_gas_consmp_bottom" id="ipt_gas_consmp_bottom">
+        <br/>
+        <label for="ipt_gas_consmp_deco">Gas consumption (deco, L/min):</label>
+        <input type="text" value="{{dive._gas_consmp_deco}}" name="ipt_gas_consmp_deco" id="ipt_gas_consmp_deco">
         <br/>
         <label for="action_update_settings"></label>
         <input type="submit" name="action_update_settings" id="action_update_settings" value="Update">

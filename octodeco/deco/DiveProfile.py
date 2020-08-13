@@ -24,6 +24,7 @@ class DiveProfile:
                  descent_speed = 20, ascent_speed = 10,
                  max_pO2_deco = 1.60, gas_switch_mins = 3.0,
                  last_stop_depth = 3,
+                 gas_consmp_bottom = 20.0, gas_consmp_deco = 20.0,
                  gf_low = 35, gf_high = 70):
         self._points = [ DivePoint(0, 0, Gas.Air(), None) ];
         self._descent_speed = descent_speed;
@@ -31,6 +32,8 @@ class DiveProfile:
         self._max_pO2_deco = max_pO2_deco;
         self._gas_switch_mins = gas_switch_mins;
         self._last_stop_depth = last_stop_depth;
+        self._gas_consmp_bottom = gas_consmp_bottom;
+        self._gas_consmp_deco = gas_consmp_deco;
         self._gases_carried = set();
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;
@@ -44,6 +47,7 @@ class DiveProfile:
         self.add_custom_desc = None;
         self.custom_desc = None;
         self.is_demo_dive = False;
+        self.is_ephemeral = False;
         self.is_public = False;
         self.db_version = DiveProfileSer.CURRENT_VERSION;
 
@@ -53,6 +57,15 @@ class DiveProfile:
 
     def points(self):
         return self._points;
+
+    def clean_copy(self):
+        cp = copy.deepcopy(self);
+        if hasattr(cp, 'dive_id'):
+            delattr(cp, 'dive_id')
+        if hasattr(cp, 'user_id'):
+            delattr(cp, 'user_id');
+        cp._remove_all_extra_points( update_deco_info = False );
+        return cp;
 
     def dataframe(self):
         return pd.DataFrame([ p.repr_for_dataframe(diveprofile = self)
@@ -125,6 +138,8 @@ class DiveProfile:
         return self._gases_carried;
 
     def _append_point_abstime(self, new_time, new_depth, gas):
+        if len(self._points) == 1:
+            self._points[0].gas = gas;
         p = DivePoint(new_time, new_depth, gas, self._points[-1]);
         self._points.append(p);
         return p;
@@ -133,19 +148,19 @@ class DiveProfile:
         new_time = self._points[ -1 ].time + time_diff;
         return self._append_point_abstime(new_time, new_depth, gas);
 
-    def _append_point_fix_ascent(self, new_duration, new_depth, gas):
+    def _append_point_fix_ascent(self, op):
         # Returns new point, and whether or not one was added
         have_point_added = False;
-        time_needed = ( self._points[-1].depth - new_depth ) / self._ascent_speed;
-        if time_needed > new_duration:
+        time_needed = ( self._points[-1].depth - op.depth ) / self._ascent_speed;
+        if time_needed > op.duration:
             # Add deco point
-            transit_point_duration = time_needed - new_duration;
+            transit_point_duration = time_needed - op.duration;
             transit_point_depth = self._points[-1].depth - self._ascent_speed*transit_point_duration;
-            tp = self._append_point( transit_point_duration, transit_point_depth, gas );
+            tp = self._append_point( transit_point_duration, transit_point_depth, self._points[-1].gas );
             tp.is_ascent_point = True;
             have_point_added = True;
         # Add the original point
-        p = self._append_point(new_duration, new_depth, gas);
+        p = self._append_point(op.duration, op.depth, op.gas);
         return p, have_point_added;
 
     def _append_transit(self, new_depth, gas, round_to_mins = False):
@@ -299,7 +314,7 @@ class DiveProfile:
             op = old_points[i];
             oldlen = len(self._points);
             # Potentially prepend extra point to cover ascent speed; append original point
-            p, extra_added = self._append_point_fix_ascent( op.duration, op.depth, op.gas );
+            p, extra_added = self._append_point_fix_ascent( op );
             # Update tissues, based on last point considered
             for j in range(oldlen, len(self._points)):
                 self._points[j].set_updated_tissue_state( );
@@ -416,9 +431,7 @@ class DiveProfile:
     Evaluating various GF's and impact on deco time
     '''
     def decotime_for_gf(self, gf_low, gf_high):
-        cp = copy.deepcopy(self);
-        cp.remove_surface_at_end();
-        cp._remove_all_extra_points( update_deco_info = False );
+        cp = self.clean_copy();
         cp.gf_low_display = gf_low;
         cp.gf_high_display = gf_high;
         cp.add_stops_to_surface();
@@ -431,9 +444,7 @@ class DiveProfile:
             # => also gfdecotable does not make sense
             return None;
         # Prepare template
-        cp = copy.deepcopy(self);
-        cp.remove_surface_at_end();
-        cp._remove_all_extra_points( update_deco_info = False );
+        cp = self.clean_copy();
         # Do the math
         res = dict();
         for gflow in gflows:
@@ -441,3 +452,51 @@ class DiveProfile:
             for gfhigh in gfhighs:
                 res[ gflow ][ gfhigh ] = cp.decotime_for_gf( gflow, gfhigh );
         return res;
+
+    '''
+    Gas consumption computations
+    '''
+    def gas_consumption(self):
+        r = {};
+        for p in self._points:
+            if p.duration > 0 and p.depth > 0:
+                rate = self._gas_consmp_deco if p.is_deco_stop else self._gas_consmp_bottom;
+                r[p.gas] = r.get(p.gas, 0.0) + p.duration * p.p_amb * rate;
+        return r;
+
+    def _gas_consumption_info(self):
+        return { 'decotime' : self.decotime(), 'gas_consmp': self.gas_consumption() };
+
+    def _update_profile_lost_gases(self, lost_gases, interpolate = True):
+        self._gases_carried.difference_update(set(lost_gases));
+        for i in range(len(self._points)):
+            p = self._points[i];
+            if p.gas not in self._gases_carried and p.depth > 0:
+                # The gas is considered to be breathed from this point to the next, so pO2 should be
+                # OK for both.
+                p_amb = max(p.p_amb, self._points[i+1].p_amb) if i < len(self._points) - 1 \
+                    else p.p_amb;
+                p.gas = Gas.best_gas( self._gases_carried, p_amb, self._max_pO2_deco );
+        self.update_stops( interpolate = interpolate );
+
+    def copy_profile_lost_gases(self, lost_gases, interpolate = True):
+        cp = self.clean_copy();
+        cp.custom_desc = self.description() + ' - lost {}'.format(lost_gases);
+        cp._update_profile_lost_gases(lost_gases, interpolate = interpolate);
+        return cp;
+
+    def gas_consumption_analysis(self):
+        # First, everything as planned
+        gci = self._gas_consumption_info();
+        r = [ { 'lost': None, **gci} ];
+        # Identify bottom gas / deco gas
+        gc = self.gas_consumption();
+        bottom_gas = max(gc, key=lambda k: gc[k]);
+        deco_gases = self.gases_carried().copy();
+        deco_gases.remove(bottom_gas);
+        # Then, for each deco gas ..
+        cp = self.clean_copy()
+        for gas in deco_gases:
+            ccp = cp.copy_profile_lost_gases([gas], interpolate = False);
+            r.append({'lost': str(gas), **ccp._gas_consumption_info()});
+        return r;
