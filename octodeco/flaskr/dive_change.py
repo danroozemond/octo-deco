@@ -92,3 +92,16 @@ def modify_settings(dive_id):
         return redirect(url_for('dive.show', dive_id=dive_id));
     else:
         abort(405);
+
+
+@bp.route('/update/keep/<int:dive_id>', methods = [ 'POST' ])
+def update_keep(dive_id):
+    dp = dive.get_diveprofile_for_display(dive_id);
+    if dp is not None:
+        dp.is_ephemeral = False;
+        flash('Keeping this dive permanently.');
+        db_dive.store_dive(dp);
+        dive.invalidate_cached_dive(dive_id);
+        return redirect(url_for('dive.show', dive_id=dive_id));
+    else:
+        abort(405);
