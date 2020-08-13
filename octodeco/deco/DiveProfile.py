@@ -64,7 +64,6 @@ class DiveProfile:
             delattr(cp, 'dive_id')
         if hasattr(cp, 'user_id'):
             delattr(cp, 'user_id');
-        cp.remove_surface_at_end();
         cp._remove_all_extra_points( update_deco_info = False );
         return cp;
 
