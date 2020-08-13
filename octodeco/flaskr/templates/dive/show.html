@@ -324,13 +324,13 @@
             <label for="ipt_gflow">low</label>
             <input type="range" min=5 max=100 step=5 class="slider" list="tickmarks"
                    id="ipt_gflow" name="gflow"
-                   onmousemove="set_gf_text_from_sliders();"
+                   onmousemove="if (event.which == 1) { set_gf_text_from_sliders(); }"
                    onchange="set_gf_text_from_sliders();reload_all();"/>
             /
             <label for="ipt_gfhigh">high</label>
             <input type="range" min=5 max=100 step=5 class="slider" list="tickmarks"
                    id="ipt_gfhigh" name="gfhigh"
-                   onmousemove="set_gf_text_from_sliders();"
+                   onmousemove="if (event.which == 1) { set_gf_text_from_sliders(); }"
                    onchange="set_gf_text_from_sliders();reload_all();"/>
             = GF
             <span id="show_gflow" class="changeable">hello</span>
