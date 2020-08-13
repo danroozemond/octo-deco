@@ -23,19 +23,33 @@ def load_user_details():
 #
 # Getting info
 #
+def _get_arg_multikey(args, tp, keys, default):
+    r = None;
+    try:
+        for k in keys:
+            r = args.get(k);
+            if r is not None and r != '':
+                return tp(r);
+    except ValueError:
+        pass;
+    return default;
+
+
 def get_all_args_from_request():
     # GFs
-    gflow = request.args.get('gflow', request.form.get('gflow', 101, type=int), type=int);
-    gfhigh = request.args.get('gfhigh', request.form.get('gfhigh', 101, type=int), type=int);
-    gflow = min(200, max(0,gflow));
-    gfhigh = min(200, max(0, gfhigh));
+    args = dict(request.args);
+    args.update(request.form);
+    gflow = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gflow', 'gflow'], 101)));
+    gfhigh = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gfhigh', 'gfhigh' ], 101)));
     # Lost gas
-    lostgasstr = request.args.get('lostgas', '', type=str);
+    lostgasstr = str(args.get('lostgas', ''));
     lostgas = Gas.many_from_string(lostgasstr) if lostgasstr != '' else [];
     # Done
-    return {'gflow' : gflow,
-            'gfhigh' : gfhigh,
-            'lostgas' : lostgas };
+    r = { 'gflow': gflow,
+          'gfhigh': gfhigh,
+          'lostgas': lostgas };
+    print(r);
+    return r;
 
 
 # Using this pattern as it enables invalidation of dive cache as a whole
