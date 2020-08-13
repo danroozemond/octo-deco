@@ -75,7 +75,7 @@ def get_one_dive(dive_id:int):
 #
 # Store/modify
 #
-def store_dive_update(diveprofile):
+def _store_dive_update(diveprofile):
     # Check dive_id
     dive_id = int(diveprofile.dive_id);
     # Check user_id
@@ -95,7 +95,7 @@ def store_dive_update(diveprofile):
     assert cur.rowcount == 1;
 
 
-def store_dive_new(diveprofile):
+def _store_dive_new(diveprofile):
     cur = db.get_db().cursor();
     cur.execute('''
         INSERT INTO dives(user_id, dive)
@@ -103,14 +103,14 @@ def store_dive_new(diveprofile):
         ''', [ get_user_details().user_id ] );
     diveprofile.dive_id = cur.lastrowid;
     diveprofile.user_id = get_user_details().user_id;
-    return store_dive_update(diveprofile);
+    return _store_dive_update(diveprofile);
 
 
 def store_dive(diveprofile):
     try:
-        store_dive_update(diveprofile);
+        _store_dive_update(diveprofile);
     except AttributeError:
-        store_dive_new(diveprofile);
+        _store_dive_new(diveprofile);
     # A nice hook to call a cleanup function
     cleanup_stale_dives();
 

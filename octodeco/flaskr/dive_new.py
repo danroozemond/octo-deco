@@ -38,7 +38,7 @@ def new_do():
 @bp.route('/new/demo', methods = [ 'POST' ])
 def new_demo():
     dp = CreateDive.create_demo_dive();
-    db_dive.store_dive_new(dp);
+    db_dive.store_dive(dp);
     dive_id = dp.dive_id;
     flash('Generated demo dive [%i]' % dive_id);
     return redirect(url_for('dive.show', dive_id = dive_id))
@@ -66,7 +66,7 @@ def new_csv( create_csv_func ):
         flash( 'Error parsing CSV: %s' % err.args );
         return redirect(url_for('dive.new_show'));
     # Store the dive
-    db_dive.store_dive_new(dp);
+    db_dive.store_dive(dp);
     dive_id = dp.dive_id;
     flash('Import successful - %s' % dp.description());
     # Done.
@@ -99,7 +99,7 @@ def new_ephm_lost_gas(dive_id):
     cp.is_public = False;
     cp.parent_dive_id = dive_id;
     # Store the dive
-    db_dive.store_dive_new(cp);
+    db_dive.store_dive(cp);
     dive_id = cp.dive_id;
     flash('Created scenario: %s' % cp.description());
     # Done.
