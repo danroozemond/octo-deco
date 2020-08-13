@@ -7,7 +7,7 @@ from flask import (
     flash, redirect, url_for, request, abort, session, render_template
 )
 
-from octodeco.deco import CreateDive;
+from octodeco.deco import CreateDive, Gas;
 
 
 #
@@ -88,8 +88,9 @@ def new_octodeco_csv():
 #
 @bp.route('/new/lost/<int:dive_id>', methods = ['GET'])
 def new_ephm_lost_gas(dive_id):
-    req_args = dive.get_all_args_from_request();
-    lost_gases = req_args['lostgas'];
+    req_args = dive.get_gf_args_from_request();
+    lostgasstr = str(request.args.get('lostgas', ''));
+    lost_gases = Gas.many_from_string(lostgasstr);
     if len(lost_gases) == 0:
         flash('Incorrect lost gas parameter');
         return redirect(url_for('dive.show', dive_id = dive_id));

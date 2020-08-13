@@ -10,7 +10,7 @@ from . import db_dive;
 from . import plots;
 from . import user;
 from .app import cache;
-from octodeco.deco import Gas;
+
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
 
@@ -35,21 +35,16 @@ def _get_arg_multikey(args, tp, keys, default):
     return default;
 
 
-def get_all_args_from_request():
-    if 'dive_args' not in g:
+def get_gf_args_from_request():
+    if 'gf_args' not in g:
         # GFs
         args = dict(request.args);
         args.update(request.form);
         gflow = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gflow', 'gflow'], 101)));
         gfhigh = min(200, max(0, _get_arg_multikey(args, int, [ 'ipttxt_gfhigh', 'gfhigh' ], 101)));
-        # Lost gas
-        lostgasstr = str(args.get('lostgas', ''));
-        lostgas = Gas.many_from_string(lostgasstr) if lostgasstr != '' else [];
         # Done
-        g.dive_args = { 'gflow': gflow,
-              'gfhigh': gfhigh,
-              'lostgas': lostgas };
-    return g.dive_args;
+        g.gf_args = { 'gflow': gflow, 'gfhigh': gfhigh };
+    return g.gf_args;
 
 
 # Using this pattern as it enables invalidation of dive cache as a whole
@@ -223,7 +218,7 @@ def invalidate_cached_dive(dive_id: int):
 
 
 def get_diveprofile_for_display(dive_id: int):
-    return get_cached_dive(dive_id).profile_args(get_all_args_from_request());
+    return get_cached_dive(dive_id).profile_args(get_gf_args_from_request());
 
 
 #
