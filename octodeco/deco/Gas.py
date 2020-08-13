@@ -23,6 +23,12 @@ class Gas(dict):
     def __hash__(self):
         return hash( self['fO2'] ) + 3 * hash(self['fHe']);
 
+    def __eq__(self, other):
+        if hasattr(self, 'cython_array') and hasattr(other, 'cython_array'):
+            return self.cython_array == other.cython_array;
+        else:
+            return all([ self[g] == other[g] for g in [ 'fO2', 'fN2', 'fHe' ]]);
+
 
 def Air():
     return Gas({ 'fO2': 0.21, 'fN2': 0.79, 'fHe': 0.0 });
