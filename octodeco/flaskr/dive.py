@@ -202,14 +202,16 @@ class CachedDiveProfile:
 
 @cache.memoize()
 def get_cached_dive(dive_id: int):
-    session[ 'last_dive_id' ] = None;
     cdp = CachedDiveProfile(dive_id);
     if cdp is None:
         flash('Dive not found [%i]' % dive_id);
+        session[ 'last_dive_id' ] = None;
         return redirect(url_for('dive.show_any'));
     if not db_dive.is_display_allowed(cdp.profile_base()):
+        session[ 'last_dive_id' ] = None;
         abort(403);
-    session[ 'last_dive_id' ] = dive_id;
+    if not cdp.profile_base().is_ephemeral:
+        session[ 'last_dive_id' ] = dive_id;
     return cdp;
 
 
