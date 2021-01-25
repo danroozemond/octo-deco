@@ -47,11 +47,18 @@ def show_diveprofile(diveprofile):
                              line = {'color': 'rgb(176,42,143)', 'width': 2},
                              visible = "legendonly"),
                   secondary_y = True);
-    # TTS (scaled to make visible, using customdata)
+    # TTS (scaled to make visible; using customdata)
     fig.add_trace(go.Scatter(x = df[ "time" ], y = 2*df[ "TTS" ], name = 'TTS',
                              hovertemplate = 'TTS: %{customdata:.1f}mins @ %{x:.1f}mins<extra></extra>',
                              customdata = df[ "TTS" ],
                              line = {'color': 'rgb(44,160,174)', 'width': 2},
+                             visible = "legendonly"),
+                  secondary_y = True);
+    # NDL (scaled to make visible; using customdata)
+    fig.add_trace(go.Scatter(x = df[ "time" ], y = 2*df[ "NDL" ], name = 'NDL',
+                             hovertemplate = 'NDL: %{customdata:.1f}mins @ %{x:.1f}mins<extra></extra>',
+                             customdata = df[ "NDL" ],
+                             line = {'color': 'rgb(0,173,239)', 'width': 2},
                              visible = "legendonly"),
                   secondary_y = True);
     # Ceil99
