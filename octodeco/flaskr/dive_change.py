@@ -86,6 +86,11 @@ def modify_settings(dive_id):
             dp._gas_consmp_bottom = ipt_gas_consmp_bottom;
             dp._gas_consmp_deco = ipt_gas_consmp_deco;
             flash("Updated gas consumption figures");
+        # Remove all stops
+        ipt_remove_all_stops = ( request.form.get('ipt_remove_all_stops', 'off').lower() == 'on')
+        if ipt_remove_all_stops:
+            dp.update_stops( actually_add_stops = False );
+            flash('Removed all stops');
         # Update database and invalidate cache
         db_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
