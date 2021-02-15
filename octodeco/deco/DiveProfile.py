@@ -416,16 +416,20 @@ class DiveProfile:
         if update_deco_info:
             self.update_deco_info();
 
-    def update_stops( self, interpolate = True ):
+    def update_stops( self, interpolate = True, actually_add_stops = True ):
         # Remove surface time
         surfacetime = self.remove_surface_at_end();
         # Remove deco stops & interpolated points
         self._remove_all_extra_points( update_deco_info = False );
-        # Bring back stops, surface section, interpolated points
+        # Bring back stops, surface section
         self.append_surfacing(transit = False);
-        self.add_stops();
+        if actually_add_stops:
+            self.add_stops();
         self.append_section(0, surfacetime);
-        self.interpolate_points();
+        # interpolated points
+        if interpolate:
+            self.interpolate_points();
+
 
     '''
     Evaluating various GF's and impact on deco time
