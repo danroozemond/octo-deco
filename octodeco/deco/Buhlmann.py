@@ -119,11 +119,9 @@ class Buhlmann:
         # Straight computation is possible (even for Trimix), but comes down to solving
         # a pretty messy quadratic equation, and I'm too lazy for that.
         # Binary search is fast enough and more robust (and again, lazy)
-        gf99allowed_next = amb_to_gf(p_amb_next_stop);
-
         def max_over_supersat(t):
             ts2 = tissue_state.updated_state(t, p_amb, gas);
-            return ts2.GF99(p_amb_next_stop) - gf99allowed_next;
+            return ts2.max_over_supersat(amb_to_gf, p_amb_next_stop);
 
         # Binary search:
         #   t0 <= t <= t1, max_over_supersat(t) = 0.
@@ -145,6 +143,7 @@ class Buhlmann:
                 t1 = h;
         stop_length = t1;
         return stop_length;
+
 
     def _get_ambtogf(self, tissue_state, p_amb, p_target, amb_to_gf = None):
         # Allowed to pass in amb_to_gf in case we recompute part of the deco after it has already started
