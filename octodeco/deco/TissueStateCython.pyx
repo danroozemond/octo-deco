@@ -176,27 +176,30 @@ class TissueState:
         cdef float[:] cm_fs = self._workmann_m0(cpfs);
         assert cpsu <= cpamb and cpamb <= cpfs;
         mgf = array.array('f', [ ]); array.resize(mgf, N_TISSUES);
+        cdef float[:] cmgf = mgf;
         cdef int i = 0;
         cdef float m_at_gf_high, m_at_gf_low;
         while i < N_TISSUES:
             m_at_gf_high = cpsu + cgf_high_f * ( cm_su[i] - cpsu );
             m_at_gf_low =  cpfs + cgf_low_f  * ( cm_fs[i] - cpfs );
-            mgf[i] = m_at_gf_high + (cpamb - cpsu) / (cpfs-cpsu) * ( m_at_gf_low - m_at_gf_high );
+            cmgf[i] = m_at_gf_high + (cpamb - cpsu) / (cpfs-cpsu) * ( m_at_gf_low - m_at_gf_high );
             i += 1;
         return mgf;
 
     def _m_value_gf_point(self, p_amb, gf_value):
-        cdef float[:] cm = self._workmann_m0(p_amb);
+        m = self._workmann_m0(p_amb);
+        cdef float[:] cm = m;
         mgf = array.array('f', [ ]); array.resize(mgf, N_TISSUES);
+        cdef float[:] cmgf = mgf;
         cdef int i = 0;
         cdef float gff = gf_value / 100.0;
         while i < N_TISSUES:
-            mgf[i] = p_amb + gff * (cm[i] - p_amb);
+            cmgf[i] = p_amb + gff * (cm[i] - p_amb);
             i += 1;
         return mgf;
 
     def _m_value_gf(self, amb_to_gf, p_amb):
-        # here do the proper thing if in range, otherwise do the evil thing.
+        # here do the proper thing if in range, otherwise fixed
         cdef float cpsu = amb_to_gf.p_surface;
         cdef float cpfs = amb_to_gf.p_first_stop;
         if amb_to_gf.p_surface == amb_to_gf.p_first_stop:
@@ -212,11 +215,12 @@ class TissueState:
     def max_over_supersat(self, amb_to_gf, p_amb):
         cdef float[:] cmgf = self._m_value_gf(amb_to_gf, p_amb);
         cdef float[:] cstate = self._state;
-        cdef float r = cstate[0] - cmgf[0];
-        cdef int i = 1;
+        cdef float over_supersat;
+        cdef int i = 0;
         while i < N_TISSUES:
-            if cstate[i] - cmgf[i] > r:
-                r = cstate[i] - cmgf[i];
+            over_supersat = cstate[2*i] + cstate[2*i+1] - cmgf[i];
+            if i == 0 or over_supersat > r:
+                r = over_supersat;
             i += 1;
         return r;
 

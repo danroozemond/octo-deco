@@ -137,13 +137,13 @@ class Buhlmann:
             return 0.0;
         while t1 - t0 > self.stop_length_precision:
             h = t0 + (t1 - t0) / 2;
-            if max_over_supersat(h) > 0:
+            mosh = max_over_supersat(h);
+            if mosh > 0:
                 t0 = h;
             else:
                 t1 = h;
         stop_length = t1;
         return stop_length;
-
 
     def _get_ambtogf(self, tissue_state, p_amb, p_target, amb_to_gf = None):
         # Allowed to pass in amb_to_gf in case we recompute part of the deco after it has already started
