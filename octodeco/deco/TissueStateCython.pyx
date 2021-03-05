@@ -204,9 +204,9 @@ class TissueState:
         cdef float cpfs = amb_to_gf.p_first_stop;
         if amb_to_gf.p_surface == amb_to_gf.p_first_stop:
             return self._m_value_gf_point(p_amb, amb_to_gf.gf_high);
-        elif p_amb < amb_to_gf.p_surface:
+        elif p_amb <= amb_to_gf.p_surface:
             return self._m_value_gf_point(p_amb, amb_to_gf.gf_high);
-        elif amb_to_gf.p_first_stop < p_amb:
+        elif amb_to_gf.p_first_stop <= p_amb:
             return self._m_value_gf_point(p_amb, amb_to_gf.gf_low);
         else:
             # Actually compute the GF line as defined
