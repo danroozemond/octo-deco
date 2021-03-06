@@ -1,7 +1,7 @@
 # Please see LICENSE.md
 from . import BuhlmannConstants;
 from . import Gas;
-from . import TissueStateClassic, TissueStateCython, TissueStateVerify;
+from . import TissueStateCython;
 from . import Util;
 
 
@@ -35,13 +35,11 @@ class Buhlmann:
                  gf_low, gf_high,
                  descent_speed, ascent_speed,
                  max_pO2_deco, gas_swich_mins,
-                 last_stop_depth,
-                 debugTissueState = False):
+                 last_stop_depth):
         self._constants = BuhlmannConstants.ZHL_16C_1a;
         self._rq = 0.9; # Respiratory Quotient.
         self._n_tissues = self._constants.N_TISSUES;
-        self.TissueState = TissueStateCython.TissueState if not debugTissueState \
-                    else   TissueStateVerify.TissueState;
+        self.TissueState = TissueStateCython.TissueState;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = max_pO2_deco;
