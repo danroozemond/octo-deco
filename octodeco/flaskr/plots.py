@@ -138,10 +138,8 @@ def _pg_m_lines(diveprofile, constants):
     return show_m_lines;
 
 
-def _pg_m_line_gf(i, tissue_state_for_a_b):
-    def m_line(amb_to_gf, p_amb):
-        return tissue_state_for_a_b._m_value_gf(amb_to_gf, p_amb);
-    return m_line;
+def _pg_m_value_gf(tissue_state_for_a_b, amb_to_gf, p_amb, i):
+    return tissue_state_for_a_b._m_values_gf(amb_to_gf, p_amb)[i];
 
 
 def show_pressure_graph(diveprofile):
@@ -205,9 +203,8 @@ def show_pressure_graph(diveprofile):
             # pts_for_m_line_gf only contains non-interpolated deco points.
             pt = max(pts_for_m_line_gf, key=lambda p: (p.deco_info['SurfaceGF'], p.p_amb));
             amb_to_gf = pt.deco_info['amb_to_gf'];
-            m_line = _pg_m_line_gf(i, pt.tissue_state);
             p_ambs = [0.0, Util.SURFACE_PRESSURE, amb_to_gf.p_first_stop, max_x ];
-            p_comp_max = [ m_line(amb_to_gf, p) for p in p_ambs ];
+            p_comp_max = [ _pg_m_value_gf(pt.tissue_state, amb_to_gf, p, i) for p in p_ambs ];
             hovertemplate = '<extra>GF M-line ({}/{}, first stop:{:.1f}m)</extra>'.\
                 format(diveprofile.gf_low_display, diveprofile.gf_high_display,
                        Util.Pamb_to_depth(amb_to_gf.p_first_stop));
