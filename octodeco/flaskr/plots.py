@@ -139,12 +139,8 @@ def _pg_m_lines(diveprofile, constants):
 
 
 def _pg_m_line_gf(i, tissue_state_for_a_b):
-    a, b = tissue_state_for_a_b._get_coeffs_a_b();
-    ai = a[i]; bi = b[i];
     def m_line(amb_to_gf, p_amb):
-        gff = amb_to_gf(p_amb) / 100.0;
-        M = ai + p_amb/bi;
-        return p_amb + gff*(M - p_amb);
+        return tissue_state_for_a_b._m_value_gf(amb_to_gf, p_amb);
     return m_line;
 
 
@@ -161,14 +157,14 @@ def show_pressure_graph(diveprofile):
     n_tissues = con.N_TISSUES;
     n2halftimes = con.N2_HALFTIMES;
     show_m_lines = _pg_m_lines(diveprofile, con);
-    pts_for_m_line_gf = [ p for p in pts if not p.is_interpolated_point and hasattr(p, 'deco_info') ];
+    pts_for_m_line_gf = [ p for p in pts if hasattr(p, 'deco_info') ];
     # Get the rest of the reusable info
     colors = px.colors.qualitative.Dark24;
     x = [ p.p_amb for p in pts ];
     max_x = max(x);
     customdata = [ p.time for p in pts ];
     max_y = 0;
-    default_tissue_to_show = 2;
+    default_tissue_to_show = 3;
     # For each tissue ..
     for i in range(n_tissues):
         # The actual line of inert gas pressures
@@ -210,7 +206,7 @@ def show_pressure_graph(diveprofile):
             pt = max(pts_for_m_line_gf, key=lambda p: (p.deco_info['SurfaceGF'], p.p_amb));
             amb_to_gf = pt.deco_info['amb_to_gf'];
             m_line = _pg_m_line_gf(i, pt.tissue_state);
-            p_ambs = [0.0, 1.0, amb_to_gf.p_first_stop, max_x ];
+            p_ambs = [0.0, Util.SURFACE_PRESSURE, amb_to_gf.p_first_stop, max_x ];
             p_comp_max = [ m_line(amb_to_gf, p) for p in p_ambs ];
             hovertemplate = '<extra>GF M-line ({}/{}, first stop:{:.1f}m)</extra>'.\
                 format(diveprofile.gf_low_display, diveprofile.gf_high_display,

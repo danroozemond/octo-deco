@@ -26,17 +26,6 @@ class AmbientToGF:
         self.gf_high = gf_high;
         self.p_target = p_target;
 
-    def __call__(self, p_amb):
-        if p_amb > self.p_first_stop:
-            return self.gf_low;
-        elif p_amb < self.p_surface:
-            return self.gf_high;
-        elif self.p_first_stop == self.p_surface:
-            return self.gf_high;
-        else:
-            return self.gf_high + \
-                   (p_amb - self.p_surface) / (self.p_first_stop - self.p_surface) * (self.gf_low - self.gf_high);
-
 
 class Buhlmann:
     """
@@ -77,7 +66,7 @@ class Buhlmann:
     #
     # NDL, deco stop, deco profile computations
     #
-    def NDL(self, tissue_state, p_amb, gas):
+    def NDL(self, tissue_state, amb_to_gf, p_amb, gas):
         # Binary search, t0/h/t1 the time we still stay at this depth
         #   t0 < h < t1
         #   max_over_supersat(t0) < 0
@@ -86,7 +75,7 @@ class Buhlmann:
         def max_over_supersat(t):
             ts2 = tissue_state.updated_state(t, p_amb, gas);
             ts3 = self._update_tissue_state_travel(ts2, p_amb, Util.SURFACE_PRESSURE, gas);
-            return ts3.GF99(Util.SURFACE_PRESSURE) - self.gf_high;
+            return ts3.max_over_supersat(amb_to_gf, Util.SURFACE_PRESSURE);
 
         t0 = 0.0;
         t1 = self.stop_length_infinity;
@@ -244,9 +233,8 @@ class Buhlmann:
         nontrivialstops = [ s for s in stops if s[ 1 ] >= .1 ];
         result[ 'FirstStop' ] = nontrivialstops[ 0 ][ 0 ] if len(nontrivialstops) > 0 else 0;
         result[ 'amb_to_gf' ] = amb_to_gf;
-        result[ 'GFLimitNow' ] = amb_to_gf(p_amb) if amb_to_gf is not None else 0.0;
         result[ 'TTS' ] = depth / self.ascent_speed + sum([ s[ 1 ] for s in stops ]);
-        result[ 'NDL' ] = self.NDL( tissue_state, p_amb, gas );
+        result[ 'NDL' ] = self.NDL( tissue_state, amb_to_gf, p_amb, gas );
 
         # Done
         return result;

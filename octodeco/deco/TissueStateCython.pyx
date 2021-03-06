@@ -227,8 +227,8 @@ class TissueState:
     #
     # p_ceiling for various scenarios
     #
-    def p_ceiling_for_gf_now (self, gf_now):
-        # Derived from _GF99_new as defined below
+    def p_ceiling_for_gf_now(self, gf_now):
+        # Derived from _GF99 as defined below
         cdef float gff = gf_now / 100.0;
         cdef float pceil = -100;
         cdef float pceil_i;
@@ -249,16 +249,13 @@ class TissueState:
         #   p0 < h < p1
         #   too_high_gf(p0) > 0
         #   too_high_gf(p1) < 0
-        def too_high_gf(p_amb):
-            gf_now = amb_to_gf(p_amb);
-            return self.GF99(p_amb) - gf_now;
         p0 = Util.SURFACE_PRESSURE;
         p1 = 99.0;
-        if too_high_gf(p0) < 0.0:
+        if self.max_over_supersat(amb_to_gf, p0) < 0.0:
             return p0;
         while p1 - p0 > 0.001:
             h = p0 + ( p1-p0 )/2;
-            if too_high_gf(h) > 0:
+            if self.max_over_supersat(amb_to_gf, h) > 0:
                 p0 = h;
             else:
                 p1 = h;
