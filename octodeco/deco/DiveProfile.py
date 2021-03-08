@@ -320,9 +320,8 @@ class DiveProfile:
                 self._points[j].set_updated_tissue_state( );
                 self._points[j].set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
                 amb_to_gf = self._points[j].deco_info['amb_to_gf'];
-            gf_now = amb_to_gf(p.p_amb);
             # Are we in violation?
-            if p.deco_info['GF99'] > gf_now+0.1:
+            if p.tissue_state.max_over_supersat(amb_to_gf, p.p_amb) > 0.01:
                 # Add points before, but take care to live along the GF line
                 before_stop = self._points[-2] if not extra_added else self._points[-3];
                 stops, p_ceiling, amb_to_gf = deco_model.compute_deco_profile(

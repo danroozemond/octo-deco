@@ -162,15 +162,73 @@ class TissueState:
         cdef float cpamb = p_amb;
         cdef int i = 0;
         while i < N_TISSUES:
-            m[i] = a[i] + cpamb / b[i];
+            m[i] = ca[i] + cpamb / cb[i];
             i += 1;
         return m;
+
+    def _m_values_gf_proper(self, amb_to_gf, p_amb):
+        cdef float cpamb = p_amb;
+        cdef float cpsu = amb_to_gf.p_surface;
+        cdef float cpfs = amb_to_gf.p_first_stop;
+        cdef float cgf_high_f = amb_to_gf.gf_high / 100.0;
+        cdef float cgf_low_f = amb_to_gf.gf_low / 100.0;
+        cdef float[:] cm_su = self._workmann_m0(cpsu);
+        cdef float[:] cm_fs = self._workmann_m0(cpfs);
+        assert cpsu <= cpamb and cpamb <= cpfs;
+        mgf = array.array('f', [ ]); array.resize(mgf, N_TISSUES);
+        cdef float[:] cmgf = mgf;
+        cdef int i = 0;
+        cdef float m_at_gf_high, m_at_gf_low;
+        while i < N_TISSUES:
+            m_at_gf_high = cpsu + cgf_high_f * ( cm_su[i] - cpsu );
+            m_at_gf_low =  cpfs + cgf_low_f  * ( cm_fs[i] - cpfs );
+            cmgf[i] = m_at_gf_high + (cpamb - cpsu) / (cpfs-cpsu) * ( m_at_gf_low - m_at_gf_high );
+            i += 1;
+        return mgf;
+
+    def _m_values_gf_point(self, p_amb, gf_value):
+        m = self._workmann_m0(p_amb);
+        cdef float[:] cm = m;
+        mgf = array.array('f', [ ]); array.resize(mgf, N_TISSUES);
+        cdef float[:] cmgf = mgf;
+        cdef int i = 0;
+        cdef float gff = gf_value / 100.0;
+        while i < N_TISSUES:
+            cmgf[i] = p_amb + gff * (cm[i] - p_amb);
+            i += 1;
+        return mgf;
+
+    def _m_values_gf(self, amb_to_gf, p_amb):
+        # here do the proper thing if in range, otherwise fixed
+        cdef float cpsu = amb_to_gf.p_surface;
+        cdef float cpfs = amb_to_gf.p_first_stop;
+        if amb_to_gf.p_surface == amb_to_gf.p_first_stop:
+            return self._m_values_gf_point(p_amb, amb_to_gf.gf_high);
+        elif p_amb <= amb_to_gf.p_surface:
+            return self._m_values_gf_point(p_amb, amb_to_gf.gf_high);
+        elif amb_to_gf.p_first_stop <= p_amb:
+            return self._m_values_gf_point(p_amb, amb_to_gf.gf_low);
+        else:
+            # Actually compute the GF line as defined
+            return self._m_values_gf_proper(amb_to_gf, p_amb);
+
+    def max_over_supersat(self, amb_to_gf, p_amb):
+        cdef float[:] cmgf = self._m_values_gf(amb_to_gf, p_amb);
+        cdef float[:] cstate = self._state;
+        cdef float over_supersat;
+        cdef int i = 0;
+        while i < N_TISSUES:
+            over_supersat = cstate[2*i] + cstate[2*i+1] - cmgf[i];
+            if i == 0 or over_supersat > r:
+                r = over_supersat;
+            i += 1;
+        return r;
 
     #
     # p_ceiling for various scenarios
     #
     def p_ceiling_for_gf_now(self, gf_now):
-        # Derived from _GF99_new as defined below
+        # Derived from _GF99 as defined below
         cdef float gff = gf_now / 100.0;
         cdef float pceil = -100;
         cdef float pceil_i;
@@ -191,16 +249,13 @@ class TissueState:
         #   p0 < h < p1
         #   too_high_gf(p0) > 0
         #   too_high_gf(p1) < 0
-        def too_high_gf(p_amb):
-            gf_now = amb_to_gf(p_amb);
-            return self.GF99(p_amb) - gf_now;
         p0 = Util.SURFACE_PRESSURE;
         p1 = 99.0;
-        if too_high_gf(p0) < 0.0:
+        if self.max_over_supersat(amb_to_gf, p0) < 0.0:
             return p0;
         while p1 - p0 > 0.001:
             h = p0 + ( p1-p0 )/2;
-            if too_high_gf(h) > 0:
+            if self.max_over_supersat(amb_to_gf, h) > 0:
                 p0 = h;
             else:
                 p1 = h;

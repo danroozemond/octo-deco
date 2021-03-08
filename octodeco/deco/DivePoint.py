@@ -27,14 +27,14 @@ class DivePoint:
 
     def debug_info(self):
         fmt = '{}{}{} T {:6.1f}  D {:5.1f}  P {:3.1f}={:3.1f}  G {:5s}  DD {:5.1f}  CNS {:5.1f}  FS {:5.1f}  ' +\
-               'C {:5.1f}   GF {:5.1f}/{:4.1f}   SGF {:6.1f}  {}';
+               'C {:5.1f}   GF {:5.1f}   SGF {:6.1f}  {}';
         return fmt.format('I' if self.is_interpolated_point else ' ',\
                           'D' if self.is_deco_stop else ' ',\
                           'A' if self.is_ascent_point else ' ',\
                           self.time, self.depth, self.p_amb, self.p_alv, str(self.gas), self.duration,
                           self.cns_perc,
                           self.deco_info['FirstStop'],self.deco_info['Ceil'],
-                          self.deco_info['GF99'], self.deco_info['amb_to_gf'](self.p_amb),
+                          self.deco_info['GF99'],
                           self.deco_info['SurfaceGF'],
                           Util.stops_to_string_precise(self.deco_info['Stops']));
 

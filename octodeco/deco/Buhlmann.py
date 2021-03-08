@@ -1,7 +1,7 @@
 # Please see LICENSE.md
 from . import BuhlmannConstants;
 from . import Gas;
-from . import TissueStateClassic, TissueStateCython, TissueStateVerify;
+from . import TissueStateCython;
 from . import Util;
 
 
@@ -26,17 +26,6 @@ class AmbientToGF:
         self.gf_high = gf_high;
         self.p_target = p_target;
 
-    def __call__(self, p_amb):
-        if p_amb > self.p_first_stop:
-            return self.gf_low;
-        elif p_amb < self.p_surface:
-            return self.gf_high;
-        elif self.p_first_stop == self.p_surface:
-            return self.gf_high;
-        else:
-            return self.gf_high + \
-                   (p_amb - self.p_surface) / (self.p_first_stop - self.p_surface) * (self.gf_low - self.gf_high);
-
 
 class Buhlmann:
     """
@@ -46,13 +35,11 @@ class Buhlmann:
                  gf_low, gf_high,
                  descent_speed, ascent_speed,
                  max_pO2_deco, gas_swich_mins,
-                 last_stop_depth,
-                 debugTissueState = False):
+                 last_stop_depth):
         self._constants = BuhlmannConstants.ZHL_16C_1a;
         self._rq = 0.9; # Respiratory Quotient.
         self._n_tissues = self._constants.N_TISSUES;
-        self.TissueState = TissueStateCython.TissueState if not debugTissueState \
-                    else   TissueStateVerify.TissueState;
+        self.TissueState = TissueStateCython.TissueState;
         self.gf_low = gf_low;
         self.gf_high = gf_high;
         self.max_pO2_deco = max_pO2_deco;
@@ -77,7 +64,7 @@ class Buhlmann:
     #
     # NDL, deco stop, deco profile computations
     #
-    def NDL(self, tissue_state, p_amb, gas):
+    def NDL(self, tissue_state, amb_to_gf, p_amb, gas):
         # Binary search, t0/h/t1 the time we still stay at this depth
         #   t0 < h < t1
         #   max_over_supersat(t0) < 0
@@ -86,7 +73,7 @@ class Buhlmann:
         def max_over_supersat(t):
             ts2 = tissue_state.updated_state(t, p_amb, gas);
             ts3 = self._update_tissue_state_travel(ts2, p_amb, Util.SURFACE_PRESSURE, gas);
-            return ts3.GF99(Util.SURFACE_PRESSURE) - self.gf_high;
+            return ts3.max_over_supersat(amb_to_gf, Util.SURFACE_PRESSURE);
 
         t0 = 0.0;
         t1 = self.stop_length_infinity;
@@ -119,11 +106,9 @@ class Buhlmann:
         # Straight computation is possible (even for Trimix), but comes down to solving
         # a pretty messy quadratic equation, and I'm too lazy for that.
         # Binary search is fast enough and more robust (and again, lazy)
-        gf99allowed_next = amb_to_gf(p_amb_next_stop);
-
         def max_over_supersat(t):
             ts2 = tissue_state.updated_state(t, p_amb, gas);
-            return ts2.GF99(p_amb_next_stop) - gf99allowed_next;
+            return ts2.max_over_supersat(amb_to_gf, p_amb_next_stop);
 
         # Binary search:
         #   t0 <= t <= t1, max_over_supersat(t) = 0.
@@ -139,7 +124,8 @@ class Buhlmann:
             return 0.0;
         while t1 - t0 > self.stop_length_precision:
             h = t0 + (t1 - t0) / 2;
-            if max_over_supersat(h) > 0:
+            mosh = max_over_supersat(h);
+            if mosh > 0:
                 t0 = h;
             else:
                 t1 = h;
@@ -245,9 +231,8 @@ class Buhlmann:
         nontrivialstops = [ s for s in stops if s[ 1 ] >= .1 ];
         result[ 'FirstStop' ] = nontrivialstops[ 0 ][ 0 ] if len(nontrivialstops) > 0 else 0;
         result[ 'amb_to_gf' ] = amb_to_gf;
-        result[ 'GFLimitNow' ] = amb_to_gf(p_amb) if amb_to_gf is not None else 0.0;
         result[ 'TTS' ] = depth / self.ascent_speed + sum([ s[ 1 ] for s in stops ]);
-        result[ 'NDL' ] = self.NDL( tissue_state, p_amb, gas );
+        result[ 'NDL' ] = self.NDL( tissue_state, amb_to_gf, p_amb, gas );
 
         # Done
         return result;
