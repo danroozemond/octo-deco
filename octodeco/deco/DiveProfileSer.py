@@ -6,8 +6,6 @@ import pickle;
 
 import pytz
 
-from . import TissueStateCython, TissueStateClassic;
-
 CURRENT_VERSION = 13;
 
 
