@@ -117,15 +117,15 @@ class TissueState:
     #
     # For computing integral supersaturation (as defined by Simon Mitchell)
     #
-    def abs_supersat(self, pp_n2, pp_he):
+    def abs_supersat(self, p_amb):
         cdef float r = 0;
+        cdef float p_tissue = 0;
         cdef float[:] cstate = self._state;
         cdef int i = 0;
         while i < N_TISSUES:
-            if cstate[2*i] > pp_n2:
-                r += cstate[2*i] - pp_n2;
-            if cstate[2*i+1] > pp_he:
-                r += cstate[2*i+1] - pp_he;
+            p_tissue = cstate[2*i] + cstate[2*i+1];
+            if p_tissue > p_amb:
+                r += p_tissue - p_amb;
             i += 1;
         return r;
 

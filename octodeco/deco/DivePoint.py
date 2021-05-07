@@ -92,10 +92,10 @@ class DivePoint:
         # Tissue state
         self.tissue_state = self.prev.tissue_state.updated_state( self.duration, p_amb_section, self.prev.gas );
         # CNS & integral supersaturation
-        pp_o2, pp_n2, pp_he = self.prev.gas.partial_pressures(p_amb_section);
+        pp_o2, _, _ = self.prev.gas.partial_pressures(p_amb_section);
         self.cns_perc = CNSConstants.cns_perc_update(self.prev.cns_perc, p_amb_section, pp_o2, self.duration);
         # Integral supersaturation
-        self.integral_supersat = self.prev.integral_supersat + self.duration * self.tissue_state.abs_supersat(pp_n2, pp_he);
+        self.integral_supersat = self.prev.integral_supersat + self.duration * self.tissue_state.abs_supersat(p_amb_section);
 
     def set_updated_deco_info(self, deco_model, gases, amb_to_gf = None ):
         self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, self.gas, gases, amb_to_gf = amb_to_gf );
