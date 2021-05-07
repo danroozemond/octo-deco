@@ -29,6 +29,8 @@ class Gas(dict):
         else:
             return all([ self[g] == other[g] for g in [ 'fO2', 'fN2', 'fHe' ]]);
 
+    def partial_pressures(self, p_amb):
+        return self['fO2']*p_amb, self['fN2']*p_amb, self['fHe']*p_amb;
 
 def Air():
     return Gas({ 'fO2': 0.21, 'fN2': 0.79, 'fHe': 0.0 });

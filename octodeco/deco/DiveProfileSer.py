@@ -6,7 +6,7 @@ import pickle;
 
 import pytz
 
-CURRENT_VERSION = 13;
+CURRENT_VERSION = 14;
 
 
 #
@@ -42,6 +42,8 @@ def _migrate_up_to_current(from_version, diveprofile):
             point.is_ascent_point = False;
         if not hasattr(point, 'cns_perc'):
             point.cns_perc = 0.0;
+        if not hasattr(point, 'integral_supersat'):
+            point.integral_supersat = 0.0;
 
     # v8
     if hasattr(diveprofile, '_deco_model'):

@@ -107,6 +107,9 @@ class DiveProfile:
     def cns_max(self):
         return max(map(lambda p: p.cns_perc, self._points));
 
+    def integral_supersaturation(self):
+        return self._points[-1].integral_supersat;
+
     def description(self):
         if self.custom_desc is not None:
             return self.custom_desc;
