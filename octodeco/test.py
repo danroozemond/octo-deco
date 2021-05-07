@@ -37,15 +37,15 @@ for x, y in dp.dive_summary().items():
 #     print(p.debug_info());
 
 
-sys.exit(0);
+#sys.exit(0);
 
-for gfs in [(53,53)]:
+for gfs in [(5,75), (35,65), (60,60), (80,55), (200,50), (55,65), (30,90) ]:
     dp = DiveProfile(gf_low = gfs[0], gf_high = gfs[1]);
-    dp.append_section(52, 30, gas = Gas.Trimix(21,30));
+    dp.append_section(50, 30, gas = Gas.Trimix(21,30));
     dp.add_gas(Gas.Nitrox(50))
     dp.add_stops_to_surface();
     dp.append_section(0.0, 60.0)
     dp.interpolate_points()
     dp.update_deco_info();
-    print('GF: {}/{}, deco time: {:5.1f} mins, integral supersat: {:6.1f}'.\
+    print('GF: {:3d}/{:3d}, deco time: {:5.1f} mins, integral supersat: {:6.1f}'.\
           format(gfs[0], gfs[1], dp.decotime(), dp.integral_supersaturation()));
