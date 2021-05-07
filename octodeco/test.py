@@ -7,6 +7,11 @@ from octodeco.deco.DiveProfile import DiveProfile;
 
 t0 = time.perf_counter();
 
+
+
+# simon mitchell's first example, NEDU study, : GF53/53 should give 927.1
+# see video 56:39
+
 dp = DiveProfile(gf_low=53, gf_high=53);
 dp.append_section(52, 30, gas = Gas.Air());
 #dp.add_gas(Gas.Nitrox(50))
@@ -17,12 +22,26 @@ dp.update_deco_info();
 
 for x, y in dp.dive_summary().items():
     print('{:25}: {}'.format(x,y));
-
-# simon mitchell's first example, NEDU study, : GF53/53 should give 927.1
-# see video 56:39
+print('====')
 
 # Hemmoor planning was 50m, 28 mins, {Nx50, Tx21/30}
 
+# Simon mitchell's third example,
+# RT=70, GF 50/54 gives 342.2
+# RT=58, GF 30/85 gives 480.8
+# 50 meters, 25 mins, on 18/45
+
+dp = DiveProfile(gf_low=50, gf_high=54);
+dp.append_section(50, 25, gas = Gas.Trimix(18,45));
+dp.add_gas(Gas.Nitrox(50))
+dp.add_stops_to_surface();
+dp.interpolate_points();
+dp.append_section(0.0, 60.0)
+dp.update_deco_info();
+
+for x, y in dp.dive_summary().items():
+    print('{:25}: {}'.format(x,y));
+print('====')
 
 #dp.set_gf(35,65, updateStops = True);
 # dp.remove_points(lambda x: x.is_interpolated_point, fix_durations = False, update_deco_info = True)
