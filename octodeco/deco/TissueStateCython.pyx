@@ -122,10 +122,11 @@ class TissueState:
         cdef float p_tissue = 0;
         cdef float[:] cstate = self._state;
         cdef int i = 0;
+        cdef p_alv = self.amb_to_alv(p_amb);
         while i < N_TISSUES:
             p_tissue = cstate[2*i] + cstate[2*i+1];
-            if p_tissue > p_amb:
-                r += p_tissue - p_amb;
+            if p_tissue > p_alv:
+                r += p_tissue - p_alv;
             i += 1;
         return r;
 

@@ -92,6 +92,7 @@ class DiveProfile:
              'Total dive time': '%.1f mins' % self.divetime(),
              'Decompression time': '%.1f mins' % self.decotime(),
              'CNS max': '%.1f%%' % self.cns_max(),
+             'Integral supersat':'%.1f' % self.integral_supersaturation(),
              'Deco profile comp time': '%.2f secs' % self._deco_stops_computation_time,
              'Full info comp time': '%.2f secs' % self._full_info_computation_time
              };

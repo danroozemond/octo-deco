@@ -94,8 +94,14 @@ class DivePoint:
         # CNS & integral supersaturation
         pp_o2, _, _ = self.prev.gas.partial_pressures(p_amb_section);
         self.cns_perc = CNSConstants.cns_perc_update(self.prev.cns_perc, p_amb_section, pp_o2, self.duration);
-        # Integral supersaturation
-        self.integral_supersat = self.prev.integral_supersat + self.duration * self.tissue_state.abs_supersat(p_amb_section);
+        # Integral supersaturation - approximate with a triangle
+        sup_sat_prev = self.prev.tissue_state.abs_supersat(self.prev.p_amb);
+        sup_sat_now  = self.tissue_state.abs_supersat(self.p_amb);
+        assert sup_sat_prev >= 0.0;
+        assert sup_sat_now >= 0.0;
+        sup_sat_int_add = self.duration * min(sup_sat_now, sup_sat_prev) \
+                          + 0.5 * self.duration * ( max(sup_sat_now, sup_sat_prev) - min(sup_sat_now, sup_sat_prev) );
+        self.integral_supersat = self.prev.integral_supersat + sup_sat_int_add;
 
     def set_updated_deco_info(self, deco_model, gases, amb_to_gf = None ):
         self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, self.gas, gases, amb_to_gf = amb_to_gf );
