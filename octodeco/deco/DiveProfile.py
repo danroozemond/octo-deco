@@ -3,9 +3,10 @@ import copy;
 import datetime
 import math;
 import time;
+from typing import Set, Any
 
 import pandas as pd;
-import pytz
+import pytz;
 
 from . import Buhlmann;
 from . import DiveProfileSer;
@@ -20,6 +21,8 @@ Conventions:
 
 
 class DiveProfile:
+    _gases_carried: Set[ Any ]
+
     def __init__(self,
                  descent_speed = 20, ascent_speed = 10,
                  max_pO2_deco = 1.60, gas_switch_mins = 3.0,
@@ -447,7 +450,11 @@ class DiveProfile:
         cp.add_stops_to_surface();
         return cp.decotime();
 
-    def decotimes_for_gfs(self, gflows=[ 25, 35, 45, 55 ],gfhighs=[ 45, 65, 70, 75, 85, 95 ]):
+    def decotimes_for_gfs(self, gflows = None, gfhighs = None):
+        if gfhighs is None:
+            gfhighs = [ 45, 65, 70, 75, 85, 95 ]
+        if gflows is None:
+            gflows = [ 25, 35, 45, 55 ]
         rtt = self.runtimetable();
         if rtt is None:
             # We could not create a runtime table, because it did not make sense
