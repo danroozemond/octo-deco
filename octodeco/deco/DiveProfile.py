@@ -11,6 +11,7 @@ import pytz;
 from . import Buhlmann;
 from . import DiveProfileSer;
 from . import Gas;
+from . import Cylinder;
 from .DivePoint import DivePoint;
 
 '''
@@ -38,6 +39,7 @@ class DiveProfile:
         self._gas_consmp_bottom = gas_consmp_bottom;
         self._gas_consmp_deco = gas_consmp_deco;
         self._gases_carried = set();
+        self._cylinders_used = None;
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;
         self._desc_deco_model_display = '';
@@ -502,8 +504,7 @@ class DiveProfile:
         gci = self._gas_consumption_info();
         r = [ { 'lost': None, **gci} ];
         # Identify bottom gas / deco gas
-        gc = self.gas_consumption();
-        bottom_gas = max(gc, key=lambda k: gc[k]);
+        bottom_gas = self._guess_bottom_gas();
         deco_gases = self.gases_carried().copy();
         deco_gases.remove(bottom_gas);
         # Then, for each deco gas ..
@@ -512,3 +513,23 @@ class DiveProfile:
             ccp = cp.copy_profile_lost_gases([gas], interpolate = False);
             r.append({'lost': str(gas), **ccp._gas_consumption_info()});
         return r;
+
+    '''
+    Gas consumption: cylinders
+    '''
+    def _guess_bottom_gas(self):
+        gc = self.gas_consumption();
+        bottom_gas = max(gc, key = lambda k: gc[ k ]);
+        return bottom_gas;
+
+    def _guess_cylinders(self):
+        bottom_gas = self._guess_bottom_gas();
+        r = { k : Cylinder.Cylinder('D12', 24, 200) if k == bottom_gas else Cylinder.Guess(v, k)
+              for k,v in self.gas_consumption().items() };
+        return r;
+
+    def cylinders_used(self):
+        if self._cylinders_used is None:
+            self._cylinders_used = self._guess_cylinders();
+        return self._cylinders_used;
+
