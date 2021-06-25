@@ -28,9 +28,9 @@ class DivePoint:
     def debug_info(self):
         fmt = '{}{}{} T {:6.1f}  D {:5.1f}  P {:3.1f}={:3.1f}  G {:5s}  DD {:5.1f}  CNS {:5.1f}  FS {:5.1f}  ' +\
                'C {:5.1f}   GF {:5.1f}   SGF {:6.1f}  {}';
-        return fmt.format('I' if self.is_interpolated_point else ' ',\
-                          'D' if self.is_deco_stop else ' ',\
-                          'A' if self.is_ascent_point else ' ',\
+        return fmt.format('I' if self.is_interpolated_point else ' ',
+                          'D' if self.is_deco_stop else ' ',
+                          'A' if self.is_ascent_point else ' ',
                           self.time, self.depth, self.p_amb, self.p_alv, str(self.gas), self.duration,
                           self.cns_perc,
                           self.deco_info['FirstStop'],self.deco_info['Ceil'],
@@ -57,7 +57,7 @@ class DivePoint:
         else:
             r += [ '' for i in range( len(DivePoint.dataframe_columns_deco_info()) + 1) ];
         r += [ 1 if self.is_deco_stop else 0, 1 if self.is_ascent_point else 0, 1 if self.is_interpolated_point else 0];
-        r += [ diveprofile.gf_low_profile, diveprofile.gf_high_profile ] if diveprofile is not None else [100,100];
+        r += [ diveprofile.gf_low_profile, diveprofile.gf_high_profile ] if diveprofile is not None else [100, 100];
         return r;
 
     @property
