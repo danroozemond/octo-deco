@@ -142,6 +142,7 @@ class DiveProfile:
             self._points[0].gas = gas;
         p = DivePoint(new_time, new_depth, gas, self._points[-1]);
         self._points.append(p);
+        p.set_updated_gas_consumption_info(self);
         return p;
 
     def _append_point(self, time_diff, new_depth, gas):
@@ -294,6 +295,7 @@ class DiveProfile:
         for p in self._points:
             p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = p.deco_info['amb_to_gf'];
+            p.set_updated_gas_consumption_info(self);
         self.update_deco_model_info(deco_model, update_display = True)
         self._full_info_computation_time = time.perf_counter() - t0;
 
@@ -460,12 +462,7 @@ class DiveProfile:
     Gas consumption computations
     '''
     def gas_consumption(self):
-        r = {};
-        for p in self._points:
-            if p.duration > 0 and p.depth > 0:
-                rate = self._gas_consmp_deco if p.is_deco_stop else self._gas_consmp_bottom;
-                r[p.gas] = r.get(p.gas, 0.0) + p.duration * p.p_amb * rate;
-        return r;
+        return self._points[-1].gas_consumption_info();
 
     def _gas_consumption_info(self):
         return { 'decotime' : self.decotime(), 'gas_consmp': self.gas_consumption() };

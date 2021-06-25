@@ -15,6 +15,7 @@ class DivePoint:
         self.is_interpolated_point = False;
         self.cns_perc = 0.0;
         self.prev = prev;
+        self._gas_consumption_info = dict();
         # NOTE - If you add attributes here, also add migration code to DiveProfileSer
         #
 
@@ -95,4 +96,16 @@ class DivePoint:
     def set_updated_deco_info(self, deco_model, gases, amb_to_gf = None ):
         self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, self.gas, gases, amb_to_gf = amb_to_gf );
 
+    def set_updated_gas_consumption_info(self, diveprofile):
+        if self.prev is None:
+            self._gas_consumption_info = { g : 0.0 for g in diveprofile.gases_carried() };
+        else:
+            self._gas_consumption_info = self.prev._gas_consumption_info.copy();
+        if self.duration > 0 and self.depth > 0:
+            rate = diveprofile._gas_consmp_deco if self.is_deco_stop else diveprofile._gas_consmp_bottom;
+            gas = self.gas;
+            self._gas_consumption_info[ gas ] = self._gas_consumption_info.get(gas, 0.0) \
+                                                + self.duration * self.p_amb * rate;
 
+    def gas_consumption_info(self):
+        return self._gas_consumption_info;
