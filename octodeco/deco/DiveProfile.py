@@ -280,8 +280,7 @@ class DiveProfile:
                 r[ 'gas_usage' ] = {lastgas: gci[ lastgas ]};
                 lastgas = p.gas;
             res.append(r);
-        res.append({'depth': 0.0,
-                    'gas_usage': points[-1].gas_consumption_info()});
+        res.append({'depth': 0.0});
         return res;
 
     '''

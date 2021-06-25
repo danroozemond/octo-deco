@@ -68,7 +68,7 @@ table.dataframe {
     margin: 1em;
 }
 table.smalltable  {
-    width: 50%;
+    width: 70%;
 }
 table.dataframe tr:nth-child(even) {
     background-color: #f0f0f0;

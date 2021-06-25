@@ -122,10 +122,12 @@ class CachedDiveProfile:
         if rtt is None:
             return 'A runtime table is unfortunately not available for this dive.';
         dsdf = pandas.DataFrame(rtt);
+        dsdf = dsdf[['depth','time','gas','gas_usage']].rename(columns={'gas_usage':'gas usage'});
         frm = {
             'depth': lambda x: '{:.0f}'.format(x),
             'time': lambda x: '{:.1f}'.format(x) if not pandas.isnull(x) else '',
-            'gas': str
+            'gas': str,
+            'gas usage': lambda d: ', '.join([ '{}: {:.0f}L used'.format(k,v) for k,v in d.items() ])
         };
         dsdf_table = dsdf.to_html(classes="smalltable", header="true",
                                   formatters=frm, na_rep='');

@@ -85,6 +85,7 @@ def modify_settings(dive_id):
         if ipt_gas_consmp_bottom != dp._gas_consmp_bottom or ipt_gas_consmp_deco != dp._gas_consmp_deco:
             dp._gas_consmp_bottom = ipt_gas_consmp_bottom;
             dp._gas_consmp_deco = ipt_gas_consmp_deco;
+            dp.update_deco_info();
             flash("Updated gas consumption figures");
         # Remove all stops
         ipt_remove_all_stops = ( request.form.get('ipt_remove_all_stops', 'off').lower() == 'on')
