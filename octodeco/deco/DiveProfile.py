@@ -268,14 +268,20 @@ class DiveProfile:
             if len(points) > 30:
                 return None;
         # Transform to runtime
-        res = []; lastgas = None;
+        res = []; lastgas = points[0].gas;
         for p in points:
-            r = {'depth':p.depth, 'time':p.time};
-            if p.gas != lastgas:
+            gci = p.gas_consumption_info();
+            r = {'depth':p.depth,
+                 'time':p.time};
+            if p.gas == lastgas:
+                r[ 'gas_usage' ] = { p.gas : gci[p.gas] };
+            else:
+                r[ 'gas' ] = p.gas;
+                r[ 'gas_usage' ] = {lastgas: gci[ lastgas ]};
                 lastgas = p.gas;
-                r['gas'] = p.gas;
             res.append(r);
-        res.append({'depth':0.0});
+        res.append({'depth': 0.0,
+                    'gas_usage': points[-1].gas_consumption_info()});
         return res;
 
     '''
