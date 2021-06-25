@@ -31,6 +31,9 @@ class Gas(dict):
         else:
             return all([ self[g] == other[g] for g in [ 'fO2', 'fN2', 'fHe' ]]);
 
+    def __ne__(self, other):
+        return not self.__eq__(other);
+
 
 def Air():
     return Gas({ 'fO2': 0.21, 'fN2': 0.79, 'fHe': 0.0 });
