@@ -31,7 +31,7 @@ app.config.from_mapping(
     SECRET_KEY = setting_secret_key,
     DATABASE = os.path.join(app.instance_path, 'flaskr.sqlite'),
     NAV_ITEMS = get_nav_items(),
-    CACHE_TYPE = "filesystem",  # Flask-Caching related configs
+    CACHE_TYPE = "FileSystemCache",  # Flask-Caching related configs
     CACHE_DIR = cache_dir,
     CACHE_THRESHOLD = cache_threshold,
     CACHE_DEFAULT_TIMEOUT = 300
