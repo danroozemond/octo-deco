@@ -521,7 +521,7 @@ class DiveProfile:
     def gas_consumption_analysis(self):
         # First, everything as planned
         gci = self._gas_consumption_info();
-        r = [ { 'lost': None, **gci} ];
+        r = [ { 'lost': None, 'emergency' : self.analyze_emergency_gas_need(), **gci} ];
         # Identify bottom gas / deco gas
         bottom_gas = self._guess_bottom_gas();
         deco_gases = self.gases_carried().copy();
@@ -530,13 +530,25 @@ class DiveProfile:
         cp = self.clean_copy()
         for gas in deco_gases:
             ccp = cp.copy_profile_lost_gases([gas], interpolate = False);
-            r.append({'lost': str(gas), **ccp._gas_consumption_info()});
+            r.append({'lost': str(gas),
+                      'emergency' : ccp.analyze_emergency_gas_need(),
+                      **ccp._gas_consumption_info()});
         return r;
 
-    def emergency_gas_need(self, p_amb):
-        # Returns liters needed, based on:
-        # 2x divers, 2x stress, 4 mins needed
-        return 2 * 2 * 4 * self._gas_consmp_bottom * p_amb;
+    def analyze_emergency_gas_need(self):
+        bottom_gas = self._guess_bottom_gas();
+        cyl = self.cylinders_used()[bottom_gas];
+        liters_used_bottom_gas = self.gas_consumption()[bottom_gas];
+        max_p_amb = max([ p.p_amb for p in self._points]);
+        liters_needed_emerg = 2 * 2 * 4 * self._gas_consmp_bottom * max_p_amb;
+        perc_emerg = cyl.liters_used_to_perc(liters_used_bottom_gas + liters_needed_emerg);
+        ok = perc_emerg < 95.0;
+        r = { 'bottom_gas' : bottom_gas,
+              'perc_used' : cyl.liters_used_to_perc(liters_used_bottom_gas),
+              'perc_emerg' : perc_emerg,
+              'ok' : ok };
+        return r;
+
 
     '''
     Gas consumption: cylinders

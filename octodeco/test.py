@@ -26,9 +26,9 @@ for s in dp.runtimetable():
 
 # print(dp.gas_consumption())
 #
-# print('');
-# for s in dp.gas_consumption_analysis():
-#     print(s)
+print('');
+for s in dp.gas_consumption_analysis():
+    print(s)
 
 # for p in dp._points:
 #     print(p.debug_info());
