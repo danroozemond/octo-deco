@@ -479,7 +479,16 @@ class DiveProfile:
         return self._points[-1].gas_consumption_info();
 
     def _gas_consumption_info(self):
-        return { 'decotime' : self.decotime(), 'gas_consmp': self.gas_consumption() };
+        cyls = self.cylinders_used();
+        gci = self.gas_consumption();
+        gci_more = { gas : {
+                'liters': liters,
+                'bars': cyls[gas].liters_to_bars(liters),
+                'perc': cyls[gas].liters_used_to_perc(liters),
+                'cyl_name': cyls[gas].name
+            }
+            for gas,liters in gci.items() } ;
+        return { 'decotime' : self.decotime(), 'gas_consmp': gci_more };
 
     def _update_profile_lost_gases(self, lost_gases, interpolate = True):
         self._gases_carried.difference_update(set(lost_gases));

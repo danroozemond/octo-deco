@@ -13,10 +13,10 @@ class Cylinder:
         self.contains_L = size_L * max_pressure_bar;
 
     def liters_to_bars(self, liters):
-        return liters/self.contains_L;
+        return liters/self.size_L;
 
     def liters_used_to_perc(self, liters):
-        return 100.0 * self.liters_to_bars( liters ) / self.max_pressure_bar;
+        return 100.0 * liters / self.contains_L;
 
     def __repr__(self):
         return '{}[{}L, {}bar]'.format(self.name, self.size_L, self.max_pressure_bar);

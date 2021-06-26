@@ -147,7 +147,7 @@ class CachedDiveProfile:
             format_lost_gas_link(s['lost'])
             :
             { ' deco time': '{:.1f}mins'.format(s[ 'decotime' ]),
-              **{str(k): '{:.0f}L'.format(v) for k, v in s[ 'gas_consmp' ].items()}}
+              **{str(gas): '{:.0f}L'.format(inf['liters']) for gas, inf in s[ 'gas_consmp' ].items()}}
             for s in gct };
         dsdf = pandas.DataFrame(gct_formatted);
         dsdf_table = dsdf.to_html(classes="smalltable", na_rep='', escape=False);

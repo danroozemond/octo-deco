@@ -7,7 +7,7 @@ from octodeco.deco.DiveProfile import DiveProfile;
 
 t0 = time.perf_counter();
 
-dp = DiveProfile(gf_low=35, gf_high=70);
+dp = DiveProfile(gf_low=35, gf_high=70, gas_consmp_deco = 14, gas_consmp_bottom = 16);
 dp.append_section(52, 10-52/20, gas = Gas.Trimix(21,35));
 dp.append_section(48, 20-4/20, gas = Gas.Trimix(21,35));
 dp.add_gas(Gas.Nitrox(50))
@@ -25,8 +25,6 @@ for s in dp.runtimetable():
     print(s);
 
 print(dp.gas_consumption())
-
-print(dp._guess_cylinders())
 
 print('');
 for s in dp.gas_consumption_analysis():
