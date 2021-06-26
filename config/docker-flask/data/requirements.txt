@@ -1,7 +1,8 @@
 pandas
 numpy
 plotly
-flask
+# There's an issue with werkzeug in 2.0.1.
+flask<2.0.0
 click
 uwsgi
 oauthlib
