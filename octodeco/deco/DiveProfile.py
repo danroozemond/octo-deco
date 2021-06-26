@@ -544,6 +544,7 @@ class DiveProfile:
         perc_emerg = cyl.liters_used_to_perc(liters_used_bottom_gas + liters_needed_emerg);
         ok = perc_emerg < 95.0;
         r = { 'bottom_gas' : bottom_gas,
+              'cyl_name' : cyl.name,
               'perc_used' : cyl.liters_used_to_perc(liters_used_bottom_gas),
               'perc_emerg' : perc_emerg,
               'ok' : ok };
