@@ -127,7 +127,7 @@ class CachedDiveProfile:
             'depth': lambda x: '{:.0f}'.format(x),
             'time': lambda x: '{:.1f}'.format(x) if not pandas.isnull(x) else '',
             'gas': str,
-            'gas usage': lambda d: ', '.join([ '{}: {:.0f}L used'.format(k,v) for k,v in d.items() ])
+            'gas usage': lambda d: ', '.join([ '{}: {:.0f}L used ({:.0f} bar from {})'.format(gas,inf['liters_used'], inf['bars_used'], inf['cyl_name']) for gas,inf in d.items() ])
         };
         dsdf_table = dsdf.to_html(classes="smalltable", header="true",
                                   formatters=frm, na_rep='');
