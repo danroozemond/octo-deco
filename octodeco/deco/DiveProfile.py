@@ -256,6 +256,15 @@ class DiveProfile:
     '''
     Generating a runtime
     '''
+    def _runtimetable_gas_usage_info(self, p_amb, gas, cyls, gas_used):
+        liters = gas_used[gas];
+        cyl = cyls[gas];
+        r = { gas: { 'liters_used': liters,
+                     'bars_used' : cyl.liters_to_bars(liters),
+                     'perc_used' : cyl.liters_used_to_perc(liters),
+                     'cyl_name' : cyl.name } };
+        return r;
+
     def runtimetable(self):
         # Collect the interesting points: last points of each section
         points = [];
@@ -274,15 +283,16 @@ class DiveProfile:
                 return None;
         # Transform to runtime
         res = []; lastgas = points[0].gas;
+        cyls = self.cylinders_used();
         for p in points:
             gci = p.gas_consumption_info();
             r = {'depth':p.depth,
                  'time':p.time};
             if p.gas == lastgas:
-                r[ 'gas_usage' ] = { p.gas : gci[p.gas] };
+                r[ 'gas_usage' ] = self._runtimetable_gas_usage_info(p.p_amb, p.gas, cyls, gci);
             else:
                 r[ 'gas' ] = p.gas;
-                r[ 'gas_usage' ] = {lastgas: gci[ lastgas ]};
+                r[ 'gas_usage' ] = self._runtimetable_gas_usage_info(p.p_amb, lastgas, cyls, gci);
                 lastgas = p.gas;
             res.append(r);
         res.append({'depth': 0.0});
@@ -522,6 +532,11 @@ class DiveProfile:
             ccp = cp.copy_profile_lost_gases([gas], interpolate = False);
             r.append({'lost': str(gas), **ccp._gas_consumption_info()});
         return r;
+
+    def emergency_gas_need(self, p_amb):
+        # Returns liters needed, based on:
+        # 2x divers, 2x stress, 4 mins needed
+        return 2 * 2 * 4 * self._gas_consmp_bottom * p_amb;
 
     '''
     Gas consumption: cylinders

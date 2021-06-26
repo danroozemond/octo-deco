@@ -8,8 +8,8 @@ from octodeco.deco.DiveProfile import DiveProfile;
 t0 = time.perf_counter();
 
 dp = DiveProfile(gf_low=35, gf_high=70, gas_consmp_deco = 14, gas_consmp_bottom = 16);
-dp.append_section(52, 10-52/20, gas = Gas.Trimix(21,35));
-dp.append_section(48, 20-4/20, gas = Gas.Trimix(21,35));
+dp.append_section(52, 30-52/20, gas = Gas.Trimix(21,35));
+#dp.append_section(48, 20-4/20, gas = Gas.Trimix(21,35));
 dp.add_gas(Gas.Nitrox(50))
 dp.add_gas(Gas.Nitrox(80))
 dp.add_stops_to_surface();
@@ -24,11 +24,11 @@ print(dp.dive_summary());
 for s in dp.runtimetable():
     print(s);
 
-print(dp.gas_consumption())
-
-print('');
-for s in dp.gas_consumption_analysis():
-    print(s)
+# print(dp.gas_consumption())
+#
+# print('');
+# for s in dp.gas_consumption_analysis():
+#     print(s)
 
 # for p in dp._points:
 #     print(p.debug_info());
