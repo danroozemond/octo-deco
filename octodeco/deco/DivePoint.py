@@ -15,6 +15,7 @@ class DivePoint:
         self.is_interpolated_point = False;
         self.cns_perc = 0.0;
         self.prev = prev;
+        self._gas_consumption_info = dict();
         # NOTE - If you add attributes here, also add migration code to DiveProfileSer
         #
 
@@ -28,9 +29,9 @@ class DivePoint:
     def debug_info(self):
         fmt = '{}{}{} T {:6.1f}  D {:5.1f}  P {:3.1f}={:3.1f}  G {:5s}  DD {:5.1f}  CNS {:5.1f}  FS {:5.1f}  ' +\
                'C {:5.1f}   GF {:5.1f}   SGF {:6.1f}  {}';
-        return fmt.format('I' if self.is_interpolated_point else ' ',\
-                          'D' if self.is_deco_stop else ' ',\
-                          'A' if self.is_ascent_point else ' ',\
+        return fmt.format('I' if self.is_interpolated_point else ' ',
+                          'D' if self.is_deco_stop else ' ',
+                          'A' if self.is_ascent_point else ' ',
                           self.time, self.depth, self.p_amb, self.p_alv, str(self.gas), self.duration,
                           self.cns_perc,
                           self.deco_info['FirstStop'],self.deco_info['Ceil'],
@@ -57,7 +58,7 @@ class DivePoint:
         else:
             r += [ '' for i in range( len(DivePoint.dataframe_columns_deco_info()) + 1) ];
         r += [ 1 if self.is_deco_stop else 0, 1 if self.is_ascent_point else 0, 1 if self.is_interpolated_point else 0];
-        r += [ diveprofile.gf_low_profile, diveprofile.gf_high_profile ] if diveprofile is not None else [100,100];
+        r += [ diveprofile.gf_low_profile, diveprofile.gf_high_profile ] if diveprofile is not None else [100, 100];
         return r;
 
     @property
@@ -95,4 +96,16 @@ class DivePoint:
     def set_updated_deco_info(self, deco_model, gases, amb_to_gf = None ):
         self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, self.gas, gases, amb_to_gf = amb_to_gf );
 
+    def set_updated_gas_consumption_info(self, diveprofile):
+        if self.prev is None:
+            self._gas_consumption_info = { g : 0.0 for g in diveprofile.gases_carried() };
+        else:
+            self._gas_consumption_info = self.prev._gas_consumption_info.copy();
+        if self.duration > 0 and self.depth > 0:
+            rate = diveprofile._gas_consmp_deco if self.is_deco_stop else diveprofile._gas_consmp_bottom;
+            gas = self.gas;
+            self._gas_consumption_info[ gas ] = self._gas_consumption_info.get(gas, 0.0) \
+                                                + self.duration * self.p_amb * rate;
 
+    def gas_consumption_info(self):
+        return self._gas_consumption_info;

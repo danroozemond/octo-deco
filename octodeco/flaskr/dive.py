@@ -122,10 +122,12 @@ class CachedDiveProfile:
         if rtt is None:
             return 'A runtime table is unfortunately not available for this dive.';
         dsdf = pandas.DataFrame(rtt);
+        dsdf = dsdf[['depth','time','gas','gas_usage']].rename(columns={'gas_usage':'gas usage'});
         frm = {
             'depth': lambda x: '{:.0f}'.format(x),
             'time': lambda x: '{:.1f}'.format(x) if not pandas.isnull(x) else '',
-            'gas': str
+            'gas': str,
+            'gas usage': lambda d: ', '.join([ '{}: {:.0f}L used ({:.0f} bar from {})'.format(gas,inf['liters_used'], inf['bars_used'], inf['cyl_name']) for gas,inf in d.items() ])
         };
         dsdf_table = dsdf.to_html(classes="smalltable", header="true",
                                   formatters=frm, na_rep='');
@@ -139,13 +141,31 @@ class CachedDiveProfile:
             else:
                 return '<a href="{}?lostgas={}">lost {}</a>'.\
                     format(url_for('dive.new_ephm_lost_gas', dive_id=self.dive_id), slost, slost);
+        def format_emergency(dp, dict_emerg):
+            tooltip = 'In the event of an emergency ({:.0f}x, {:.0f}mins) at {:.0f}m you need {:.0f}% of the bottom gas {} in your {}'\
+                .format(dp._gas_consmp_emerg_factor, dp._gas_consmp_emerg_mins, dp.max_depth(),
+                        dict_emerg['perc_emerg'], dict_emerg['bottom_gas'], dict_emerg['cyl_name']);
+            text = '{:.0f}%'.format(dict_emerg['perc_emerg']);
+            cl = 'gas_{}'.format(dict_emerg['ok']);
+            return '<div class="tooltip {}">{}<span class="tooltiptext">{}</span></div>'.format(cl, text, tooltip);
+        def format_gas_usage(gas, inf):
+            if inf['liters'] == 0.0:
+                return '-';
+            text1 = '{:.0f}L'.format(inf['liters']);
+            text2 = '{:.0f}%'.format(inf['perc']);
+            tooltip = '{:.0f}bar of {}'.format(inf['bars'], inf['cyl_name']);
+            cl = 'gas_{}'.format(inf['ok']);
+            r = '{} [<span class="tooltip {}">{}<span class="tooltiptext">{}</span></span>]'.format(text1, cl, text2, tooltip);
+            return r;
         dp = self.profile_base();
         gct = dp.gas_consumption_analysis();
         gct_formatted = {
             format_lost_gas_link(s['lost'])
             :
             { ' deco time': '{:.1f}mins'.format(s[ 'decotime' ]),
-              **{str(k): '{:.0f}L'.format(v) for k, v in s[ 'gas_consmp' ].items()}}
+              ' emergency': format_emergency(dp, s['emergency']),
+              **{str(gas): format_gas_usage(gas, inf)
+                 for gas, inf in s[ 'gas_consmp' ].items()}}
             for s in gct };
         dsdf = pandas.DataFrame(gct_formatted);
         dsdf_table = dsdf.to_html(classes="smalltable", na_rep='', escape=False);
