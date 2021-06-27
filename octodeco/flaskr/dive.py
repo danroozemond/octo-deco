@@ -147,6 +147,15 @@ class CachedDiveProfile:
             text = '{:.0f}%'.format(dict_emerg['perc_emerg']);
             cl = 'gas_{}'.format(dict_emerg['ok']);
             return '<div class="tooltip {}">{}<span class="tooltiptext">{}</span></div>'.format(cl, text, tooltip);
+        def format_gas_usage(gas, inf):
+            if inf['liters'] == 0.0:
+                return '-';
+            text1 = '{:.0f}L'.format(inf['liters']);
+            text2 = '{:.0f}%'.format(inf['perc']);
+            tooltip = '{:.0f}bar of {}'.format(inf['bars'], inf['cyl_name']);
+            cl = 'gas_{}'.format(inf['ok']);
+            r = '{} [<span class="tooltip {}">{}<span class="tooltiptext">{}</span></span>]'.format(text1, cl, text2, tooltip);
+            return r;
         dp = self.profile_base();
         gct = dp.gas_consumption_analysis();
         gct_formatted = {
@@ -154,9 +163,7 @@ class CachedDiveProfile:
             :
             { ' deco time': '{:.1f}mins'.format(s[ 'decotime' ]),
               ' emergency': format_emergency(dp, s['emergency']),
-              **{str(gas):
-                     '{:.0f}L<br>[{:.0f}% of {}]'.format(inf['liters'],inf['perc'],inf['cyl_name'])
-                    if inf['liters'] > 0.0 else '-'
+              **{str(gas): format_gas_usage(gas, inf)
                  for gas, inf in s[ 'gas_consmp' ].items()}}
             for s in gct };
         dsdf = pandas.DataFrame(gct_formatted);

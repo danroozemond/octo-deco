@@ -491,14 +491,23 @@ class DiveProfile:
     def gas_consumption(self):
         return self._points[-1].gas_consumption_info();
 
-    def _gas_consumption_info(self):
+    @staticmethod
+    def _gas_consumption_ok(perc, emergency):
+        thr1 = 100.0*2/3 if not emergency else 95.0;
+        thr2 = 90.0      if not emergency else 99.0;
+        ok = 'good' if perc < thr1 else \
+            ('warn' if perc < thr2 else 'bad');
+        return ok;
+
+    def _gas_consumption_info(self, emergency):
         cyls = self.cylinders_used();
         gci = self.gas_consumption();
         gci_more = { gas : {
                 'liters': liters,
                 'bars': cyls[gas].liters_to_bars(liters),
                 'perc': cyls[gas].liters_used_to_perc(liters),
-                'cyl_name': cyls[gas].name
+                'cyl_name': cyls[gas].name,
+                'ok' : self._gas_consumption_ok(cyls[gas].liters_used_to_perc(liters), emergency)
             }
             for gas,liters in gci.items() } ;
         return { 'decotime' : self.decotime(), 'gas_consmp': gci_more };
@@ -523,7 +532,7 @@ class DiveProfile:
 
     def gas_consumption_analysis(self):
         # First, everything as planned
-        gci = self._gas_consumption_info();
+        gci = self._gas_consumption_info(False);
         r = [ { 'lost': None, 'emergency' : self.analyze_emergency_gas_need(), **gci} ];
         # Identify bottom gas / deco gas
         bottom_gas = self._guess_bottom_gas();
@@ -533,9 +542,10 @@ class DiveProfile:
         cp = self.clean_copy()
         for gas in deco_gases:
             ccp = cp.copy_profile_lost_gases([gas], interpolate = False);
+            gci = ccp._gas_consumption_info(True);
             r.append({'lost': str(gas),
                       'emergency' : ccp.analyze_emergency_gas_need(),
-                      **ccp._gas_consumption_info()});
+                      **gci});
         return r;
 
     def analyze_emergency_gas_need(self):
@@ -545,8 +555,7 @@ class DiveProfile:
         max_p_amb = max(map(lambda p: p.p_amb, self._points));
         liters_needed_emerg = 2 * 2 * 4 * self._gas_consmp_bottom * max_p_amb;
         perc_emerg = cyl.liters_used_to_perc(liters_used_bottom_gas + liters_needed_emerg);
-        ok = 'good' if perc_emerg < 95.0 else \
-            ('warn' if perc_emerg < 99.0 else 'bad');
+        ok = self._gas_consumption_ok(perc_emerg, True);
         r = { 'bottom_gas' : bottom_gas,
               'cyl_name' : cyl.name,
               'perc_used' : cyl.liters_used_to_perc(liters_used_bottom_gas),
