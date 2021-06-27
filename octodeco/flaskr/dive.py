@@ -141,19 +141,18 @@ class CachedDiveProfile:
             else:
                 return '<a href="{}?lostgas={}">lost {}</a>'.\
                     format(url_for('dive.new_ephm_lost_gas', dive_id=self.dive_id), slost, slost);
-        def format_emergency(dict_emerg):
-            perc = dict_emerg['perc_emerg'];
-            tooltip = 'In the event of an emergency at max depth you need {:.0f}% of your bottom gas {} in your {}'\
-                .format(perc, dict_emerg['bottom_gas'], dict_emerg['cyl_name']);
-            # TODO insert span with color and onhover &c
-            return '{:.0f}%'.format(perc);
+        def format_emergency(dp, dict_emerg):
+            tooltip = 'In the event of an emergency at {:.0f}m you need {:.0f}% of the bottom gas {} in your {}'\
+                .format(dp.max_depth(), dict_emerg['perc_emerg'], dict_emerg['bottom_gas'], dict_emerg['cyl_name']);
+            text = '{:.0f}%'.format(dict_emerg['perc_emerg']);
+            return '<div class="tooltip">{}<span class="tooltiptext">{}</span></div>'.format(text, tooltip);
         dp = self.profile_base();
         gct = dp.gas_consumption_analysis();
         gct_formatted = {
             format_lost_gas_link(s['lost'])
             :
             { ' deco time': '{:.1f}mins'.format(s[ 'decotime' ]),
-              ' emergency': format_emergency(s['emergency']),
+              ' emergency': format_emergency(dp, s['emergency']),
               **{str(gas):
                      '{:.0f}L<br>[{:.0f}% of {}]'.format(inf['liters'],inf['perc'],inf['cyl_name'])
                     if inf['liters'] > 0.0 else '-'

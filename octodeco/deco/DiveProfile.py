@@ -112,11 +112,14 @@ class DiveProfile:
     def cns_max(self):
         return max(map(lambda p: p.cns_perc, self._points));
 
+    def max_depth(self):
+        return max(map(lambda p: p.depth, self._points));
+
     def description(self):
         if self.custom_desc is not None:
             return self.custom_desc;
 
-        maxdepth = max(map( lambda p: p.depth, self._points ));
+        maxdepth = self.max_depth();
         dtc = self.created.strftime('%d-%b-%Y %H:%M');
         r = '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
         if self.add_custom_desc is not None and self.add_custom_desc != '':
@@ -539,7 +542,7 @@ class DiveProfile:
         bottom_gas = self._guess_bottom_gas();
         cyl = self.cylinders_used()[bottom_gas];
         liters_used_bottom_gas = self.gas_consumption()[bottom_gas];
-        max_p_amb = max([ p.p_amb for p in self._points]);
+        max_p_amb = max(map(lambda p: p.p_amb, self._points));
         liters_needed_emerg = 2 * 2 * 4 * self._gas_consmp_bottom * max_p_amb;
         perc_emerg = cyl.liters_used_to_perc(liters_used_bottom_gas + liters_needed_emerg);
         ok = perc_emerg < 95.0;
