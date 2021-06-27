@@ -38,6 +38,8 @@ class DiveProfile:
         self._last_stop_depth = last_stop_depth;
         self._gas_consmp_bottom = gas_consmp_bottom;
         self._gas_consmp_deco = gas_consmp_deco;
+        self._gas_consmp_emerg_factor = 4.0;
+        self._gas_consmp_emerg_mins = 4.0;
         self._gases_carried = set();
         self._cylinders_used = None;
         self._deco_stops_computation_time = 0.0;
