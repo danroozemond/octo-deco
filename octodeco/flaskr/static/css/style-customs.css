@@ -216,7 +216,19 @@ input[type="text"].changeable {
     width: 2em;
 }
 
-/* Tooltips */
+.gas_good {
+    color: teal;
+}
+.gas_warn {
+    color: #d0b949;
+}
+.gas_bad {
+    color: #cc0000;
+}
+
+/*
+ * Tooltips
+ */
 .tooltip {
   position: relative;
   display: inline-block;
@@ -249,3 +261,4 @@ input[type="text"].changeable {
   visibility: visible;
   opacity: 1;
 }
+

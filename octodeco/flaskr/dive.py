@@ -145,7 +145,8 @@ class CachedDiveProfile:
             tooltip = 'In the event of an emergency at {:.0f}m you need {:.0f}% of the bottom gas {} in your {}'\
                 .format(dp.max_depth(), dict_emerg['perc_emerg'], dict_emerg['bottom_gas'], dict_emerg['cyl_name']);
             text = '{:.0f}%'.format(dict_emerg['perc_emerg']);
-            return '<div class="tooltip">{}<span class="tooltiptext">{}</span></div>'.format(text, tooltip);
+            cl = 'gas_{}'.format(dict_emerg['ok']);
+            return '<div class="tooltip {}">{}<span class="tooltiptext">{}</span></div>'.format(cl, text, tooltip);
         dp = self.profile_base();
         gct = dp.gas_consumption_analysis();
         gct_formatted = {

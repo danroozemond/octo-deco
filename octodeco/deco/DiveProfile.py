@@ -545,7 +545,8 @@ class DiveProfile:
         max_p_amb = max(map(lambda p: p.p_amb, self._points));
         liters_needed_emerg = 2 * 2 * 4 * self._gas_consmp_bottom * max_p_amb;
         perc_emerg = cyl.liters_used_to_perc(liters_used_bottom_gas + liters_needed_emerg);
-        ok = perc_emerg < 95.0;
+        ok = 'good' if perc_emerg < 95.0 else \
+            ('warn' if perc_emerg < 99.0 else 'bad');
         r = { 'bottom_gas' : bottom_gas,
               'cyl_name' : cyl.name,
               'perc_used' : cyl.liters_used_to_perc(liters_used_bottom_gas),
