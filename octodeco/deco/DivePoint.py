@@ -53,7 +53,7 @@ class DivePoint:
         r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * self.p_amb, self.cns_perc ];
         if self.deco_info is not None:
             r += [ self.deco_info[n] for n in DivePoint.dataframe_columns_deco_info() ];
-            r += [ Util.stops_to_string( self.deco_info['Stops'] ) ]
+            r += [ Util.stops_to_string_precise( self.deco_info['Stops'] ) ]
         else:
             r += [ '' for i in range( len(DivePoint.dataframe_columns_deco_info()) + 1) ];
         r += [ 1 if self.is_deco_stop else 0, 1 if self.is_ascent_point else 0, 1 if self.is_interpolated_point else 0];
