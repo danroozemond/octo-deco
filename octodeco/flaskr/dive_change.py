@@ -1,5 +1,4 @@
-from . import dive;
-from . import db_dive;
+from . import dive, dive_new, db_dive;
 from .dive import bp;
 from flask import (
     flash, redirect, url_for, request, abort, session
@@ -13,8 +12,10 @@ from flask import (
 def update(dive_id):
     action = request.form.get('action');
     dp = dive.get_diveprofile_for_display(dive_id);
-    if dp is None:
+    # Check
+    if dp is None and action != 'Duplicate dive':
         abort(405);
+    # Do
     if action == 'Update Stops':
         olddecotime = dp.decotime();
         dp.set_gf(dp.gf_low_display, dp.gf_high_display, updateStops = True);
@@ -22,6 +23,8 @@ def update(dive_id):
         db_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
+    elif action == 'Duplicate dive':
+        return redirect(url_for('dive.new_duplicate', dive_id = dive_id));
     else:
         abort(405);
 

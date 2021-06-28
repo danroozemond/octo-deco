@@ -83,6 +83,20 @@ def new_octodeco_csv():
     return new_csv( CreateDive.create_from_octodeco_csv );
 
 
+@bp.route('/new/duplicate/<int:dive_id>', methods = ['GET','POST'])
+def new_duplicate(dive_id):
+    dp = dive.get_cached_dive(dive_id).profile_base();
+    cp = dp.full_copy();
+    cp.is_ephemeral = False;
+    cp.is_public = False;
+    # Store the dive
+    db_dive.store_dive(cp);
+    new_dive_id = cp.dive_id;
+    flash('Duplicated {}: {}'.format(dive_id, cp.description()));
+    # Done.
+    return redirect(url_for('dive.show', dive_id = new_dive_id));
+
+
 #
 # Create ephemeral/temp dives as variant of existing ones
 #

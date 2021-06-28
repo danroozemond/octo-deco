@@ -65,12 +65,16 @@ class DiveProfile:
     def points(self):
         return self._points;
 
-    def clean_copy(self):
+    def full_copy(self):
         cp = copy.deepcopy(self);
         if hasattr(cp, 'dive_id'):
             delattr(cp, 'dive_id')
         if hasattr(cp, 'user_id'):
             delattr(cp, 'user_id');
+        return cp;
+
+    def clean_copy(self):
+        cp = self.full_copy();
         cp._remove_all_extra_points( update_deco_info = False );
         return cp;
 
