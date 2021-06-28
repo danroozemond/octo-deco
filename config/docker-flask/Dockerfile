@@ -1,4 +1,4 @@
-FROM python:3.8.2-buster
+FROM python:3.9.5-buster
 
 COPY data /data
 RUN pip install -r /data/requirements.txt
