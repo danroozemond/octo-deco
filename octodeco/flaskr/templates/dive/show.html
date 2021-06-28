@@ -355,8 +355,10 @@
             <span id="show_gfhigh" class="changeable">world</span>
         {% if modify_allowed %}
             <input type="submit" name="action" value="Update Stops">
-        </div>
+        {% else %}
+            <input type="submit" name="action" value="Duplicate dive">
         {% endif %}
+        </div>
     </form>
 
     <!--
@@ -470,6 +472,11 @@
     <form method="post" action="{{url_for('dive.delete',dive_id=dive.dive_id)}}">
         <label for="subm_delete">Delete:</label>
         <input type="submit" name="action_delete" id="subm_delete" value="Delete this dive" onclick="return confirm('Sure?');">
+    </form>
+    <h3>Duplicate</h3>
+    <form method="post" action="{{url_for('dive.new_duplicate',dive_id=dive.dive_id)}}">
+        <label for="subm_duplicate">Duplicate:</label>
+        <input type="submit" name="action_duplicate" id="subm_duplicate" value="Create a fresh copy">
     </form>
     </div>
     {% endif %}
