@@ -6,7 +6,7 @@ import pickle;
 
 import pytz
 
-CURRENT_VERSION = 13;
+CURRENT_VERSION = 16;
 
 
 #
@@ -25,9 +25,13 @@ def _migrate_up_to_current(from_version, diveprofile):
         diveprofile._gas_consmp_bottom = 20.0;
     if not hasattr(diveprofile, '_gas_consmp_deco'):
         diveprofile._gas_consmp_deco = 20.0;
+    if not hasattr(diveprofile, '_gas_consmp_emerg_factor'):
+        diveprofile._gas_consmp_emerg_factor = 4.0;
+    if not hasattr(diveprofile, '_gas_consmp_emerg_mins'):
+        diveprofile._gas_consmp_emerg_mins = 4.0;
 
     # None
-    for attrname in [ 'custom_desc', 'add_custom_desc' ]:
+    for attrname in [ 'custom_desc', 'add_custom_desc', '_cylinders_used' ]:
         if not hasattr(diveprofile, attrname):
             setattr(diveprofile, attrname, None);
 
@@ -42,6 +46,8 @@ def _migrate_up_to_current(from_version, diveprofile):
             point.is_ascent_point = False;
         if not hasattr(point, 'cns_perc'):
             point.cns_perc = 0.0;
+        if not hasattr(point, '_gas_consumption_info'):
+            point.set_updated_gas_consumption_info(diveprofile);
 
     # v8
     if hasattr(diveprofile, '_deco_model'):
