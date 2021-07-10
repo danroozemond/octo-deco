@@ -227,6 +227,19 @@ class DiveProfile:
         self.add_stops();
 
     '''
+    Getting some info
+    '''
+    def find_point_at_time(self, find_time):
+        a = 0; b = len(self._points)-1;
+        while a + 1 < b:
+            h = int(a + (b-a)/2);
+            if self._points[h].time < find_time:
+                a = h;
+            else:
+                b = h;
+        return self._points[h];
+
+    '''
     Granularity
     '''
     def interpolate_points(self, granularity_mins = 1.0):
