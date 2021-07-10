@@ -215,12 +215,13 @@ class Buhlmann:
         # the % makes most sense if ambient pressure is between compartment pressure and tolerance
         # if ambient pressure is bigger than compartment pressure: ongassing
         gf99s, gf99, leading_tissue_i = tissue_state.GF99_all_info(p_amb);
-        surfacegf = tissue_state.GF99(Util.SURFACE_PRESSURE);
+        surfacegfs, surfacegf, _ = tissue_state.GF99_all_info(Util.SURFACE_PRESSURE);
         result = {'Ceil99': Util.Pamb_to_depth(p_ceiling_99),
                   'GF99': round(gf99, 1),
                   'SurfaceGF': round(surfacegf, 1),
                   'LeadingTissueIndex': leading_tissue_i,
-                  'allGF99s': gf99s
+                  'allGF99s': gf99s,
+                  'allSurfaceGFs' : surfacegfs
                   };
 
         # Below is about computing the decompression profile

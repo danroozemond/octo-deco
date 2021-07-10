@@ -98,3 +98,4 @@ assert pt_surf.depth == 0.0;
 assert pt_surf.prev.depth > 0.0;
 print('\nGF on surfacing (time {:.1f}) {} {}'.format(pt_surf.time, pt_surf.deco_info['GF99'], pt_surf.deco_info['SurfaceGF'] ));
 print('All GFs at time {:.1f} : {}'.format(pt_surf.time, pt_surf.deco_info['allGF99s']));
+print('All SGFs at time {:.1f} : {}'.format(pt_surf.time, pt_surf.deco_info['allSurfaceGFs']));
