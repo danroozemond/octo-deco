@@ -1,4 +1,4 @@
-import sys, math, time, os, re;
+import sys, math, os, re;
 import xml.etree.ElementTree as ET
 
 from octodeco.deco import Gas, Util, CreateDive, CNSConstants;
@@ -37,8 +37,8 @@ class XmlGasEvents:
         self._events = [ ( xml_parse_time(xe.attrib['time']), XmlGasEvents._gas_from_xml_event(xe) )
                          for xe in xevents ];
         self._events.sort(key=(lambda t: t[0]));
-        self.current_time = 0.0;
-        self.current_gas = self._events[0][1];
+        assert len(self._events) >= 0;
+        self.current_idx = 0;
 
     def _gas_from_xml_event(xe):
         f = lambda s: float(re.search('^([0-9\.]+)',s).group(1))
@@ -48,7 +48,9 @@ class XmlGasEvents:
         return set([t[1] for t in self._events]);
 
     def get_gas(self, time):
-        return Gas.Air();
+        if self.current_idx + 1 < len(self._events) and time >= self._events[self.current_idx+1][0]:
+            self.current_idx += 1;
+        return self._events[self.current_idx][1];
 
 
 def load_diveprofile_from_xml(xdive) -> DiveProfile:
@@ -94,5 +96,5 @@ time_surf = dp._points[-1].time - surf_len;
 pt_surf = dp.find_point_at_time(time_surf);
 assert pt_surf.depth == 0.0;
 assert pt_surf.prev.depth > 0.0;
-print('\nGF on surfacing (time {:.0f}) {} {}'.format(pt_surf.time, pt_surf.deco_info['GF99'], pt_surf.deco_info['SurfaceGF'] ));
-print('All GFs at time {:.0f} : {}'.format(pt_surf.time, pt_surf.deco_info['allGF99s']));
+print('\nGF on surfacing (time {:.1f}) {} {}'.format(pt_surf.time, pt_surf.deco_info['GF99'], pt_surf.deco_info['SurfaceGF'] ));
+print('All GFs at time {:.1f} : {}'.format(pt_surf.time, pt_surf.deco_info['allGF99s']));
