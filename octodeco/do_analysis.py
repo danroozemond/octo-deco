@@ -60,7 +60,16 @@ class XmlGasEvents:
 
 def load_diveprofile_from_xml(xdive) -> DiveProfile:
     xa = xdive.attrib;
-    dp = DiveProfile();
+    # Deco model
+    xdm = xdive.find('divecomputer/extradata[@key="Deco model"]');
+    gf_low = 35; gf_high = 70;
+    if xdm is not None:
+        m = re.match('^GF ([0-9]+)/([0-9]+)$', xdm.attrib[ 'value' ].strip());
+        if m is not None:
+            gf_low = int(m.group(1));
+            gf_high = int(m.group(2));
+    # Initiate DiveProfile
+    dp = DiveProfile(gf_low = gf_low, gf_high = gf_high);
     dp.xml_number = int(xa['number']);
     dp.divesite_uuid = xa['divesiteid'].strip();
     print('Loading dive {}'.format(dp.xml_number));
@@ -93,6 +102,7 @@ def add_key_data(df, diveprofiles, divesites):
     df['depth'] = df['number'].map(lambda n : diveprofiles[n].max_depth());
     df['dive time'] = df['number'].map(lambda n: diveprofiles[ n ].divetime());
     df['gases'] = df['number'].map(lambda n : ','.join([ str(g) for g in diveprofiles[n].gases_carried()]));
+    df['deco_model'] = df['number'].map(lambda n : diveprofiles[n]._desc_deco_model_display);
     return df;
 
 def add_gf99_data(df, diveprofiles):
@@ -139,31 +149,40 @@ def add_gf99_data(df, diveprofiles):
     # Done
     return df;
 
+def add_gf99_data_count_time(df, diveprofiles):
+    halftimes = next(iter(diveprofiles.values())).deco_model()._constants.N2_HALFTIMES;
+    N = 16; perc_thresholds = [ 10.0, 20.0 ];
+    # Do the math
+    for _,dp in diveprofiles.items():
+        # 1.
+        cumuls = { pthr : np.array([ 0.0 for i in range(N) ]) for pthr in perc_thresholds };
+        for p in dp.points():
+            if p.depth >= 2.0:
+                gf99s = p.deco_info['allGF99s'];
+                indics = { pthr :
+                               np.array([ 1.0 if gf99s[i] > pthr else 0.0 for i in range(N) ])
+                               for pthr in perc_thresholds };
+                for pthr in perc_thresholds:
+                    cumuls[pthr] = cumuls[pthr] + p.duration*indics[pthr];
+        dp.cumuls = cumuls;
+    # Fill the dataframe
+    # df[ 'all_GF99s_max' ] = df[ 'number' ].map(lambda n : diveprofiles[n].all_GF99s_max);
+    for pthr in perc_thresholds:
+        for i in range(N):
+            df[ 'cumul_GF99_over_{:.0f}%_T{}'.format(pthr,halftimes[i]) ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].cumuls[pthr][i])
+    # Done
+    return df;
 
 ##
 ## Execute
 ##
-# xdive = get_xml_dive(764);
-# dp = load_diveprofile_from_xml(xdive);
-# print(dp.description())
-# print('nr points:', len(dp._points));
-# for k,v in dp.dive_summary().items():
-#     print('{}: {}'.format(k,v));
-# surf_len = dp.length_of_surface_section();
-# time_surf = dp._points[-1].time - surf_len;
-# pt_surf = dp.find_point_at_time(time_surf);
-# assert pt_surf.depth == 0.0;
-# assert pt_surf.prev.depth > 0.0;
-# print('\nGF on surfacing (time {:.1f}) {} {}'.format(pt_surf.time, pt_surf.deco_info['GF99'], pt_surf.deco_info['SurfaceGF'] ));
-# print('All GFs at time {:.1f} : {}'.format(pt_surf.time, pt_surf.deco_info['allGF99s']));
-# print('All SGFs at time {:.1f} : {}'.format(pt_surf.time, pt_surf.deco_info['allSurfaceGFs']));
-
 diveprofiles = { n: load_diveprofile_from_xml(get_xml_dive(n)) for n in range(604, 607) };
 dd = { n : { 'number' : n, 'description': dp.description() }
        for n, dp in diveprofiles.items() };
 dfout = pd.DataFrame(dd).transpose();
 dfout = add_key_data(dfout, diveprofiles, get_xml_divesites());
 dfout = add_gf99_data(dfout, diveprofiles);
+dfout = add_gf99_data_count_time(dfout, diveprofiles);
 
 print(dfout.head());
 print('Writing output file...');
