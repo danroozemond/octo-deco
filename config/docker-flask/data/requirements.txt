@@ -1,11 +1,12 @@
 pandas
 numpy
 plotly
-flask
+# Werkzeug issue with flask 2.0.1
+flask==1.1.4
+Flask-Caching==1.10.1
 click
 uwsgi
 oauthlib
 requests
-Flask-Caching
 cython
 gitpython

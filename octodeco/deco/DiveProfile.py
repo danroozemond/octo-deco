@@ -3,13 +3,15 @@ import copy;
 import datetime
 import math;
 import time;
+from typing import Set, Any
 
 import pandas as pd;
-import pytz
+import pytz;
 
 from . import Buhlmann;
 from . import DiveProfileSer;
 from . import Gas;
+from . import Cylinder;
 from .DivePoint import DivePoint;
 
 '''
@@ -20,6 +22,8 @@ Conventions:
 
 
 class DiveProfile:
+    _gases_carried: Set[ Any ]
+
     def __init__(self,
                  descent_speed = 20, ascent_speed = 10,
                  max_pO2_deco = 1.60, gas_switch_mins = 3.0,
@@ -34,7 +38,10 @@ class DiveProfile:
         self._last_stop_depth = last_stop_depth;
         self._gas_consmp_bottom = gas_consmp_bottom;
         self._gas_consmp_deco = gas_consmp_deco;
+        self._gas_consmp_emerg_factor = 4.0;
+        self._gas_consmp_emerg_mins = 4.0;
         self._gases_carried = set();
+        self._cylinders_used = None;
         self._deco_stops_computation_time = 0.0;
         self._full_info_computation_time = 0.0;
         self._desc_deco_model_display = '';
@@ -58,12 +65,16 @@ class DiveProfile:
     def points(self):
         return self._points;
 
-    def clean_copy(self):
+    def full_copy(self):
         cp = copy.deepcopy(self);
         if hasattr(cp, 'dive_id'):
             delattr(cp, 'dive_id')
         if hasattr(cp, 'user_id'):
             delattr(cp, 'user_id');
+        return cp;
+
+    def clean_copy(self):
+        cp = self.full_copy();
         cp._remove_all_extra_points( update_deco_info = False );
         return cp;
 
@@ -108,6 +119,9 @@ class DiveProfile:
     def cns_max(self):
         return max(map(lambda p: p.cns_perc, self._points));
 
+    def max_depth(self):
+        return max(map(lambda p: p.depth, self._points));
+
     def integral_supersaturation(self):
         return self._points[-1].integral_supersat;
 
@@ -115,7 +129,7 @@ class DiveProfile:
         if self.custom_desc is not None:
             return self.custom_desc;
 
-        maxdepth = max(map( lambda p: p.depth, self._points ));
+        maxdepth = self.max_depth();
         dtc = self.created.strftime('%d-%b-%Y %H:%M');
         r = '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
         if self.add_custom_desc is not None and self.add_custom_desc != '':
@@ -146,6 +160,7 @@ class DiveProfile:
             self._points[0].gas = gas;
         p = DivePoint(new_time, new_depth, gas, self._points[-1]);
         self._points.append(p);
+        p.set_updated_gas_consumption_info(self);
         return p;
 
     def _append_point(self, time_diff, new_depth, gas):
@@ -254,6 +269,15 @@ class DiveProfile:
     '''
     Generating a runtime
     '''
+    def _runtimetable_gas_usage_info(self, p_amb, gas, cyls, gas_used):
+        liters = gas_used[gas];
+        cyl = cyls[gas];
+        r = { gas: { 'liters_used': liters,
+                     'bars_used' : cyl.liters_to_bars(liters),
+                     'perc_used' : cyl.liters_used_to_perc(liters),
+                     'cyl_name' : cyl.name } };
+        return r;
+
     def runtimetable(self):
         # Collect the interesting points: last points of each section
         points = [];
@@ -271,14 +295,20 @@ class DiveProfile:
             if len(points) > 30:
                 return None;
         # Transform to runtime
-        res = []; lastgas = None;
+        res = []; lastgas = points[0].gas;
+        cyls = self.cylinders_used();
         for p in points:
-            r = {'depth':p.depth, 'time':p.time};
-            if p.gas != lastgas:
+            gci = p.gas_consumption_info();
+            r = {'depth':p.depth,
+                 'time':p.time};
+            if p.gas == lastgas:
+                r[ 'gas_usage' ] = self._runtimetable_gas_usage_info(p.p_amb, p.gas, cyls, gci);
+            else:
+                r[ 'gas' ] = p.gas;
+                r[ 'gas_usage' ] = self._runtimetable_gas_usage_info(p.p_amb, lastgas, cyls, gci);
                 lastgas = p.gas;
-                r['gas'] = p.gas;
             res.append(r);
-        res.append({'depth':0.0});
+        res.append({'depth': 0.0});
         return res;
 
     '''
@@ -298,6 +328,7 @@ class DiveProfile:
         for p in self._points:
             p.set_updated_deco_info( deco_model, self._gases_carried, amb_to_gf = amb_to_gf );
             amb_to_gf = p.deco_info['amb_to_gf'];
+            p.set_updated_gas_consumption_info(self);
         self.update_deco_model_info(deco_model, update_display = True)
         self._full_info_computation_time = time.perf_counter() - t0;
 
@@ -444,7 +475,11 @@ class DiveProfile:
         cp.add_stops_to_surface();
         return cp.decotime();
 
-    def decotimes_for_gfs(self, gflows=[ 25, 35, 45, 55 ],gfhighs=[ 45, 65, 70, 75, 85, 95 ]):
+    def decotimes_for_gfs(self, gflows = None, gfhighs = None):
+        if gfhighs is None:
+            gfhighs = [ 45, 65, 70, 75, 85, 95 ]
+        if gflows is None:
+            gflows = [ 25, 35, 45, 55 ]
         rtt = self.runtimetable();
         if rtt is None:
             # We could not create a runtime table, because it did not make sense
@@ -464,15 +499,28 @@ class DiveProfile:
     Gas consumption computations
     '''
     def gas_consumption(self):
-        r = {};
-        for p in self._points:
-            if p.duration > 0 and p.depth > 0:
-                rate = self._gas_consmp_deco if p.is_deco_stop else self._gas_consmp_bottom;
-                r[p.gas] = r.get(p.gas, 0.0) + p.duration * p.p_amb * rate;
-        return r;
+        return self._points[-1].gas_consumption_info();
 
-    def _gas_consumption_info(self):
-        return { 'decotime' : self.decotime(), 'gas_consmp': self.gas_consumption() };
+    @staticmethod
+    def _gas_consumption_ok(perc, emergency):
+        thr1 = 100.0*2/3 if not emergency else 95.0;
+        thr2 = 90.0      if not emergency else 99.0;
+        ok = 'good' if perc < thr1 else \
+            ('warn' if perc < thr2 else 'bad');
+        return ok;
+
+    def _gas_consumption_info(self, emergency):
+        cyls = self.cylinders_used();
+        gci = self.gas_consumption();
+        gci_more = { gas : {
+                'liters': liters,
+                'bars': cyls[gas].liters_to_bars(liters),
+                'perc': cyls[gas].liters_used_to_perc(liters),
+                'cyl_name': cyls[gas].name,
+                'ok' : self._gas_consumption_ok(cyls[gas].liters_used_to_perc(liters), emergency)
+            }
+            for gas,liters in gci.items() } ;
+        return { 'decotime' : self.decotime(), 'gas_consmp': gci_more };
 
     def _update_profile_lost_gases(self, lost_gases, interpolate = True):
         self._gases_carried.difference_update(set(lost_gases));
@@ -494,16 +542,54 @@ class DiveProfile:
 
     def gas_consumption_analysis(self):
         # First, everything as planned
-        gci = self._gas_consumption_info();
-        r = [ { 'lost': None, **gci} ];
+        gci = self._gas_consumption_info(False);
+        r = [ { 'lost': None, 'emergency' : self.analyze_emergency_gas_need(), **gci} ];
         # Identify bottom gas / deco gas
-        gc = self.gas_consumption();
-        bottom_gas = max(gc, key=lambda k: gc[k]);
+        bottom_gas = self._guess_bottom_gas();
         deco_gases = self.gases_carried().copy();
         deco_gases.remove(bottom_gas);
         # Then, for each deco gas ..
         cp = self.clean_copy()
         for gas in deco_gases:
             ccp = cp.copy_profile_lost_gases([gas], interpolate = False);
-            r.append({'lost': str(gas), **ccp._gas_consumption_info()});
+            gci = ccp._gas_consumption_info(True);
+            r.append({'lost': str(gas),
+                      'emergency' : ccp.analyze_emergency_gas_need(),
+                      **gci});
         return r;
+
+    def analyze_emergency_gas_need(self):
+        bottom_gas = self._guess_bottom_gas();
+        cyl = self.cylinders_used()[bottom_gas];
+        liters_used_bottom_gas = self.gas_consumption()[bottom_gas];
+        max_p_amb = max(map(lambda p: p.p_amb, self._points));
+        liters_needed_emerg = 2 * 2 * 4 * self._gas_consmp_bottom * max_p_amb;
+        perc_emerg = cyl.liters_used_to_perc(liters_used_bottom_gas + liters_needed_emerg);
+        ok = self._gas_consumption_ok(perc_emerg, True);
+        r = { 'bottom_gas' : bottom_gas,
+              'cyl_name' : cyl.name,
+              'perc_used' : cyl.liters_used_to_perc(liters_used_bottom_gas),
+              'perc_emerg' : perc_emerg,
+              'ok' : ok };
+        return r;
+
+
+    '''
+    Gas consumption: cylinders
+    '''
+    def _guess_bottom_gas(self):
+        gc = self.gas_consumption();
+        bottom_gas = max(gc, key = lambda k: gc[ k ]);
+        return bottom_gas;
+
+    def _guess_cylinders(self):
+        bottom_gas = self._guess_bottom_gas();
+        r = { k : Cylinder.Cylinder('D12', 24, 200) if k == bottom_gas else Cylinder.Guess(v, k)
+              for k,v in self.gas_consumption().items() };
+        return r;
+
+    def cylinders_used(self):
+        if self._cylinders_used is None:
+            self._cylinders_used = self._guess_cylinders();
+        return self._cylinders_used;
+
