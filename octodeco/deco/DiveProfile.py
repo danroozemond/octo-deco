@@ -297,12 +297,12 @@ class DiveProfile:
             gci = p.gas_consumption_info();
             r = {'depth':p.depth,
                  'time':p.time};
-            if p.gas == lastgas:
-                r[ 'gas_usage' ] = self._runtimetable_gas_usage_info(p.p_amb, p.gas, cyls, gci);
-            else:
+            if p.gas != lastgas or len(res) == 0:
                 r[ 'gas' ] = p.gas;
                 r[ 'gas_usage' ] = self._runtimetable_gas_usage_info(p.p_amb, lastgas, cyls, gci);
                 lastgas = p.gas;
+            else:
+                r[ 'gas_usage' ] = self._runtimetable_gas_usage_info(p.p_amb, p.gas, cyls, gci);
             res.append(r);
         res.append({'depth': 0.0});
         return res;

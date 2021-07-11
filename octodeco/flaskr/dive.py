@@ -122,7 +122,10 @@ class CachedDiveProfile:
         if rtt is None:
             return 'A runtime table is unfortunately not available for this dive.';
         dsdf = pandas.DataFrame(rtt);
-        dsdf = dsdf[['depth','time','gas','gas_usage']].rename(columns={'gas_usage':'gas usage'});
+        desired_col_seq = [ 'depth', 'time', 'gas', 'gas_usage' ];
+        for c in set(desired_col_seq).difference(dsdf.columns):
+            dsdf[ c ] = '';
+        dsdf = dsdf[ desired_col_seq ].rename(columns = {'gas_usage': 'gas usage'});
         frm = {
             'depth': lambda x: '{:.0f}'.format(x),
             'time': lambda x: '{:.1f}'.format(x) if not pandas.isnull(x) else '',
