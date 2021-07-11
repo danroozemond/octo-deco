@@ -103,6 +103,7 @@ def add_key_data(df, diveprofiles, divesites):
     df['dive time'] = df['number'].map(lambda n: diveprofiles[ n ].divetime());
     df['gases'] = df['number'].map(lambda n : ','.join([ str(g) for g in diveprofiles[n].gases_carried()]));
     df['deco_model'] = df['number'].map(lambda n : diveprofiles[n]._desc_deco_model_display);
+    df['integral supersaturation']= df['number'].map(lambda n : diveprofiles[n].integral_supersaturation());
     return df;
 
 def add_gf99_data(df, diveprofiles):
