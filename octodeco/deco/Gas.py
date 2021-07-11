@@ -34,6 +34,8 @@ class Gas(dict):
     def __ne__(self, other):
         return not self.__eq__(other);
 
+    def partial_pressures(self, p_amb):
+        return self['fO2']*p_amb, self['fN2']*p_amb, self['fHe']*p_amb;
 
 def Air():
     return Gas({ 'fO2': 0.21, 'fN2': 0.79, 'fHe': 0.0 });

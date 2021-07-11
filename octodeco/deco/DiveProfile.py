@@ -103,6 +103,7 @@ class DiveProfile:
              'Total dive time': '%.1f mins' % self.divetime(),
              'Decompression time': '%.1f mins' % self.decotime(),
              'CNS max': '%.1f%%' % self.cns_max(),
+             'Integral supersat':'%.1f' % self.integral_supersaturation(),
              'Deco profile comp time': '%.2f secs' % self._deco_stops_computation_time,
              'Full info comp time': '%.2f secs' % self._full_info_computation_time
              };
@@ -120,6 +121,9 @@ class DiveProfile:
 
     def max_depth(self):
         return max(map(lambda p: p.depth, self._points));
+
+    def integral_supersaturation(self):
+        return self._points[-1].integral_supersat;
 
     def description(self):
         if self.custom_desc is not None:

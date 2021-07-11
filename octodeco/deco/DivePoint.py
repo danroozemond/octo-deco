@@ -14,6 +14,7 @@ class DivePoint:
         self.is_ascent_point = False;
         self.is_interpolated_point = False;
         self.cns_perc = 0.0;
+        self.integral_supersat = 0.0;
         self.prev = prev;
         self._gas_consumption_info = dict();
         # NOTE - If you add attributes here, also add migration code to DiveProfileSer
@@ -89,9 +90,19 @@ class DivePoint:
         assert self.time >= self.prev.time;  # Otherwise divepoints are in a broken sequence
         assert self.prev is not None;
         p_amb_section = ( self.p_amb + self.prev.p_amb ) / 2;
+        # Tissue state
         self.tissue_state = self.prev.tissue_state.updated_state( self.duration, p_amb_section, self.prev.gas );
-        ppo2 = self.prev.gas['fO2'] * p_amb_section;
-        self.cns_perc = CNSConstants.cns_perc_update(self.prev.cns_perc, p_amb_section, ppo2, self.duration);
+        # CNS & integral supersaturation
+        pp_o2, _, _ = self.prev.gas.partial_pressures(p_amb_section);
+        self.cns_perc = CNSConstants.cns_perc_update(self.prev.cns_perc, p_amb_section, pp_o2, self.duration);
+        # Integral supersaturation - approximate with a triangle
+        sup_sat_prev = self.prev.tissue_state.abs_supersat(self.prev.p_amb);
+        sup_sat_now  = self.tissue_state.abs_supersat(self.p_amb);
+        assert sup_sat_prev >= 0.0;
+        assert sup_sat_now >= 0.0;
+        sup_sat_int_add = self.duration * min(sup_sat_now, sup_sat_prev) \
+                          + 0.5 * self.duration * ( max(sup_sat_now, sup_sat_prev) - min(sup_sat_now, sup_sat_prev) );
+        self.integral_supersat = self.prev.integral_supersat + sup_sat_int_add;
 
     def set_updated_deco_info(self, deco_model, gases, amb_to_gf = None ):
         self.deco_info = deco_model.deco_info(self.tissue_state, self.depth, self.gas, gases, amb_to_gf = amb_to_gf );

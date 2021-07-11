@@ -115,6 +115,22 @@ class TissueState:
         return self._state[2*i], self._state[2*i+1];
 
     #
+    # For computing integral supersaturation (as defined by Simon Mitchell)
+    #
+    def abs_supersat(self, p_amb):
+        cdef float r = 0;
+        cdef float p_tissue = 0;
+        cdef float[:] cstate = self._state;
+        cdef int i = 0;
+        cdef p_alv = self.amb_to_alv(p_amb);
+        while i < N_TISSUES:
+            p_tissue = cstate[2*i] + cstate[2*i+1];
+            if p_tissue > p_alv:
+                r += p_tissue - p_alv;
+            i += 1;
+        return r;
+
+    #
     # Workmann / Buhlmann coefficients (retrieval nontrivial in Trimix case)
     #
     """
@@ -301,5 +317,6 @@ class TissueState:
         gf99 = max(gf99s);
         leading_tissue_i = gf99s.index(gf99);
         return gf99s, max(0.0, gf99), leading_tissue_i;
+
 
 
