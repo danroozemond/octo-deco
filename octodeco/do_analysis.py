@@ -106,15 +106,36 @@ def add_gf99_data(df, diveprofiles):
         M = np.matrix([ p.deco_info['allSurfaceGFs'] for p in dp.points() ]);
         dp.all_SurfaceGF99s_max_T = np.amax(M, axis = 0);
         dp.all_SurfaceGF99s_max = np.amax(dp.all_SurfaceGF99s_max_T);
+        # 3
+        surf_len = dp.length_of_surface_section();
+        time_surf = dp._points[-1].time - surf_len;
+        pt_surf = dp.find_point_at_time(time_surf);
+        dp.GF99s_at_surfacing = pt_surf.deco_info['allGF99s'];
+        dp.GF99_at_surfacing = max(pt_surf.deco_info['allGF99s']);
+        pt = dp.find_point_at_time(time_surf + 10.0);
+        dp.GF99s_at_surfacing_plus_10 = pt.deco_info[ 'allGF99s' ];
+        dp.GF99_at_surfacing_plus_10 = max(pt.deco_info[ 'allGF99s' ]);
+        pt = dp.find_point_at_time(time_surf + 30.0);
+        dp.GF99s_at_surfacing_plus_30 = pt.deco_info[ 'allGF99s' ];
+        dp.GF99_at_surfacing_plus_30 = max(pt.deco_info[ 'allGF99s' ]);
     # Fill the dataframe
     halftimes = next(iter(diveprofiles.values())).deco_model()._constants.N2_HALFTIMES;
     N = 16;
     df[ 'all_GF99s_max' ] = df[ 'number' ].map(lambda n : diveprofiles[n].all_GF99s_max);
     df[ 'all_SurfaceGF99s_max' ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].all_SurfaceGF99s_max);
+    df[ 'GF99_at_surfacing' ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].GF99_at_surfacing);
+    df[ 'GF99_at_surfacing_plus_10' ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].GF99_at_surfacing_plus_10);
+    df[ 'GF99_at_surfacing_plus_30' ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].GF99_at_surfacing_plus_30);
     for i in range(N):
         df[ 'all_GF99s_max_T{}'.format(halftimes[i]) ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].all_GF99s_max_T.item(0,i));
     for i in range(N):
         df[ 'all_SurfaceGF99s_max_T{}'.format(halftimes[i]) ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].all_SurfaceGF99s_max_T.item(0,i));
+    for i in range(N):
+        df[ 'GF99_at_surfacing_T{}'.format(halftimes[i]) ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].GF99s_at_surfacing[i]);
+    for i in range(N):
+        df[ 'GF99_at_surfacing_plus_10_T{}'.format(halftimes[i]) ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].GF99s_at_surfacing_plus_10[i]);
+    for i in range(N):
+        df[ 'GF99_at_surfacing_plus_30_T{}'.format(halftimes[i]) ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].GF99s_at_surfacing_plus_30[i]);
     # Done
     return df;
 
