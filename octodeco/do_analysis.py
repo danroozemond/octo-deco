@@ -41,8 +41,9 @@ class XmlGasEvents:
         xevents = xdive.findall(".//event[@name='gaschange']");
         self._events = [ ( xml_parse_time(xe.attrib['time']), XmlGasEvents._gas_from_xml_event(xe) )
                          for xe in xevents ];
+        if len(self._events) == 0:
+            self._events = [ (0.1, Gas.Air()) ];
         self._events.sort(key=(lambda t: t[0]));
-        assert len(self._events) >= 0;
         self.current_idx = 0;
 
     def _gas_from_xml_event(xe):
@@ -177,7 +178,7 @@ def add_gf99_data_count_time(df, diveprofiles):
 ##
 ## Execute
 ##
-diveprofiles = { n: load_diveprofile_from_xml(get_xml_dive(n)) for n in range(604, 607) };
+diveprofiles = { n: load_diveprofile_from_xml(get_xml_dive(n)) for n in range(600, 768) };
 dd = { n : { 'number' : n, 'description': dp.description() }
        for n, dp in diveprofiles.items() };
 dfout = pd.DataFrame(dd).transpose();
