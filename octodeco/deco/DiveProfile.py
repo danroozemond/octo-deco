@@ -243,6 +243,12 @@ class DiveProfile:
                 b = h;
         return self._points[h];
 
+    def point_of_surfacing(self):
+        i = -1;
+        while -i < len(self._points) and self._points[ i ].depth == 0:
+            i -= 1;
+        return self._points[i+1];
+
     '''
     Granularity
     '''

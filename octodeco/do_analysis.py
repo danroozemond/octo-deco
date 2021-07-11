@@ -119,15 +119,13 @@ def add_gf99_data(df, diveprofiles):
         dp.all_SurfaceGF99s_max_T = np.amax(M, axis = 0);
         dp.all_SurfaceGF99s_max = np.amax(dp.all_SurfaceGF99s_max_T);
         # 3
-        surf_len = dp.length_of_surface_section();
-        time_surf = dp._points[-1].time - surf_len;
-        pt_surf = dp.find_point_at_time(time_surf);
+        pt_surf = dp.point_of_surfacing();
         dp.GF99s_at_surfacing = pt_surf.deco_info['allGF99s'];
         dp.GF99_at_surfacing = max(pt_surf.deco_info['allGF99s']);
-        pt = dp.find_point_at_time(time_surf + 10.0);
+        pt = dp.find_point_at_time(pt_surf.time + 10.0);
         dp.GF99s_at_surfacing_plus_10 = pt.deco_info[ 'allGF99s' ];
         dp.GF99_at_surfacing_plus_10 = max(pt.deco_info[ 'allGF99s' ]);
-        pt = dp.find_point_at_time(time_surf + 30.0);
+        pt = dp.find_point_at_time(pt_surf.time + 30.0);
         dp.GF99s_at_surfacing_plus_30 = pt.deco_info[ 'allGF99s' ];
         dp.GF99_at_surfacing_plus_30 = max(pt.deco_info[ 'allGF99s' ]);
     # Fill the dataframe
@@ -190,3 +188,9 @@ print(dfout.head());
 print('Writing output file...');
 dfout.to_excel(os.path.join(ANALYSIS_PATH,'output.xlsx'));
 print('Done.');
+
+
+# Tmp - export
+# dp = diveprofiles[605];
+# dp.dataframe().to_csv(os.path.join(ANALYSIS_PATH,'dive-605.csv'));
+
