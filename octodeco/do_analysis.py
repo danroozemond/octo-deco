@@ -151,32 +151,32 @@ def add_gf99_data(df, diveprofiles):
 
 def add_gf99_data_count_time(df, diveprofiles):
     halftimes = next(iter(diveprofiles.values())).deco_model()._constants.N2_HALFTIMES;
-    N = 16; perc_thresholds = [ 10.0, 20.0 ];
+    N = 16; perc_depth_thresholds = [ (2.0, 10.0), (2.0, 20.0), (0.0, 10.0), (0.0, 20.0) ];
     # Do the math
     for _,dp in diveprofiles.items():
         # 1.
-        cumuls = { pthr : np.array([ 0.0 for i in range(N) ]) for pthr in perc_thresholds };
+        cumuls = { pd : np.array([ 0.0 for i in range(N) ]) for pd in perc_depth_thresholds };
         for p in dp.points():
-            if p.depth >= 2.0:
-                gf99s = p.deco_info['allGF99s'];
-                indics = { pthr :
-                               np.array([ 1.0 if gf99s[i] > pthr else 0.0 for i in range(N) ])
-                               for pthr in perc_thresholds };
-                for pthr in perc_thresholds:
-                    cumuls[pthr] = cumuls[pthr] + p.duration*indics[pthr];
+            gf99s = p.deco_info['allGF99s'];
+            indics = { pd :
+                           np.array([ 1.0 if (p.depth >= pd[0] and gf99s[i] > pd[1]) else 0.0 for i in range(N) ])
+                           for pd in perc_depth_thresholds };
+            for pd in perc_depth_thresholds:
+                cumuls[pd] = cumuls[pd] + p.duration*indics[pd];
         dp.cumuls = cumuls;
     # Fill the dataframe
     # df[ 'all_GF99s_max' ] = df[ 'number' ].map(lambda n : diveprofiles[n].all_GF99s_max);
-    for pthr in perc_thresholds:
+    for pd in perc_depth_thresholds:
         for i in range(N):
-            df[ 'cumul_GF99_over_{:.0f}%_T{}'.format(pthr,halftimes[i]) ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].cumuls[pthr][i])
+            df[ 'cumul_GF99_>={:.0f}%_>={:.0f}m_T{}'.format(pd[1],pd[0],halftimes[i]) ] = df[ 'number' ].map(lambda n: diveprofiles[ n ].cumuls[pd][i])
     # Done
     return df;
 
 ##
 ## Execute
 ##
-diveprofiles = { n: load_diveprofile_from_xml(get_xml_dive(n)) for n in range(600, 768) };
+# diveprofiles = { n: load_diveprofile_from_xml(get_xml_dive(n)) for n in range(604, 608) };
+diveprofiles = { n: load_diveprofile_from_xml(get_xml_dive(n)) for n in [605, 608, 615, 617, 619, 728, 743, 764] };
 dd = { n : { 'number' : n, 'description': dp.description() }
        for n, dp in diveprofiles.items() };
 dfout = pd.DataFrame(dd).transpose();
