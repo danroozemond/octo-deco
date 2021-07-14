@@ -10,6 +10,7 @@ from . import Gas, Util;
 CONSTANT_ID = None;
 cdef int N_TISSUES = 16;
 cdef float[32] HALFTIMES;
+cdef float[32] HALFTIMES_OFFGAS;
 cdef float[32] A_VALUES;
 cdef float[32] B_VALUES;
 
@@ -47,13 +48,17 @@ class TissueState:
         CONSTANT_ID = constants.ID;
         assert N_TISSUES == constants.N_TISSUES;
         cdef int i = 0;
+        cdef float ff = 0.0;
         while i < N_TISSUES:
+            ff = 1.5 if (3 <= i <= 7) else 1.0;
             # N2
             HALFTIMES[2*i] = constants.N2_HALFTIMES[i];
+            HALFTIMES_OFFGAS[2*i] = ff*constants.N2_HALFTIMES[i];
             A_VALUES[2*i]  = constants.N2_A_VALUES[i];
             B_VALUES[2*i]  = constants.N2_B_VALUES[i];
             #He
             HALFTIMES[2*i+1] = constants.HE_HALFTIMES[i];
+            HALFTIMES_OFFGAS[2*i+1] = ff*constants.HE_HALFTIMES[i];
             A_VALUES[2*i+1]  = constants.HE_A_VALUES[i];
             B_VALUES[2*i+1]  = constants.HE_B_VALUES[i];
             # Next
@@ -102,8 +107,15 @@ class TissueState:
         cdef int i = 0;
         cdef float tmp;
         while i < N_TISSUES:
-            cnewstate[2*i] = coldstate[2*i] + ( 1 - 0.5 **( cdur/HALFTIMES[2*i]) ) * ( pp_alv_n2 - coldstate[2*i] );
-            cnewstate[2*i+1] = coldstate[2*i+1] + ( 1 - 0.5 ** ( cdur/HALFTIMES[2*i+1]) ) * ( pp_alv_he - coldstate[2*i+1] );
+            # Differentiate between ongassing and offgassing
+            if pp_alv_n2 > coldstate[2*i]:
+                cnewstate[2*i] = coldstate[2*i] + ( 1 - 0.5 **( cdur/HALFTIMES[2*i]) ) * ( pp_alv_n2 - coldstate[2*i] );
+            else:
+                cnewstate[2*i] = coldstate[2*i] + ( 1 - 0.5 **( cdur/HALFTIMES_OFFGAS[2*i]) ) * ( pp_alv_n2 - coldstate[2*i] );
+            if pp_alv_he > coldstate[2*i+1]:
+                cnewstate[2*i+1] = coldstate[2*i+1] + ( 1 - 0.5 ** ( cdur/HALFTIMES[2*i+1]) ) * ( pp_alv_he - coldstate[2*i+1] );
+            else:
+                cnewstate[2*i+1] = coldstate[2*i+1] + ( 1 - 0.5 ** ( cdur/HALFTIMES_OFFGAS[2*i+1]) ) * ( pp_alv_he - coldstate[2*i+1] );
             i += 1;
         return r;
 
