@@ -20,13 +20,15 @@ def get_nav_items():
 # Get settings
 assert os.environ.get('FLASK_SECRET_KEY') is not None;
 assert os.environ.get('GOOGLE_OAUTH_JSON') is not None;
+assert os.environ.get('FLASK_PORT') is not None;
 setting_secret_key = os.environ.get('FLASK_SECRET_KEY');
 setting_instance_path = os.environ.get('FLASK_INSTANCE_PATH');
 cache_dir = os.environ.get('FLASK_CACHE_DIR');
 cache_threshold = int(os.environ.get('FLASK_CACHE_THRESHOLD', 10000));
 
 # create and configure the app
-app = Flask(__name__, instance_relative_config=True, instance_path = setting_instance_path)
+app = Flask(__name__,  port=int(os.environ.get('FLASK_PORT')),
+            instance_relative_config=True, instance_path = setting_instance_path)
 app.config.from_mapping(
     SECRET_KEY = setting_secret_key,
     DATABASE = os.path.join(app.instance_path, 'flaskr.sqlite'),
