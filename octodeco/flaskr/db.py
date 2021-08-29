@@ -21,18 +21,3 @@ def close_db():
     if db is not None:
         db.close();
 
-
-def init_db():
-    db = get_db();
-    with current_app.open_resource('sql/init-clean.sql') as f:
-        db.executescript(f.read().decode('utf8'))
-    print('Initialized the database using init-clean.sql');
-
-
-def migrate_db(frv, tov):
-    db = get_db();
-    if frv == '0.3' and tov == '0.4':
-        fname = 'sql/migrate-0.3-to-0.4.sql';
-        with current_app.open_resource(fname) as f:
-            db.executescript(f.read().decode('utf8'))
-        print('Migrated data in the database using %s' % fname);
