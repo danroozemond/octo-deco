@@ -8,6 +8,8 @@
 # "Architecture" of octodeco
 * `deco`: The library for decompression computations
 * `flaskr`: The web interface for decompression insights, including the logic for various charts. 
+  It also includes the logic for dealing with a collection of dives, belonging to users, that may 
+  be added, removed, changed, shared, etc.
   Uses flask as primary technology.
   Uses the two HTTP APIs defined below.
 * `db`: HTTP API for database operations. Uses FastAPI as technology.

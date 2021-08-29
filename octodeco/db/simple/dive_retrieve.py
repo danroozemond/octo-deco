@@ -6,8 +6,9 @@ from typing import Optional
 from pydantic import BaseModel
 
 router = APIRouter(
-    prefix="/retrieve"
+    prefix="/dive/retrieve"
 );
+
 
 # Probably when I grow up I want to use SQLAlchemy
 class DBDive(BaseModel):

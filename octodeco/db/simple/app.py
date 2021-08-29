@@ -29,5 +29,5 @@ def root():
 
 
 # Here the magic happens
-from . import retrieve;
-app.include_router(retrieve.router)
+from . import dive_retrieve;
+app.include_router(dive_retrieve.router)
