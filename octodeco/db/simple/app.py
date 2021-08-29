@@ -1,6 +1,5 @@
 import os
 import sqlite3
-from sqlite3 import Connection
 from fastapi import FastAPI, Depends
 
 app = FastAPI()
@@ -13,7 +12,8 @@ def get_db():
     db = sqlite3.connect(
         DB_SQLITE,
         detect_types = sqlite3.PARSE_DECLTYPES,
-        isolation_level = None
+        isolation_level = None,
+        check_same_thread = False
     )
     db.row_factory = sqlite3.Row
     try:
@@ -21,8 +21,13 @@ def get_db():
     finally:
         db.close();
 
+
+# Todo remove this
 @app.get("/")
-def root(db: Connection = Depends(get_db)):
-    print(db);
+def root():
     return {"message": "Hello World"}
 
+
+# Here the magic happens
+from . import retrieve;
+app.include_router(retrieve.router)

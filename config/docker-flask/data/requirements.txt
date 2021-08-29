@@ -12,3 +12,4 @@ cython
 gitpython
 fastapi
 uvicorn[standard]
+pydantic
