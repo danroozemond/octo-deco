@@ -14,29 +14,6 @@ from octodeco.deco import DiveProfileSer;
 #
 # Retrieve
 #
-def get_dive_count():
-    cur = db.get_db().cursor();
-    cur.execute('''
-        SELECT COUNT(*)
-        FROM dives
-        WHERE user_id = ?
-        ''', [ get_user_details().user_id ]
-                );
-    return cur.fetchone()[0];
-
-
-def get_all_dives():
-    cur = db.get_db().cursor();
-    cur.execute('''
-        SELECT dive_id, dive_desc, is_public
-        FROM dives
-        WHERE user_id = ? AND NOT is_ephemeral
-        ''', [ get_user_details().user_id ]
-                );
-    rows = cur.fetchall();
-    return rows;
-
-
 def get_any_dive_id():
     cur = db.get_db().cursor();
     cur.execute('''

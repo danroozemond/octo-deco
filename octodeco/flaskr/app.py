@@ -27,8 +27,7 @@ cache_dir = os.environ.get('FLASK_CACHE_DIR');
 cache_threshold = int(os.environ.get('FLASK_CACHE_THRESHOLD', 10000));
 
 # create and configure the app
-app = Flask(__name__,  port=int(os.environ.get('FLASK_PORT')),
-            instance_relative_config=True, instance_path = setting_instance_path)
+app = Flask(__name__, instance_relative_config=True, instance_path = setting_instance_path)
 app.config.from_mapping(
     SECRET_KEY = setting_secret_key,
     DATABASE = os.path.join(app.instance_path, 'flaskr.sqlite'),
@@ -38,6 +37,10 @@ app.config.from_mapping(
     CACHE_THRESHOLD = cache_threshold,
     CACHE_DEFAULT_TIMEOUT = 300
 );
+
+# Further settings
+assert os.environ.get('FLASK_DB_ENDPOINT') is not None;
+setting_flask_db_endpoint = os.environ.get('FLASK_DB_ENDPOINT');
 
 # Create cache; on load flush it
 cache = Cache(app);

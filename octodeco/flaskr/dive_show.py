@@ -1,5 +1,4 @@
-from . import dive, user;
-from . import db_dive;
+from . import dive, user, db_dive, db_api_dive;
 from .dive import bp;
 from flask import (
     redirect, url_for, request, abort, session, render_template, Response
@@ -68,7 +67,7 @@ def show(dive_id):
     # This will never return None, get_diveprofile_for_display will redirect/abort if necessary
     assert dp is not None;
 
-    alldives = db_dive.get_all_dives();
+    alldives = db_api_dive.get_all_dives();
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,

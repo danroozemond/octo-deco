@@ -30,7 +30,7 @@ class DBDive(BaseModel):
         return r;
 
 
-@router.get("/dive_count/")
+@router.get("/count/")
 def get_dive_count(user_id: int, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''

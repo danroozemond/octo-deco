@@ -3,7 +3,7 @@ from flask import (
     Blueprint, request, render_template, redirect, flash, url_for, abort, g
 )
 
-from . import db_dive, db_user, auth;
+from . import db_dive, db_user, auth, db_api_dive;
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
@@ -53,8 +53,8 @@ def load_user_details():
 @bp.route('/info')
 def info():
     return render_template('user/info.html',
-                           divecount = db_dive.get_dive_count(),
-                           diveinfos = db_dive.get_all_dives(),
+                           divecount = db_api_dive.get_dive_count(),
+                           diveinfos = db_api_dive.get_all_dives(),
                            allsessions = db_user.get_all_sessions_for_user()
                            );
 
