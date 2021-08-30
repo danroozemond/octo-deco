@@ -9,7 +9,8 @@ TL;DR:
   directly usable as a Python library 
 * Tightly integrated with web app allowing creation, deletion and manipulation
   of dive profiles
-* Insightful plots, not just of the dive itself, but also eg. heat maps of tissue loading 
+* Insightful plots, not just of the dive itself, but also eg. heat maps of tissue loading
+* Gas consumption computations, including lost-gas scenarios
 * Import dives from Shearwater computers (through CSV) 
 * Analysis of options for decompression profiles from gradient factors
 

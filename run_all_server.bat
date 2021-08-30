@@ -1,6 +1,4 @@
 @echo off
-venv\Scripts\activate
-
 set GOOGLE_OAUTH_JSON=config/docker-flask/scripts/client_secret.json.local
 
 set FLASK_APP=octodeco/flaskr
