@@ -1,4 +1,4 @@
-from . import dive, dive_new, db_dive;
+from . import dive, db_api_dive, dive_new, db_dive;
 from .dive import bp;
 from flask import (
     flash, redirect, url_for, request, abort, session
@@ -20,7 +20,7 @@ def update(dive_id):
         olddecotime = dp.decotime();
         dp.set_gf(dp.gf_low_display, dp.gf_high_display, updateStops = True);
         flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
-        db_dive.store_dive(dp);
+        db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     elif action == 'Duplicate dive':
@@ -65,7 +65,7 @@ def modify_meta(dive_id):
         if ipt_public != dp.is_public:
             flash('Made dive {}'.format( 'public' if ipt_public else 'private'));
             dp.is_public = ipt_public;
-        db_dive.store_dive(dp);
+        db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     else:
@@ -96,7 +96,7 @@ def modify_settings(dive_id):
             dp.update_stops( actually_add_stops = False );
             flash('Removed all stops');
         # Update database and invalidate cache
-        db_dive.store_dive(dp);
+        db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     else:
@@ -109,7 +109,7 @@ def update_keep(dive_id):
     if dp is not None:
         dp.is_ephemeral = False;
         flash('Keeping this dive permanently.');
-        db_dive.store_dive(dp);
+        db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     else:

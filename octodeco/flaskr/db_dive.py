@@ -14,44 +14,10 @@ from octodeco.deco import DiveProfileSer;
 #
 # Store/modify
 #
-def _store_dive_update(diveprofile):
-    # Check dive_id
-    dive_id = int(diveprofile.dive_id);
-    # Check user_id
-    user_id = int(diveprofile.user_id);
-    if user_id != get_user_details().user_id:
-        abort(403);
-    # Do stuff
-    cur = db.get_db().cursor();
-    cur.execute('''
-        UPDATE dives
-        SET dive = ?, dive_desc = ?, is_demo = ?, is_ephemeral = ?,  is_public = ?, last_update = datetime('now')
-        WHERE dive_id = ? AND user_id = ?;
-        ''', [ DiveProfileSer.dumps(diveprofile), diveprofile.description(),
-               diveprofile.is_demo_dive, diveprofile.is_ephemeral, diveprofile.is_public,
-               dive_id, get_user_details().user_id ]
-               );
-    assert cur.rowcount == 1;
-
-
-def _store_dive_new(diveprofile):
-    cur = db.get_db().cursor();
-    cur.execute('''
-        INSERT INTO dives(user_id, dive)
-        VALUES (?, 'xx');
-        ''', [ get_user_details().user_id ] );
-    diveprofile.dive_id = cur.lastrowid;
-    diveprofile.user_id = get_user_details().user_id;
-    return _store_dive_update(diveprofile);
-
-
 def store_dive(diveprofile):
-    try:
-        _store_dive_update(diveprofile);
-    except AttributeError:
-        _store_dive_new(diveprofile);
     # A nice hook to call a cleanup function
-    cleanup_stale_dives();
+    # cleanup_stale_dives();
+    pass;
 
 
 #

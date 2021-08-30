@@ -1,6 +1,5 @@
 # Please see LICENSE.md
-import requests;
-import base64;
+import requests, base64, json;
 
 from flask import abort;
 
@@ -59,7 +58,32 @@ def get_one_dive(dive_id:int):
     if row is None:
         abort(404);
     assert row['user_id'] == user.get_user_details().user_id or row['is_public'] == 1;
-    diveprofile = DiveProfileSer.loads(base64.b64decode(row['dive_serialized']));
+    diveprofile = DiveProfileSer.loads(base64.b64decode(row['dive_serialized'].encode('utf-8')));
     diveprofile.dive_id = row['dive_id'];
     diveprofile.user_id = row['user_id'];
+    return diveprofile;
+
+
+#
+# Storing a dive
+#
+def store_dive(diveprofile):
+    # Check user_id
+    if hasattr(diveprofile, 'user_id'):
+        if diveprofile.user_id != user.get_user_details().user_id:
+            abort(403);
+    else:
+        diveprofile.user_id = user.get_user_details().user_id;
+    # Serialize & put request
+    d = { 'dive_id': getattr(diveprofile, 'dive_id', None),
+          'user_id': diveprofile.user_id,
+          'dive_desc': diveprofile.description(),
+          'is_public': diveprofile.is_public,
+          'is_demo': diveprofile.is_demo_dive,
+          'is_ephemeral': diveprofile.is_ephemeral,
+          'dive_serialized': base64.b64encode(DiveProfileSer.dumps(diveprofile)).decode('utf-8')
+          }
+    r = requests.put(ENDPOINT + 'dive/write/store/', json = d);
+    check_status_code(r);
+    diveprofile.dive_id = r.json()['dive_id'];
     return diveprofile;

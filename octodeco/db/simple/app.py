@@ -31,3 +31,5 @@ def root():
 # Here the magic happens
 from . import dive_retrieve;
 app.include_router(dive_retrieve.router)
+from . import dive_write;
+app.include_router(dive_write.router)

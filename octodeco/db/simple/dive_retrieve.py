@@ -1,33 +1,12 @@
-import base64;
-from fastapi import APIRouter, Depends
-from sqlite3 import Connection
+from fastapi import APIRouter, Depends;
+from sqlite3 import Connection;
+from typing import List;
 from .app import get_db;
-from typing import Optional
-from pydantic import BaseModel
+from .dive import DBDive;
 
 router = APIRouter(
     prefix="/dive/retrieve"
 );
-
-
-# Probably when I grow up I want to use SQLAlchemy
-class DBDive(BaseModel):
-    dive_id: int
-    user_id: Optional[int] = None
-    dive_desc: str
-    is_public: bool
-    dive_serialized: Optional[int] = None
-
-    @staticmethod
-    def from_row(row):
-        if row is None:
-            return None;
-        r = DBDive(dive_id = row[ 'dive_id' ], dive_desc = row[ 'dive_desc' ], is_public = row[ 'is_public' ]);
-        if 'user_id' in row.keys():
-            r.user_id = row['user_id'];
-        if 'dive' in row.keys():
-            r.dive_serialized = base64.b64encode(row['dive']);
-        return r;
 
 
 @router.get("/count/")
@@ -42,7 +21,7 @@ def get_dive_count(user_id: int, db: Connection = Depends(get_db)):
     return { 'dive_count': cur.fetchone()[ 0 ] };
 
 
-@router.get("/all/")
+@router.get("/all/", response_model=List[DBDive])
 def get_all_dives(user_id: int, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
@@ -55,7 +34,7 @@ def get_all_dives(user_id: int, db: Connection = Depends(get_db)):
     return [ DBDive.from_row(row) for row in rows ];
 
 
-@router.get("/any/")
+@router.get("/any/", response_model=DBDive)
 def get_any_dive(user_id: int, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
@@ -70,7 +49,7 @@ def get_any_dive(user_id: int, db: Connection = Depends(get_db)):
     return DBDive.from_row(row);
 
 
-@router.get("/get/")
+@router.get("/get/", response_model=DBDive)
 def get_one_dive(user_id: int,dive_id:int, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
