@@ -12,44 +12,6 @@ from octodeco.deco import DiveProfileSer;
 
 
 #
-# Retrieve
-#
-def get_any_dive_id():
-    cur = db.get_db().cursor();
-    cur.execute('''
-        SELECT MIN(dive_id)
-        FROM dives
-        WHERE user_id = ?
-        ''', [ get_user_details().user_id ]
-                );
-    row = cur.fetchone();
-    if row is None:
-        return None
-    return row[0];
-
-
-def construct_dive_from_row(row):
-    if row is None:
-        return None;
-    assert row['user_id'] == get_user_details().user_id or row['is_public'] == 1;
-    diveprofile = DiveProfileSer.loads(row['dive']);
-    diveprofile.dive_id = row['dive_id'];
-    diveprofile.user_id = row['user_id'];
-    return diveprofile;
-
-
-def get_one_dive(dive_id:int):
-    cur = db.get_db().cursor();
-    cur.execute('''
-        SELECT user_id, dive_id, dive, is_public
-        FROM dives
-        WHERE dive_id = ? and (is_public or user_id = ?) 
-        ''', [ dive_id, get_user_details().user_id ]
-                      );
-    return construct_dive_from_row(cur.fetchone());
-
-
-#
 # Store/modify
 #
 def _store_dive_update(diveprofile):

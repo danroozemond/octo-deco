@@ -6,9 +6,7 @@ from flask import (
     g, Blueprint, flash, redirect, url_for, request, abort, jsonify, session
 )
 
-from . import db_dive;
-from . import plots;
-from . import user;
+from . import db_dive, plots, user, db_api_dive;
 from .app import cache;
 
 
@@ -58,7 +56,7 @@ class CachedDiveProfile:
 
     @cache.memoize()
     def profile_base(self):
-        dp = db_dive.get_one_dive(self.dive_id);
+        dp = db_api_dive.get_one_dive(self.dive_id);
         if dp is None:
             return None;
         return dp;

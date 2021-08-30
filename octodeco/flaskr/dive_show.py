@@ -80,7 +80,7 @@ def show_any():
     last_dive_id = session.get('last_dive_id', None);
     if last_dive_id is not None:
         return redirect(url_for('dive.show', dive_id = last_dive_id));
-    dive_id = db_dive.get_any_dive_id();
+    dive_id = db_api_dive.get_any_dive_id();
     if dive_id is None:
         return redirect(url_for('dive.show_none'));
     else:
