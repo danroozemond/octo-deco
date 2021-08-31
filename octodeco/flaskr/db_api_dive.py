@@ -19,7 +19,7 @@ def get_params(dive_id = None):
     return params;
 
 
-def check_status_code(resp):
+def check_status_code_abort(resp):
     if not ( 200 <= resp.status_code < 300 ):
         abort(500);
 
@@ -29,19 +29,19 @@ def check_status_code(resp):
 #
 def get_dive_count():
     r = requests.get(ENDPOINT + 'dive/retrieve/count/', params = get_params());
-    check_status_code(r);
+    check_status_code_abort(r);
     return r.json()['dive_count'];
 
 
 def get_all_dives():
     r = requests.get(ENDPOINT + 'dive/retrieve/all/', params = get_params());
-    check_status_code(r);
+    check_status_code_abort(r);
     return r.json();
 
 
 def get_any_dive_id():
     r = requests.get(ENDPOINT + 'dive/retrieve/any/', params = get_params());
-    check_status_code(r);
+    check_status_code_abort(r);
     if r.json() is None:
         return None;
     else:
@@ -53,10 +53,12 @@ def get_any_dive_id():
 #
 def get_one_dive(dive_id:int):
     r = requests.get(ENDPOINT + 'dive/retrieve/get/', params = get_params(dive_id = dive_id));
-    check_status_code(r);
     row = r.json();
     if row is None:
-        abort(404);
+        return None;
+    # If we're here, we need a 200 status code
+    check_status_code_abort(r);
+    # Construct result
     assert row['user_id'] == user.get_user_details().user_id or row['is_public'] == 1;
     diveprofile = DiveProfileSer.loads(base64.b64decode(row['dive_serialized'].encode('utf-8')));
     diveprofile.dive_id = row['dive_id'];
@@ -84,6 +86,15 @@ def store_dive(diveprofile):
           'dive_serialized': base64.b64encode(DiveProfileSer.dumps(diveprofile)).decode('utf-8')
           }
     r = requests.put(ENDPOINT + 'dive/write/store/', json = d);
-    check_status_code(r);
+    check_status_code_abort(r);
     diveprofile.dive_id = r.json()['dive_id'];
     return diveprofile;
+
+
+#
+# Deleting a dive
+#
+def delete_dive(dive_id: int):
+    r = requests.delete(ENDPOINT + 'dive/write/delete/', params = get_params(dive_id));
+    check_status_code_abort(r);
+    return r.json()['affected_count'];

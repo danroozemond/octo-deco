@@ -10,21 +10,6 @@ from octodeco.deco import DiveProfileSer;
 # All functions in this file are focused on the current user, no need
 # to explicitly supply
 
-
-#
-# Delete
-#
-def delete_dive(dive_id:int):
-    cur = db.get_db().cursor();
-    cur.execute('''
-        DELETE
-        FROM dives
-        WHERE user_id = ? and dive_id = ?
-        ''', [ get_user_details().user_id, dive_id ]
-                      );
-    return cur.rowcount;
-
-
 #
 # is_xx_allowed
 #

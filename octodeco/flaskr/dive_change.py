@@ -31,7 +31,7 @@ def update(dive_id):
 
 @bp.route('/delete/<int:dive_id>', methods = [ 'GET', 'POST' ])
 def delete(dive_id):
-    aff = db_dive.delete_dive(dive_id);
+    aff = db_api_dive.delete_dive(dive_id);
     if aff == 0:
         abort(405);
     flash('Dive %i is now history' % dive_id);

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends;
+from fastapi import APIRouter, Depends, Response, status;
 from sqlite3 import Connection;
 from typing import List;
 from .app import get_db;
@@ -50,7 +50,7 @@ def get_any_dive(user_id: int, db: Connection = Depends(get_db)):
 
 
 @router.get("/get/", response_model=DBDive)
-def get_one_dive(user_id: int,dive_id:int, db: Connection = Depends(get_db)):
+def get_one_dive(user_id: int,dive_id:int, response: Response, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
         SELECT user_id, dive_id, dive_desc, dive, is_public
@@ -59,4 +59,8 @@ def get_one_dive(user_id: int,dive_id:int, db: Connection = Depends(get_db)):
         ''', [ dive_id, user_id ]
                       );
     row = cur.fetchone();
-    return DBDive.from_row(row);
+    if row is None:
+        response.status_code = status.HTTP_404_NOT_FOUND;
+        return None;
+    else:
+        return DBDive.from_row(row);

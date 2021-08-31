@@ -1,5 +1,4 @@
 import base64;
-import pickle;
 from fastapi import APIRouter, Depends
 from sqlite3 import Connection
 from .app import get_db;
@@ -47,3 +46,15 @@ def store_dive(dive: DBDive, db: Connection = Depends(get_db)):
     except AttributeError:
         dive = _store_dive_new(db, dive);
         return dive;
+
+
+@router.delete("/delete/")
+def delete_dive(user_id: int, dive_id: int, db: Connection = Depends(get_db)):
+    cur = db.cursor();
+    cur.execute('''
+        DELETE
+        FROM dives
+        WHERE user_id = ? and dive_id = ?
+        ''', [ user_id, dive_id ]
+                      );
+    return { 'affected_count': cur.rowcount };
