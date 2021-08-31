@@ -11,21 +11,6 @@ from octodeco.deco import DiveProfileSer;
 # to explicitly supply
 
 #
-# is_xx_allowed
-#
-def is_modify_allowed(diveprofile):
-    dpu = getattr(diveprofile, 'user_id', None);
-    return dpu == get_user_details().user_id;
-
-
-def is_display_allowed(diveprofile):
-    dpu = getattr(diveprofile, 'user_id', None);
-    if dpu is None:
-        return False;
-    return dpu == get_user_details().user_id or diveprofile.is_public;
-
-
-#
 # batch migration
 #
 def migrate_all_profiles_to_latest():

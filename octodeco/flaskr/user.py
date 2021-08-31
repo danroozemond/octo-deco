@@ -44,6 +44,23 @@ def get_user_details():
     return g.user_details;
 
 
+#
+# is_xx_allowed
+# these should move into the class or somewhere else
+# but they will be part of future refactoring so not fixing now
+#
+def is_modify_allowed(diveprofile):
+    dpu = getattr(diveprofile, 'user_id', None);
+    return dpu == get_user_details().user_id;
+
+
+def is_display_allowed(diveprofile):
+    dpu = getattr(diveprofile, 'user_id', None);
+    if dpu is None:
+        return False;
+    return dpu == get_user_details().user_id or diveprofile.is_public;
+
+
 @bp.before_request
 def load_user_details():
     get_user_details();

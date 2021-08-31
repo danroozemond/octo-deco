@@ -1,4 +1,4 @@
-from . import dive, user, db_dive, db_api_dive;
+from . import dive, user, db_dive, db_user, db_api_dive;
 from .dive import bp;
 from flask import (
     redirect, url_for, request, abort, session, render_template, Response
@@ -71,7 +71,7 @@ def show(dive_id):
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
-                           modify_allowed = db_dive.is_modify_allowed(dp)
+                           modify_allowed = user.is_modify_allowed(dp)
                            );
 
 
