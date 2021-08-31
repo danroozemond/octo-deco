@@ -1,10 +1,13 @@
 import os
 import sqlite3
 from fastapi import FastAPI, Depends
+from . import dive_maintain;
 
 app = FastAPI()
 
 DB_SQLITE = os.environ.get('DB_SQLITE');
+
+db_dive_maintainer = dive_maintain.DBDiveMaintainer();
 
 
 # Database interface
@@ -19,6 +22,7 @@ def get_db():
     try:
         yield db;
     finally:
+        db_dive_maintainer.go(db);
         db.close();
 
 

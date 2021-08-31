@@ -12,15 +12,6 @@ from octodeco.deco import DiveProfileSer;
 
 
 #
-# Store/modify
-#
-def store_dive(diveprofile):
-    # A nice hook to call a cleanup function
-    # cleanup_stale_dives();
-    pass;
-
-
-#
 # Delete
 #
 def delete_dive(dive_id:int):
@@ -83,24 +74,3 @@ def migrate_all_profiles_to_latest():
     return result;
 
 
-@cache.memoize(timeout = 300)
-def cleanup_stale_dives():
-    # Every now and then, find old ephemeral dives and clean them up
-    # Settings
-    age_to_remove = 0.2;  # days (=~5 hrs)
-    max_nr_to_remove = 10;
-    # Do
-    cur = db.get_db().cursor();
-    cur.execute("""
-                SELECT d.dive_id, julianday()-julianday(d.last_update) as age
-                FROM dives d 
-                WHERE d.is_ephemeral AND age > ?
-                ORDER BY last_update
-                LIMIT ?;
-                """, [ age_to_remove, max_nr_to_remove ]);
-    cur2 = db.get_db().cursor();
-    for row in cur:
-        dive_id = row['dive_id'];
-        cur2.execute("DELETE FROM dives WHERE dive_id = ?", [ dive_id ] );
-        print('Removed stale dive %i' % dive_id)
-    return True;
