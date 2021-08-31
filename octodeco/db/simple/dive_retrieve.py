@@ -50,13 +50,13 @@ def get_any_dive(user_id: int, db: Connection = Depends(get_db)):
 
 
 @router.get("/get/", response_model=DBDive)
-def get_one_dive(user_id: int,dive_id:int, response: Response, db: Connection = Depends(get_db)):
+def get_one_dive(dive_id:int, response: Response, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
         SELECT user_id, dive_id, dive_desc, dive, is_public
         FROM dives
-        WHERE dive_id = ? and (is_public or user_id = ?) 
-        ''', [ dive_id, user_id ]
+        WHERE dive_id = ? 
+        ''', [ dive_id ]
                       );
     row = cur.fetchone();
     if row is None:

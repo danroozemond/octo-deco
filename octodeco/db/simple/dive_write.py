@@ -49,12 +49,12 @@ def store_dive(dive: DBDive, db: Connection = Depends(get_db)):
 
 
 @router.delete("/delete/")
-def delete_dive(user_id: int, dive_id: int, db: Connection = Depends(get_db)):
+def delete_dive(dive_id: int, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
         DELETE
         FROM dives
-        WHERE user_id = ? and dive_id = ?
-        ''', [ user_id, dive_id ]
+        WHERE dive_id = ?
+        ''', [ dive_id ]
                       );
     return { 'affected_count': cur.rowcount };
