@@ -13,10 +13,11 @@ def _store_dive_update(db: Connection, dbdv: DBDive) -> int:
     cur = db.cursor();
     cur.execute('''
         UPDATE dives
-        SET dive = ?, dive_desc = ?, is_demo = ?, is_ephemeral = ?,  is_public = ?, last_update = datetime('now')
+        SET dive = ?, dive_desc = ?, is_demo = ?, is_ephemeral = ?,  is_public = ?, object_version = ?, 
+        last_update = datetime('now')
         WHERE dive_id = ? AND user_id = ?;
         ''', [ base64.b64decode(dbdv.dive_serialized.encode('utf-8')), dbdv.dive_desc,
-               dbdv.is_demo, dbdv.is_ephemeral, dbdv.is_public,
+               dbdv.is_demo, dbdv.is_ephemeral, dbdv.is_public, dbdv.object_version,
                dbdv.dive_id, dbdv.user_id ]
                );
     return cur.rowcount;

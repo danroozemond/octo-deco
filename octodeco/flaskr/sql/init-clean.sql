@@ -6,7 +6,8 @@ CREATE TABLE dives (
   dive BLOB NOT NULL,
   last_update DATETIME,
   is_public BOOL,
-  is_ephemeral BOOL
+  is_ephemeral BOOL,
+  object_version INTEGER DEFAULT 0
 );
 CREATE TABLE users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT,

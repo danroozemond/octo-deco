@@ -12,6 +12,7 @@ class DBDive(BaseModel):
     is_demo: Optional[bool] = None
     is_ephemeral: Optional[bool] = None
     dive_serialized: Optional[str] = None
+    object_version: Optional[int] = 0
 
     @staticmethod
     def from_row(row):

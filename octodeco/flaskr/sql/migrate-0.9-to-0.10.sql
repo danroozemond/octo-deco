@@ -1,0 +1,2 @@
+ALTER TABLE dives ADD COLUMN object_version INTEGER DEFAULT 0;
+

@@ -64,3 +64,17 @@ def get_one_dive(dive_id:int, response: Response, db: Connection = Depends(get_d
         return None;
     else:
         return DBDive.from_row(row);
+
+
+@router.get("/outdated_object_versions/")
+def get_all_all_dives(latest_version: int, db: Connection = Depends(get_db)):
+    cur = db.cursor();
+    cur.execute('''
+        SELECT dive_id
+        FROM dives
+        WHERE object_version < ?
+        ORDER BY last_update ASC
+        LIMIT 1000''',
+    [latest_version]);
+    result = [ row['dive_id'] for row in cur.fetchall() ];
+    return result;

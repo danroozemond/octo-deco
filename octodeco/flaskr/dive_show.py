@@ -94,7 +94,7 @@ def show_any():
 def csv(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
     if dp is None:
-        abort(405);
+        abort(403);
     r = Response(dp.dataframe().to_csv(),
                  mimetype = "text/csv",
                  headers = { "Content-disposition": "attachment; filename=dive_%i.csv" % dive_id }

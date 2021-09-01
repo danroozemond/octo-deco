@@ -50,15 +50,17 @@ def get_user_details():
 # but they will be part of future refactoring so not fixing now
 #
 def is_modify_allowed(diveprofile):
+    ud = get_user_details();
     dpu = getattr(diveprofile, 'user_id', None);
-    return dpu == get_user_details().user_id;
+    return ud.is_admin or dpu == get_user_details().user_id;
 
 
 def is_display_allowed(diveprofile):
+    ud = get_user_details();
     dpu = getattr(diveprofile, 'user_id', None);
-    if dpu is None:
-        return False;
-    return dpu == get_user_details().user_id or diveprofile.is_public;
+    return ( dpu is not None and dpu == ud.user_id ) \
+        or diveprofile.is_public \
+        or ud.is_admin;
 
 
 @bp.before_request

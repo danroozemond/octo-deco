@@ -59,7 +59,7 @@ def get_one_dive(dive_id:int):
     # Construct result
     diveprofile = DiveProfileSer.loads(base64.b64decode(row['dive_serialized'].encode('utf-8')));
     if not user.is_display_allowed(diveprofile):
-        abort(405);
+        abort(403);
     diveprofile.dive_id = row['dive_id'];
     diveprofile.user_id = row['user_id'];
     return diveprofile;
@@ -71,7 +71,7 @@ def get_one_dive(dive_id:int):
 def store_dive(diveprofile):
     # Check user_id
     if not user.is_modify_allowed(diveprofile):
-        abort(405);
+        abort(403);
     if not hasattr(diveprofile, 'user_id'):
         diveprofile.user_id = user.get_user_details().user_id;
     # Serialize & put request
@@ -97,7 +97,7 @@ def delete_dive(dive_id: int):
     # This check is a bit awkward, but we can improve it later
     if not user.is_modify_allowed(get_one_dive(dive_id)):
         print('User is not allowed to modify this dive {}'.format(dive_id));
-        abort(405);
+        abort(403);
     # Do the deletion
     r = requests.delete(ENDPOINT + 'dive/write/delete/', params = {'dive_id':dive_id});
     check_status_code_abort(r);
@@ -118,7 +118,7 @@ def migrate_all_profiles_to_latest():
         # At this point dp is automatically seralized and updated
         store_dive(dp);
         # Keep track
-        print('Migrated dive_id {dive_id}');
+        print(f'Migrated dive_id {dive_id}');
         cnt += 1;
         # Limit, to avoid timeouts
         if cnt > 100:
