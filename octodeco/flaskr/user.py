@@ -3,7 +3,7 @@ from flask import (
     Blueprint, request, render_template, redirect, flash, url_for, abort, g
 )
 
-from . import db_dive, db_user, auth, db_api_dive;
+from . import db_user, auth, db_api_dive;
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 

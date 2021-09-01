@@ -6,7 +6,7 @@ from flask import (
     g, Blueprint, flash, redirect, url_for, request, abort, jsonify, session
 )
 
-from . import db_dive, plots, user, db_api_dive;
+from . import plots, user, db_api_dive;
 from .app import cache;
 
 

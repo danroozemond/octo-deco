@@ -1,6 +1,6 @@
 import sys;
 
-from . import dive, db_dive, db_api_dive;
+from . import dive, db_api_dive;
 from .dive import bp;
 from flask import (
     flash, redirect, url_for, request, abort, session, render_template

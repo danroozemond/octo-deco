@@ -3,7 +3,7 @@ from flask import (
     Blueprint, render_template, redirect, flash, url_for, abort
 )
 
-from . import db_dive, db_api_dive, user;
+from . import db_api_dive, user;
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 

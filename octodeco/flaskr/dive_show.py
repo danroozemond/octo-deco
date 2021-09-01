@@ -1,4 +1,4 @@
-from . import dive, user, db_dive, db_user, db_api_dive;
+from . import dive, user, db_api_dive;
 from .dive import bp;
 from flask import (
     redirect, url_for, request, abort, session, render_template, Response
