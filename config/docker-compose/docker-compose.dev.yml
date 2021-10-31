@@ -1,0 +1,24 @@
+version: '2'
+services:
+  flask:
+    image: danroozemond/octo-deco-uwsgi
+    restart: always
+    ports:
+      - "127.0.0.1:9191:9191"
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - ../..:/octo-deco
+      - ../docker-flask/scripts:/scripts
+    mem_limit: 500m
+    command: "/bin/sh -c '/scripts/run_uwsgi_ini.dev.sh'"
+  fastapi_db:
+    image: danroozemond/octo-deco-uwsgi
+    restart: always
+    ports:
+      - "127.0.0.1:8001:8001"
+    volumes:
+      - ../..:/octo-deco
+      - ../../instance:/flask_instance
+      - ../docker-flask/scripts:/scripts
+    mem_limit: 100m
+    command: "/bin/sh -c '/scripts/run_uvicorn.dev.sh'"
