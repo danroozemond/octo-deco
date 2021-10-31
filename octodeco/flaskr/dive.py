@@ -7,6 +7,7 @@ from flask import (
 )
 
 from . import plots, user, db_api_dive;
+from .util.user import AllowedFeature as uft;
 from .app import cache;
 
 
@@ -227,7 +228,7 @@ def get_cached_dive(dive_id: int):
     if cdp is None or cdp.profile_base() is None:
         session[ 'last_dive_id' ] = None;
         abort(404);
-    if not user.is_display_allowed(cdp.profile_base()):
+    if not user.get_user_details().is_allowed(uft.DIVE_VIEW, dive=cdp.profile_base()):
         session[ 'last_dive_id' ] = None;
         abort(403);
     if not cdp.profile_base().is_ephemeral:

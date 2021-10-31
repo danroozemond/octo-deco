@@ -1,6 +1,7 @@
 # Please see LICENSE.md
 import requests, base64, flask;
 from . import user;
+from .util.user import AllowedFeature as uft;
 from .db_api import ENDPOINT, get_user_id_param, check_status_code_abort;
 from octodeco.deco import DiveProfileSer;
 
@@ -41,7 +42,7 @@ def get_one_dive(dive_id: int):
     check_status_code_abort(r);
     # Construct result
     diveprofile = DiveProfileSer.loads(base64.b64decode(row['dive_serialized'].encode('utf-8')));
-    if not user.is_display_allowed(diveprofile):
+    if not user.get_user_details().is_allowed(uft.DIVE_VIEW, dive=diveprofile):
         flask.abort(403);
     diveprofile.dive_id = row['dive_id'];
     diveprofile.user_id = row['user_id'];
@@ -53,10 +54,10 @@ def get_one_dive(dive_id: int):
 #
 def store_dive(diveprofile):
     # Check user_id
-    if not user.is_modify_allowed(diveprofile):
+    if not user.get_user_details().is_allowed(uft.DIVE_MODIFY, dive=diveprofile):
         flask.abort(403);
     if not hasattr(diveprofile, 'user_id'):
-        diveprofile.user_id = user.get_user_details().user_id;
+        diveprofile.user_id = user.get_user_details().user_id();
     # Serialize & put request
     d = { 'dive_id': getattr(diveprofile, 'dive_id', None),
           'user_id': diveprofile.user_id,
@@ -78,7 +79,7 @@ def store_dive(diveprofile):
 #
 def delete_dive(dive_id: int):
     # This check is a bit awkward, but we can improve it later
-    if not user.is_modify_allowed(get_one_dive(dive_id)):
+    if not user.get_user_details().is_allowed(uft.DIVE_MODIFY, dive=get_one_dive(get_one_dive(dive_id))):
         print('User is not allowed to modify this dive {}'.format(dive_id));
         flask.abort(403);
     # Do the deletion
@@ -91,7 +92,7 @@ def delete_dive(dive_id: int):
 # Admin: Batch migration
 #
 def migrate_all_profiles_to_latest():
-    assert user.get_user_details().is_admin;
+    assert user.get_user_details().is_admin();
     r = requests.get(ENDPOINT + 'dive/retrieve/outdated_object_versions/',
                      params = { 'latest_version': DiveProfileSer.CURRENT_VERSION});
     list_dive_ids = r.json();

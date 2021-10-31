@@ -7,7 +7,7 @@ assert ENDPOINT.endswith('/');
 
 
 def get_user_id_param():
-    params = { 'user_id': user.get_user_details().user_id };
+    params = { 'user_id': user.get_user_details().user_id() };
     return params;
 
 

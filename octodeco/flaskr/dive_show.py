@@ -1,5 +1,6 @@
 from . import dive, user, db_api_dive;
 from .dive import bp;
+from .util.user import AllowedFeature as uft;
 from flask import (
     redirect, url_for, request, abort, session, render_template, Response
 )
@@ -36,10 +37,7 @@ def show_elt_full_table(dive_id):
 @bp.route('/show/<int:dive_id>/gfdecodata', methods = ['GET'])
 def show_elt_gfdeco_table(dive_id):
     cdp = dive.get_cached_dive(dive_id);
-    if user.get_user_details().is_logged_in():
-        return cdp.gfdeco_table(dive.get_gf_args_from_request());
-    else:
-        return render_template('dive/elt_login_please.html');
+    return cdp.gfdeco_table(dive.get_gf_args_from_request());
 
 
 @bp.route('/show/<int:dive_id>/plot/pressuregraph', methods = ['GET'])
@@ -71,7 +69,7 @@ def show(dive_id):
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
-                           modify_allowed = user.is_modify_allowed(dp)
+                           modify_allowed = user.get_user_details().is_allowed(uft.DIVE_MODIFY, dive=dp)
                            );
 
 

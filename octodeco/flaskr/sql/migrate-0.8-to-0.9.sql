@@ -1,2 +1,0 @@
-ALTER TABLE dives ADD COLUMN is_ephemeral BOOL DEFAULT 0;
-

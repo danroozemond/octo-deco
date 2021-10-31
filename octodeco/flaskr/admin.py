@@ -11,7 +11,7 @@ bp = Blueprint('admin', __name__, url_prefix='/admin')
 @bp.before_request
 def load_user_details():
     ud = user.get_user_details();
-    if not ud.is_admin:
+    if not ud.is_admin():
         abort(403);
 
 
