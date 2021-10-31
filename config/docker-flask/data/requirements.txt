@@ -10,3 +10,6 @@ oauthlib
 requests
 cython
 gitpython
+fastapi
+uvicorn[standard]
+pydantic

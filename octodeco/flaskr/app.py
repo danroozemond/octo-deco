@@ -1,25 +1,23 @@
 import os
 from datetime import timedelta
 
-import click;
 import flask;
 from flask import Flask, session, url_for, g;
 from flask_caching import Cache
 
-from . import db;
-from . import util;
+from .util import git;
 
 
 # Define navigation row
 def get_nav_items():
     return [ ('dive.show_any', '/dive/', 'Dive'),
              ('user.info', '/user/', 'User')
-            ];
+             ];
 
 
 # Get settings
 assert os.environ.get('FLASK_SECRET_KEY') is not None;
-assert os.environ.get('GOOGLE_OAUTH_JSON') is not None;
+assert os.environ.get('FLASK_PORT') is not None;
 setting_secret_key = os.environ.get('FLASK_SECRET_KEY');
 setting_instance_path = os.environ.get('FLASK_INSTANCE_PATH');
 cache_dir = os.environ.get('FLASK_CACHE_DIR');
@@ -37,6 +35,10 @@ app.config.from_mapping(
     CACHE_DEFAULT_TIMEOUT = 300
 );
 
+# Further settings
+assert os.environ.get('FLASK_DB_ENDPOINT') is not None;
+setting_flask_db_endpoint = os.environ.get('FLASK_DB_ENDPOINT');
+
 # Create cache; on load flush it
 cache = Cache(app);
 cache.clear();
@@ -47,41 +49,13 @@ except OSError:
     pass
 
 
-#
-# Database manipulations
-#
-@click.command('init-db')
-@flask.cli.with_appcontext
-def init_db_command():
-    """Clear the existing data and create new tables."""
-    db.init_db()
-    click.echo('Initialized the database in %s' % app.config['DATABASE'])
-
-@click.command('migrate-db')
-@click.argument('frv')
-@click.argument('tov')
-@flask.cli.with_appcontext
-def migrate_db_command(frv, tov):
-    """Migrate from one data version to another"""
-    db.migrate_db(frv,tov)
-    click.echo('Migrated the database in %s' % app.config['DATABASE'])
-
-app.cli.add_command(init_db_command);
-app.cli.add_command(migrate_db_command);
-
-
 # Session data
 @app.before_request
 def init_session():
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=365);
-    g.current_git_commit = util.CURRENT_GIT_COMMIT;
-    g.current_git_branch = util.CURRENT_GIT_BRANCH;
-
-
-@app.teardown_appcontext
-def close_db(exception):
-    db.close_db();
+    g.current_git_commit = git.CURRENT_GIT_COMMIT;
+    g.current_git_branch = git.CURRENT_GIT_BRANCH;
 
 
 # Blueprints
@@ -89,8 +63,6 @@ from . import dive;
 app.register_blueprint(dive.bp);
 from . import user;
 app.register_blueprint(user.bp);
-from . import auth;
-app.register_blueprint(auth.bp);
 from . import admin;
 app.register_blueprint(admin.bp);
 

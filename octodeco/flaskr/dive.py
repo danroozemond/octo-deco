@@ -6,9 +6,8 @@ from flask import (
     g, Blueprint, flash, redirect, url_for, request, abort, jsonify, session
 )
 
-from . import db_dive;
-from . import plots;
-from . import user;
+from . import plots, user, db_api_dive;
+from .util.user import AllowedFeature as uft;
 from .app import cache;
 
 
@@ -58,7 +57,7 @@ class CachedDiveProfile:
 
     @cache.memoize()
     def profile_base(self):
-        dp = db_dive.get_one_dive(self.dive_id);
+        dp = db_api_dive.get_one_dive(self.dive_id);
         if dp is None:
             return None;
         return dp;
@@ -226,11 +225,10 @@ class CachedDiveProfile:
 @cache.memoize()
 def get_cached_dive(dive_id: int):
     cdp = CachedDiveProfile(dive_id);
-    if cdp is None:
-        flash('Dive not found [%i]' % dive_id);
+    if cdp is None or cdp.profile_base() is None:
         session[ 'last_dive_id' ] = None;
-        return redirect(url_for('dive.show_any'));
-    if not db_dive.is_display_allowed(cdp.profile_base()):
+        abort(404);
+    if not user.get_user_details().is_allowed(uft.DIVE_VIEW, dive=cdp.profile_base()):
         session[ 'last_dive_id' ] = None;
         abort(403);
     if not cdp.profile_base().is_ephemeral:

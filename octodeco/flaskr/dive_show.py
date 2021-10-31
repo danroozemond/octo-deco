@@ -1,6 +1,6 @@
-from . import dive, user;
-from . import db_dive;
+from . import dive, user, db_api_dive;
 from .dive import bp;
+from .util.user import AllowedFeature as uft;
 from flask import (
     redirect, url_for, request, abort, session, render_template, Response
 )
@@ -37,10 +37,7 @@ def show_elt_full_table(dive_id):
 @bp.route('/show/<int:dive_id>/gfdecodata', methods = ['GET'])
 def show_elt_gfdeco_table(dive_id):
     cdp = dive.get_cached_dive(dive_id);
-    if user.get_user_details().is_logged_in():
-        return cdp.gfdeco_table(dive.get_gf_args_from_request());
-    else:
-        return render_template('dive/elt_login_please.html');
+    return cdp.gfdeco_table(dive.get_gf_args_from_request());
 
 
 @bp.route('/show/<int:dive_id>/plot/pressuregraph', methods = ['GET'])
@@ -68,11 +65,11 @@ def show(dive_id):
     # This will never return None, get_diveprofile_for_display will redirect/abort if necessary
     assert dp is not None;
 
-    alldives = db_dive.get_all_dives();
+    alldives = db_api_dive.get_all_dives();
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
-                           modify_allowed = db_dive.is_modify_allowed(dp)
+                           modify_allowed = user.get_user_details().is_allowed(uft.DIVE_MODIFY, dive=dp)
                            );
 
 
@@ -81,7 +78,7 @@ def show_any():
     last_dive_id = session.get('last_dive_id', None);
     if last_dive_id is not None:
         return redirect(url_for('dive.show', dive_id = last_dive_id));
-    dive_id = db_dive.get_any_dive_id();
+    dive_id = db_api_dive.get_any_dive_id();
     if dive_id is None:
         return redirect(url_for('dive.show_none'));
     else:
@@ -95,7 +92,7 @@ def show_any():
 def csv(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
     if dp is None:
-        abort(405);
+        abort(403);
     r = Response(dp.dataframe().to_csv(),
                  mimetype = "text/csv",
                  headers = { "Content-disposition": "attachment; filename=dive_%i.csv" % dive_id }

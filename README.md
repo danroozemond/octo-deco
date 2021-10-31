@@ -4,6 +4,20 @@ This tool comes with all the usual warnings, and all of the usual "no guarantee"
 TL;DR:
 > **Don't put your life in the hands of some idiot on the internet.**
 
+# Features
+* Decompression computations using Bühlmann ZHL-16C with Gradient Factors,
+  directly usable as a Python library 
+* Tightly integrated with web app allowing creation, deletion and manipulation
+  of dive profiles
+* Insightful plots, not just of the dive itself, but also eg. heat maps of tissue loading
+* Gas consumption computations, including lost-gas scenarios
+* Import dives from Shearwater computers (through CSV) 
+* Analysis of options for decompression profiles from gradient factors
+
+TODO finish
+  
+A version of the library is available directly from [octo-deco.nl](https://octo-deco.nl).
+
 # Contact info
 [Dan Roozemond](mailto:dan.roozemond@gmail.com)
  
@@ -20,3 +34,8 @@ GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# Installing
+See `install.md`.
+
+

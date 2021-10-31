@@ -27,10 +27,15 @@ services:
       - "127.0.0.1:9191:9191"
     volumes:
       - ~/git-master/octo-deco:/octo-deco
-      - ~/flask_instance:/flask_instance
       - ../docker-flask/scripts:/scripts
     mem_limit: 500m
     command: "/bin/sh -c '/scripts/run_uwsgi_ini.sh'"
-    #command: "/bin/sh -c '/scripts/run_flask_cmd.sh'"
-    #command: "/bin/sh -c 'sleep 6h'"
-
+  fastapi_db:
+    image: danroozemond/octo-deco-uwsgi
+    restart: always
+    volumes:
+      - ~/git-master/octo-deco:/octo-deco
+      - ~/flask_instance:/flask_instance
+      - ../docker-flask/scripts:/scripts
+    mem_limit: 100m
+    command: "/bin/sh -c '/scripts/run_uvicorn.sh'"
