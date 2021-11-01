@@ -19,15 +19,13 @@ def get_nav_items():
 assert os.environ.get('FLASK_SECRET_KEY') is not None;
 assert os.environ.get('FLASK_PORT') is not None;
 setting_secret_key = os.environ.get('FLASK_SECRET_KEY');
-setting_instance_path = os.environ.get('FLASK_INSTANCE_PATH');
 cache_dir = os.environ.get('FLASK_CACHE_DIR');
 cache_threshold = int(os.environ.get('FLASK_CACHE_THRESHOLD', 10000));
 
 # create and configure the app
-app = Flask(__name__, instance_relative_config=True, instance_path = setting_instance_path)
+app = Flask(__name__, instance_relative_config=True)
 app.config.from_mapping(
     SECRET_KEY = setting_secret_key,
-    DATABASE = os.path.join(app.instance_path, 'flaskr.sqlite'),
     NAV_ITEMS = get_nav_items(),
     CACHE_TYPE = "FileSystemCache",  # Flask-Caching related configs
     CACHE_DIR = cache_dir,
@@ -42,11 +40,6 @@ setting_flask_db_endpoint = os.environ.get('FLASK_DB_ENDPOINT');
 # Create cache; on load flush it
 cache = Cache(app);
 cache.clear();
-
-try:
-    os.makedirs(app.instance_path)
-except OSError:
-    pass
 
 
 # Session data
