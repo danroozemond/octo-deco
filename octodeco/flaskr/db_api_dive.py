@@ -79,7 +79,7 @@ def store_dive(diveprofile):
 #
 def delete_dive(dive_id: int):
     # This check is a bit awkward, but we can improve it later
-    if not user.get_user_details().is_allowed(uft.DIVE_MODIFY, dive=get_one_dive(get_one_dive(dive_id))):
+    if not user.get_user_details().is_allowed(uft.DIVE_MODIFY, dive=get_one_dive(dive_id)):
         print('User is not allowed to modify this dive {}'.format(dive_id));
         flask.abort(403);
     # Do the deletion
