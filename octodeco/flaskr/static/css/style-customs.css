@@ -78,7 +78,7 @@ table.dataframe th {
     color: black;
     text-align: left;
 }
-table.dataframe th, td {
+table.dataframe th, table.dataframe td {
     padding: .3em;
     font-family: monospace;
     font-size: .9em;

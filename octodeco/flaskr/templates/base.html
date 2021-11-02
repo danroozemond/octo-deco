@@ -26,12 +26,12 @@
 		<script src="{{ url_for('static', filename='js/skel.min.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/skel-panels.min.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/init.js') }}"></script>
-		{% block extrascripts %}{% endblock %}
 		<noscript>
 			<link rel="stylesheet" href="{{ url_for('static', filename='css/skel-noscript.css') }}">
 			<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 		</noscript>
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style-customs.css') }}">
+		{% block extrascripts %}{% endblock %}
 	</head>
 	<body>
 		<div id="wrapper">
