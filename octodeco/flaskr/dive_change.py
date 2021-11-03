@@ -34,7 +34,7 @@ def delete(dive_id):
     aff = db_api_dive.delete_dive(dive_id);
     if aff == 0:
         abort(405);
-    flash('Dive %i is now history' % dive_id);
+    flash(f'Dive {dive_id} is now history');
     dive.invalidate_cached_dive(dive_id);
     session[ 'last_dive_id' ] = None;
     return redirect(url_for('dive.show_any'));
