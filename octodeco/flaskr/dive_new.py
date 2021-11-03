@@ -19,9 +19,9 @@ def new_show():
 
 @bp.route('/new', methods = [ 'POST' ])
 def new_do():
-    dtgs = [ ( request.form.get('depth[%i]' % i, None),
-               request.form.get('time[%i]' % i, None),
-               request.form.get('gas[%i]' % i, None) )
+    dtgs = [ ( request.form.get(f'depth[{i}]', None),
+               request.form.get(f'time[{i}]', None),
+               request.form.get(f'gas[{i}]', None) )
              for i in range(11) ];
     extragas = request.form.get('deco_gas', '');
     result = CreateDive.create_dive_by_depth_time_gas( dtgs, extragas );

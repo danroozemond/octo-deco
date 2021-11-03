@@ -19,7 +19,7 @@ def update(dive_id):
     if action == 'Update Stops':
         olddecotime = dp.decotime();
         dp.set_gf(dp.gf_low_display, dp.gf_high_display, updateStops = True);
-        flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
+        flash('Recomputed stops (deco time: {} -> {} mins)'.format(round(olddecotime), round(dp.decotime())));
         db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
@@ -81,7 +81,7 @@ def modify_settings(dive_id):
         if ipt_last_stop_depth != dp._last_stop_depth:
             dp._last_stop_depth = ipt_last_stop_depth;
             dp.update_deco_info();
-            flash("Change last stop to %i m" % ipt_last_stop_depth);
+            flash(f'Change last stop to {ipt_last_stop_depth} m');
         # Update gas consumption settings
         ipt_gas_consmp_bottom = max(1, min(50, request.form.get('ipt_gas_consmp_bottom', 20, type=int)));
         ipt_gas_consmp_deco = max(1, min(50, request.form.get('ipt_gas_consmp_deco', 20, type=int)));

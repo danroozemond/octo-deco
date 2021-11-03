@@ -25,7 +25,7 @@ class DBDiveMaintainer:
         for row in cur:
             dive_id = row['dive_id'];
             cur2.execute("DELETE FROM dives WHERE dive_id = ?", [ dive_id ] );
-            print('Removed stale dive %i' % dive_id)
+            print(f'Removed stale dive {dive_id}')
 
     def go(self, db: Connection):
         self._cleanup_stale_dives(db);
