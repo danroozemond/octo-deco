@@ -87,7 +87,6 @@ def new_duplicate(dive_id):
     dp = dive.get_cached_dive(dive_id).profile_base();
     cp = dp.full_copy();
     cp.is_ephemeral = False;
-    cp.is_public = False;
     # Store the dive
     db_api_dive.store_dive(cp);
     new_dive_id = cp.dive_id;
@@ -110,7 +109,6 @@ def new_ephm_lost_gas(dive_id):
     dp = dive.get_cached_dive(dive_id).profile_args(req_args);
     cp = dp.copy_profile_lost_gases(lost_gases);
     cp.is_ephemeral = True;
-    cp.is_public = False;
     cp.parent_dive_id = dive_id;
     # Store the dive
     db_api_dive.store_dive(cp);

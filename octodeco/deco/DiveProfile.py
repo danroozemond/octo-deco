@@ -55,7 +55,7 @@ class DiveProfile:
         self.custom_desc = None;
         self.is_demo_dive = False;
         self.is_ephemeral = False;
-        self.is_public = False;
+        self.is_public = True;
         self.db_version = DiveProfileSer.CURRENT_VERSION;
 
         # NOTE - If you add attributes here, also add migration code to DiveProfileSer

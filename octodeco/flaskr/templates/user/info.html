@@ -18,10 +18,9 @@
     </ul>
 
     <h2>Dives</h2>
-    <ul>
+    <ul style="list-style-type: disc;">
         {% for row in diveinfos %}
         <li>
-            {{ row['dive_id'] }} :
             <a href="{{url_for('dive.show', dive_id=row['dive_id'])}}">{{ row['dive_desc'] }}</a>
             {% if row['is_public'] %}(Public){% endif %}
         </li>
