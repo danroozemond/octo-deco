@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from sqlite3 import Connection
 from .app import get_db;
 from .dive import DBDive;
+import uuid;
 
 router = APIRouter(
     prefix="/dive/write"
@@ -25,11 +26,11 @@ def _store_dive_update(db: Connection, dbdv: DBDive) -> int:
 
 def _store_dive_new(db: Connection, dbdv: DBDive) -> DBDive:
     cur = db.cursor();
+    dbdv.dive_id = str(uuid.uuid4());
     cur.execute('''
-        INSERT INTO dives(user_id, dive)
-        VALUES (?, 'xx');
-        ''', [ dbdv.user_id ] );
-    dbdv.dive_id = cur.lastrowid;
+        INSERT INTO dives(user_id, dive_id, dive)
+        VALUES (?, ?, 'xx');
+        ''', [ dbdv.user_id, dbdv.dive_id ] );
     _store_dive_update(db, dbdv);
     return dbdv;
 
@@ -50,7 +51,7 @@ def store_dive(dive: DBDive, db: Connection = Depends(get_db)):
 
 
 @router.delete("/delete/")
-def delete_dive(dive_id: int, db: Connection = Depends(get_db)):
+def delete_dive(dive_id: str, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
         DELETE

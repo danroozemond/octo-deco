@@ -8,7 +8,7 @@ from flask import (
 #
 # Update (GF), delete, modify
 #
-@bp.route('/update/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/update/<string:dive_id>', methods = [ 'POST' ])
 def update(dive_id):
     action = request.form.get('action');
     dp = dive.get_diveprofile_for_display(dive_id);
@@ -19,7 +19,7 @@ def update(dive_id):
     if action == 'Update Stops':
         olddecotime = dp.decotime();
         dp.set_gf(dp.gf_low_display, dp.gf_high_display, updateStops = True);
-        flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
+        flash('Recomputed stops (deco time: {} -> {} mins)'.format(round(olddecotime), round(dp.decotime())));
         db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
@@ -29,18 +29,18 @@ def update(dive_id):
         abort(405);
 
 
-@bp.route('/delete/<int:dive_id>', methods = [ 'GET', 'POST' ])
+@bp.route('/delete/<string:dive_id>', methods = [ 'GET', 'POST' ])
 def delete(dive_id):
     aff = db_api_dive.delete_dive(dive_id);
     if aff == 0:
         abort(405);
-    flash('Dive %i is now history' % dive_id);
+    flash(f'Dive {dive_id} is now history');
     dive.invalidate_cached_dive(dive_id);
     session[ 'last_dive_id' ] = None;
     return redirect(url_for('dive.show_any'));
 
 
-@bp.route('/modify/meta/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/modify/meta/<string:dive_id>', methods = [ 'POST' ])
 def modify_meta(dive_id):
     if request.form.get('action_update', '') != '':
         # Some input sanitation
@@ -72,7 +72,7 @@ def modify_meta(dive_id):
         abort(405);
 
 
-@bp.route('/modify/settings/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/modify/settings/<string:dive_id>', methods = [ 'POST' ])
 def modify_settings(dive_id):
     if request.form.get('action_update_settings', '') != '':
         dp = dive.get_diveprofile_for_display(dive_id);
@@ -81,7 +81,7 @@ def modify_settings(dive_id):
         if ipt_last_stop_depth != dp._last_stop_depth:
             dp._last_stop_depth = ipt_last_stop_depth;
             dp.update_deco_info();
-            flash("Change last stop to %i m" % ipt_last_stop_depth);
+            flash(f'Change last stop to {ipt_last_stop_depth} m');
         # Update gas consumption settings
         ipt_gas_consmp_bottom = max(1, min(50, request.form.get('ipt_gas_consmp_bottom', 20, type=int)));
         ipt_gas_consmp_deco = max(1, min(50, request.form.get('ipt_gas_consmp_deco', 20, type=int)));
@@ -103,7 +103,7 @@ def modify_settings(dive_id):
         abort(405);
 
 
-@bp.route('/update/keep/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/update/keep/<string:dive_id>', methods = [ 'POST' ])
 def update_keep(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
     if dp is not None:

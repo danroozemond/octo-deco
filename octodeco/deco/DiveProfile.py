@@ -55,7 +55,7 @@ class DiveProfile:
         self.custom_desc = None;
         self.is_demo_dive = False;
         self.is_ephemeral = False;
-        self.is_public = False;
+        self.is_public = True;
         self.db_version = DiveProfileSer.CURRENT_VERSION;
 
         # NOTE - If you add attributes here, also add migration code to DiveProfileSer
@@ -99,12 +99,12 @@ class DiveProfile:
         v = {'Deco model (display)': self._desc_deco_model_display,
              'Deco model (profile)': self._desc_deco_model_profile,
              'Gases carried': {str(g) for g in self._gases_carried},
-             'Last stop': '%i m' % self._last_stop_depth,
-             'Total dive time': '%.1f mins' % self.divetime(),
-             'Decompression time': '%.1f mins' % self.decotime(),
-             'CNS max': '%.1f%%' % self.cns_max(),
-             'Deco profile comp time': '%.2f secs' % self._deco_stops_computation_time,
-             'Full info comp time': '%.2f secs' % self._full_info_computation_time
+             'Last stop': f'{self._last_stop_depth} m',
+             'Total dive time': f'{self.divetime():.1f} mins',
+             'Decompression time': f'{self.decotime():.1f} mins',
+             'CNS max': f'{self.cns_max():.1f}%',
+             'Deco profile comp time': f'{self._deco_stops_computation_time:.2f} secs',
+             'Full info comp time': f'{self._full_info_computation_time:.2f} secs'
              };
 
         return v;
@@ -127,9 +127,9 @@ class DiveProfile:
 
         maxdepth = self.max_depth();
         dtc = self.created.strftime('%d-%b-%Y %H:%M');
-        r = '%.1f m / %i mins (%s)' % (maxdepth, self.divetime(), dtc);
+        r = f'{maxdepth:.1f} m / {self.divetime():.0f} mins ({dtc})';
         if self.add_custom_desc is not None and self.add_custom_desc != '':
-            r = '%s: %s' % (self.add_custom_desc, r);
+            r = f'{self.add_custom_desc}: {r}';
         return r;
 
     def update_deco_model_info(self, deco_model, update_display = False, update_profile = False):
