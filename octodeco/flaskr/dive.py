@@ -223,7 +223,7 @@ class CachedDiveProfile:
 
 
 @cache.memoize()
-def get_cached_dive(dive_id: int):
+def get_cached_dive(dive_id: str):
     cdp = CachedDiveProfile(dive_id);
     if cdp is None or cdp.profile_base() is None:
         session[ 'last_dive_id' ] = None;
@@ -236,11 +236,11 @@ def get_cached_dive(dive_id: int):
     return cdp;
 
 
-def invalidate_cached_dive(dive_id: int):
+def invalidate_cached_dive(dive_id: str):
     cache.delete_memoized(get_cached_dive, dive_id);
 
 
-def get_diveprofile_for_display(dive_id: int):
+def get_diveprofile_for_display(dive_id: str):
     return get_cached_dive(dive_id).profile_args(get_gf_args_from_request());
 
 

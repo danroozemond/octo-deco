@@ -39,7 +39,7 @@ def new_demo():
     dp = CreateDive.create_demo_dive();
     db_api_dive.store_dive(dp);
     dive_id = dp.dive_id;
-    flash('Generated demo dive [%i]' % dive_id);
+    flash('Generated demo dive :)');
     return redirect(url_for('dive.show', dive_id = dive_id))
 
 
@@ -82,7 +82,7 @@ def new_octodeco_csv():
     return new_csv( CreateDive.create_from_octodeco_csv );
 
 
-@bp.route('/new/duplicate/<int:dive_id>', methods = ['GET','POST'])
+@bp.route('/new/duplicate/<string:dive_id>', methods = ['GET','POST'])
 def new_duplicate(dive_id):
     dp = dive.get_cached_dive(dive_id).profile_base();
     cp = dp.full_copy();
@@ -99,7 +99,7 @@ def new_duplicate(dive_id):
 #
 # Create ephemeral/temp dives as variant of existing ones
 #
-@bp.route('/new/lost/<int:dive_id>', methods = ['GET'])
+@bp.route('/new/lost/<string:dive_id>', methods = ['GET'])
 def new_ephm_lost_gas(dive_id):
     req_args = dive.get_gf_args_from_request();
     lostgasstr = str(request.args.get('lostgas', ''));
@@ -115,6 +115,6 @@ def new_ephm_lost_gas(dive_id):
     # Store the dive
     db_api_dive.store_dive(cp);
     dive_id = cp.dive_id;
-    flash('Created scenario: %s' % cp.description());
+    flash(f'Created scenario: {cp.description()}');
     # Done.
     return redirect(url_for('dive.show', dive_id = dive_id))

@@ -9,17 +9,17 @@ from flask import (
 #
 # Showing the dive: separate elements
 #
-@bp.route('/show/<int:dive_id>/plot/profile', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/plot/profile', methods = ['GET'])
 def show_elt_plot_profile(dive_id):
     return dive.get_cached_dive(dive_id).plot_profile(dive.get_gf_args_from_request());
 
 
-@bp.route('/show/<int:dive_id>/plot/heatmap', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/plot/heatmap', methods = ['GET'])
 def show_elt_plot_heatmap(dive_id):
     return dive.get_cached_dive(dive_id).plot_heatmap(dive.get_gf_args_from_request());
 
 
-@bp.route('/show/<int:dive_id>/summary', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/summary', methods = ['GET'])
 def show_elt_summary_table(dive_id):
     cdp = dive.get_cached_dive(dive_id);
     reqargs = dive.get_gf_args_from_request();
@@ -29,18 +29,18 @@ def show_elt_summary_table(dive_id):
     return '{}\n<h3>Runtime</h3>\n{}\n<h3>Gas consumption</h3>\n{}\n'.format(r1,r2,r3);
 
 
-@bp.route('/show/<int:dive_id>/fulldata', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/fulldata', methods = ['GET'])
 def show_elt_full_table(dive_id):
     return dive.get_cached_dive(dive_id).full_table(dive.get_gf_args_from_request());
 
 
-@bp.route('/show/<int:dive_id>/gfdecodata', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/gfdecodata', methods = ['GET'])
 def show_elt_gfdeco_table(dive_id):
     cdp = dive.get_cached_dive(dive_id);
     return cdp.gfdeco_table(dive.get_gf_args_from_request());
 
 
-@bp.route('/show/<int:dive_id>/plot/pressuregraph', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/plot/pressuregraph', methods = ['GET'])
 def show_elt_pressure_graph(dive_id):
     return dive.get_cached_dive(dive_id).plot_pressure_graph(dive.get_gf_args_from_request());
 
@@ -55,11 +55,11 @@ def show_none():
 
 @bp.route('/show/get')
 def show_get():
-    dive_id = request.args.get("dive_id", 0, type=int);
+    dive_id = request.args.get("dive_id", '', type=str);
     return redirect(url_for('dive.show', dive_id=dive_id));
 
 
-@bp.route('/show/<int:dive_id>', methods = ['GET'])
+@bp.route('/show/<string:dive_id>', methods = ['GET'])
 def show(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
     # This will never return None, get_diveprofile_for_display will redirect/abort if necessary
@@ -88,13 +88,13 @@ def show_any():
 #
 # Downloading CSV
 #
-@bp.route('/csv/<int:dive_id>')
+@bp.route('/csv/<string:dive_id>')
 def csv(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
     if dp is None:
         abort(403);
     r = Response(dp.dataframe().to_csv(),
                  mimetype = "text/csv",
-                 headers = { "Content-disposition": "attachment; filename=dive_%i.csv" % dive_id }
+                 headers = { "Content-disposition": "attachment; filename=dive_{}.csv".format(dive_id) }
                  );
     return r;

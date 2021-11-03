@@ -33,7 +33,7 @@ def get_any_dive_id():
 #
 # Retrieve dive
 #
-def get_one_dive(dive_id: int):
+def get_one_dive(dive_id: str):
     r = requests.get(ENDPOINT + 'dive/retrieve/get/', params = {'dive_id': dive_id});
     row = r.json();
     if row is None:
@@ -77,7 +77,7 @@ def store_dive(diveprofile):
 #
 # Deleting a dive
 #
-def delete_dive(dive_id: int):
+def delete_dive(dive_id: str):
     # This check is a bit awkward, but we can improve it later
     if not user.get_user_details().is_allowed(uft.DIVE_MODIFY, dive=get_one_dive(dive_id)):
         print('User is not allowed to modify this dive {}'.format(dive_id));

@@ -8,7 +8,7 @@ from flask import (
 #
 # Update (GF), delete, modify
 #
-@bp.route('/update/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/update/<string:dive_id>', methods = [ 'POST' ])
 def update(dive_id):
     action = request.form.get('action');
     dp = dive.get_diveprofile_for_display(dive_id);
@@ -29,7 +29,7 @@ def update(dive_id):
         abort(405);
 
 
-@bp.route('/delete/<int:dive_id>', methods = [ 'GET', 'POST' ])
+@bp.route('/delete/<string:dive_id>', methods = [ 'GET', 'POST' ])
 def delete(dive_id):
     aff = db_api_dive.delete_dive(dive_id);
     if aff == 0:
@@ -40,7 +40,7 @@ def delete(dive_id):
     return redirect(url_for('dive.show_any'));
 
 
-@bp.route('/modify/meta/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/modify/meta/<string:dive_id>', methods = [ 'POST' ])
 def modify_meta(dive_id):
     if request.form.get('action_update', '') != '':
         # Some input sanitation
@@ -72,7 +72,7 @@ def modify_meta(dive_id):
         abort(405);
 
 
-@bp.route('/modify/settings/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/modify/settings/<string:dive_id>', methods = [ 'POST' ])
 def modify_settings(dive_id):
     if request.form.get('action_update_settings', '') != '':
         dp = dive.get_diveprofile_for_display(dive_id);
@@ -103,7 +103,7 @@ def modify_settings(dive_id):
         abort(405);
 
 
-@bp.route('/update/keep/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/update/keep/<string:dive_id>', methods = [ 'POST' ])
 def update_keep(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
     if dp is not None:

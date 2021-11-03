@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 # Probably when I grow up I want to use SQLAlchemy
 class DBDive(BaseModel):
-    dive_id: Optional[int] = None
+    dive_id: Optional[str] = None
     user_id: Optional[int] = None
     dive_desc: Optional[str] = None
     is_public: bool
