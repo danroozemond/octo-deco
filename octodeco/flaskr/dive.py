@@ -227,10 +227,12 @@ def get_cached_dive(dive_id: str):
     cdp = CachedDiveProfile(dive_id);
     if cdp is None or cdp.profile_base() is None:
         session[ 'last_dive_id' ] = None;
-        abort(404);
+        flash(f'There was a problem finding the dive {dive_id}');
+        return None;
     if not user.get_user_details().is_allowed(uft.DIVE_VIEW, dive=cdp.profile_base()):
         session[ 'last_dive_id' ] = None;
-        abort(403);
+        flash(f'There was a problem showing the dive {dive_id}');
+        return None;
     if not cdp.profile_base().is_ephemeral:
         session[ 'last_dive_id' ] = dive_id;
     return cdp;
@@ -241,7 +243,10 @@ def invalidate_cached_dive(dive_id: str):
 
 
 def get_diveprofile_for_display(dive_id: str):
-    return get_cached_dive(dive_id).profile_args(get_gf_args_from_request());
+    cdp = get_cached_dive(dive_id);
+    if cdp is None:
+        return None;
+    return cdp.profile_args(get_gf_args_from_request());
 
 
 #

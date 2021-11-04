@@ -13,8 +13,8 @@ def update(dive_id):
     action = request.form.get('action');
     dp = dive.get_diveprofile_for_display(dive_id);
     # Check
-    if dp is None and action != 'Duplicate dive':
-        abort(405);
+    if dp is None:
+        abort(404);
     # Do
     if action == 'Update Stops':
         olddecotime = dp.decotime();
@@ -48,6 +48,8 @@ def modify_meta(dive_id):
         ipt_description = request.form.get('ipt_description')[:100];
         ipt_public = ( request.form.get('ipt_public', 'off').lower() == 'on')
         dp = dive.get_diveprofile_for_display(dive_id);
+        if dp is None:
+            abort(403);
         if abs(dp.length_of_surface_section() - ipt_surface_section) > 0.1:
             dp.remove_surface_at_end();
             if ipt_surface_section > 0:
@@ -76,6 +78,8 @@ def modify_meta(dive_id):
 def modify_settings(dive_id):
     if request.form.get('action_update_settings', '') != '':
         dp = dive.get_diveprofile_for_display(dive_id);
+        if dp is None:
+            abort(403);
         # Update depth of last stop
         ipt_last_stop_depth = max(3, min(21, request.form.get('ipt_last_stop_depth', 3, type=int)));
         if ipt_last_stop_depth != dp._last_stop_depth:

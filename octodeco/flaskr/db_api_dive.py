@@ -43,7 +43,7 @@ def get_one_dive(dive_id: str):
     # Construct result
     diveprofile = DiveProfileSer.loads(base64.b64decode(row['dive_serialized'].encode('utf-8')));
     if not user.get_user_details().is_allowed(uft.DIVE_VIEW, dive=diveprofile):
-        flask.abort(403);
+        return None;
     diveprofile.dive_id = row['dive_id'];
     diveprofile.user_id = row['user_id'];
     return diveprofile;

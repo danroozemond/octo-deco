@@ -62,8 +62,8 @@ def show_get():
 @bp.route('/show/<string:dive_id>', methods = ['GET'])
 def show(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
-    # This will never return None, get_diveprofile_for_display will redirect/abort if necessary
-    assert dp is not None;
+    if dp is None:
+        return redirect(url_for('dive.show_any'));
 
     alldives = db_api_dive.get_all_dives();
     return render_template('dive/show.html',
