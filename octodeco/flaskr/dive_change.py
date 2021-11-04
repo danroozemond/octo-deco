@@ -65,7 +65,7 @@ def modify_meta(dive_id):
             else:
                 dp.custom_desc = None;
         if ipt_public != dp.is_public:
-            flash('Made dive {}'.format( 'public' if ipt_public else 'private'));
+            flash('Made dive {}'.format( 'shareable' if ipt_public else 'private'));
             dp.is_public = ipt_public;
         db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
