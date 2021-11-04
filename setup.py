@@ -9,7 +9,8 @@ from setuptools import setup, find_packages, Extension
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-extensions = [ Extension("octodeco.deco.TissueStateCython", ["octodeco/deco/TissueStateCython.pyx"]) ];
+extensions = [ Extension(name="octodeco.deco.TissueStateCython",
+                         sources=["octodeco/deco/TissueStateCython.pyx"]) ];
 
 setup(
     name="octo-deco",
@@ -24,5 +25,5 @@ setup(
     project_urls={
         "Source Code": "https://github.com/danroozemond/octo-deco/",
     },
-    ext_modules = cythonize(extensions)
+    ext_modules = cythonize(extensions, language_level = "3")
 )
