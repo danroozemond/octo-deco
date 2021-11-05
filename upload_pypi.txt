@@ -4,4 +4,6 @@ py -m pip install --upgrade twine
 py -m twine upload --repository testpypi dist/*
 
 # Prod:
+py -m twine upload dist/*
 
+(on Windows use py, on Linux use python3)

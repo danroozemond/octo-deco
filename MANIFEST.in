@@ -1,4 +1,4 @@
-global-include octodeco/**.pyx
+global-include octodeco/**/*.pyx
 global-exclude octodeco/flaskr/**
 global-exclude octodeco/db/**
 global-exclude octodeco/test.py
