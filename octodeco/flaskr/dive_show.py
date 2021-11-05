@@ -1,6 +1,6 @@
 from . import dive, user, db_api_dive;
 from .dive import bp;
-from .util.user import AllowedFeature as uft;
+from .util.features import AllowedFeature as uft;
 from flask import (
     redirect, url_for, request, abort, session, render_template, Response
 )

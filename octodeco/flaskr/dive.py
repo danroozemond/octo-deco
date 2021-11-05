@@ -7,7 +7,7 @@ from flask import (
 )
 
 from . import plots, user, db_api_dive;
-from .util.user import AllowedFeature as uft;
+from .util.features import AllowedFeature as uft;
 from .app import cache;
 
 

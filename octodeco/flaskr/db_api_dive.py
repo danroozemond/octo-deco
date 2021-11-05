@@ -1,7 +1,7 @@
 # Please see LICENSE.md
 import requests, base64, flask;
 from . import user;
-from .util.user import AllowedFeature as uft;
+from .util.features import AllowedFeature as uft;
 from .db_api import ENDPOINT, get_user_id_param, check_status_code_abort;
 from octodeco.deco import DiveProfileSer;
 

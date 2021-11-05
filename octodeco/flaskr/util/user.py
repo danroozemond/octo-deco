@@ -1,14 +1,6 @@
 # Please see LICENSE.md
 from abc import ABC, abstractmethod;
-from enum import Enum;
 from flask import url_for;
-
-
-class AllowedFeature(Enum):
-    DIVE_VIEW = 101;
-    DIVE_MODIFY = 102;
-
-    ADMIN_IS_ADMIN = 201;
 
 
 class User(ABC):
