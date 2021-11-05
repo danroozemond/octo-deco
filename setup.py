@@ -1,10 +1,13 @@
 from Cython.Build import cythonize
 from setuptools import setup, find_packages, Extension
 
-#
-# Note - can manually build like so:
-# PycharmProjects\octo-deco>python setup.py build_ext --inplace
-#
+# Note: the packaged version only contains the octo-deco.deco library.
+# The flaskr/db are excluded; recommended use is to get the source
+# code and use docker to run those.
+# This is reflected in this file, and in MANIFEST.in.
+# In particular, install_requires contains only what's needed for
+# octodeco.deco, not flaskr etc
+
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -14,7 +17,7 @@ extensions = [ Extension(name="octodeco.deco.TissueStateCython",
 
 setup(
     name="octo-deco",
-    version="2.0.2",
+    version="2.0.3",
     packages=find_packages(),
     author="Dan Roozemond",
     author_email="dan.roozemond@gmail.com",
@@ -25,5 +28,6 @@ setup(
     project_urls={
         "Source Code": "https://github.com/danroozemond/octo-deco/",
     },
+    install_requires=['pandas', ' numpy', 'cython'],
     ext_modules = cythonize(extensions, language_level = "3")
 )
