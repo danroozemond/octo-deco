@@ -1,6 +1,6 @@
 import sys;
 
-from . import dive, db_api_dive;
+from . import dive, user, db_api_dive;
 from .dive import bp;
 from flask import (
     flash, redirect, url_for, request, abort, session, render_template
@@ -84,9 +84,11 @@ def new_octodeco_csv():
 
 @bp.route('/new/duplicate/<string:dive_id>', methods = ['GET','POST'])
 def new_duplicate(dive_id):
-    dp = dive.get_cached_dive(dive_id).profile_base();
+    user_id = user.get_user_details().user_id();
+    dp = dive.get_cached_dive(dive_id, user_id).profile_base();
     cp = dp.full_copy();
     cp.is_ephemeral = False;
+    cp.user_id = user_id;
     # Store the dive
     db_api_dive.store_dive(cp);
     new_dive_id = cp.dive_id;
@@ -106,7 +108,8 @@ def new_ephm_lost_gas(dive_id):
     if len(lost_gases) == 0:
         flash('Incorrect lost gas parameter');
         return redirect(url_for('dive.show', dive_id = dive_id));
-    dp = dive.get_cached_dive(dive_id).profile_args(req_args);
+    user_id = user.get_user_details().user_id();
+    dp = dive.get_cached_dive(dive_id, user_id).profile_args(req_args);
     cp = dp.copy_profile_lost_gases(lost_gases);
     cp.is_ephemeral = True;
     cp.parent_dive_id = dive_id;
