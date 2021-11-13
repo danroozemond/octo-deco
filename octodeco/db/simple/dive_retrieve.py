@@ -10,7 +10,7 @@ router = APIRouter(
 
 
 @router.get("/count/")
-def get_dive_count(user_id: int, db: Connection = Depends(get_db)):
+def get_dive_count(user_id: str, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
             SELECT COUNT(*)
@@ -22,7 +22,7 @@ def get_dive_count(user_id: int, db: Connection = Depends(get_db)):
 
 
 @router.get("/all/", response_model = List[ DBDive ])
-def get_all_dives(user_id: int, db: Connection = Depends(get_db)):
+def get_all_dives(user_id: str, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
         SELECT dive_id, dive_desc, is_public
@@ -35,7 +35,7 @@ def get_all_dives(user_id: int, db: Connection = Depends(get_db)):
 
 
 @router.get("/any/", response_model = DBDive)
-def get_any_dive(user_id: int, db: Connection = Depends(get_db)):
+def get_any_dive(user_id: str, db: Connection = Depends(get_db)):
     cur = db.cursor();
     cur.execute('''
         SELECT dive_id, dive_desc, is_public

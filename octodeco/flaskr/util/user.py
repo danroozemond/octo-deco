@@ -39,7 +39,7 @@ class SimpleUser(User):
         return url_for('static', filename = 'images/octopus-white.png');
 
     def user_id(self):
-        return 1;
+        return '1';
 
     def is_allowed(self, feature, **kwargs):
         return True;

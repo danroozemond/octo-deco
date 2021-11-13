@@ -26,7 +26,7 @@ def _store_dive_update(db: Connection, dbdv: DBDive) -> int:
 
 def _store_dive_new(db: Connection, dbdv: DBDive) -> DBDive:
     cur = db.cursor();
-    dbdv.dive_id = str(uuid.uuid4());
+    dbdv.dive_id = 'dv_'+ str(uuid.uuid4()).replace('-','_');
     cur.execute('''
         INSERT INTO dives(user_id, dive_id, dive)
         VALUES (?, ?, 'xx');
