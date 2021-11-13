@@ -49,7 +49,7 @@ class Buhlmann:
         self.last_stop_depth = last_stop_depth;
         self.stop_length_precision = 0.08;
         # After 8 halftimes, residual is less than 0.5%, so that's infinite enough.
-        self.stop_length_infinity = 8*self._constants.N2_HALFTIMES[-1];
+        self._stop_length_infinity = 8*self._constants.N2_HALFTIMES[-1];
 
     def description(self):
         return 'ZHL-16C GF %s/%s' % (self.gf_low, self.gf_high);
@@ -76,7 +76,7 @@ class Buhlmann:
             return ts3.max_over_supersat(amb_to_gf, Util.SURFACE_PRESSURE);
 
         t0 = 0.0;
-        t1 = self.stop_length_infinity;
+        t1 = self._stop_length_infinity;
         if max_over_supersat(t0) > 0:
             # Already in deco
             return t0;
@@ -115,10 +115,16 @@ class Buhlmann:
         #   max_over_supersat(t0) > 0
         #   max_over_supersat(t1) < 0
         t0 = 0.0;
-        t1 = self.stop_length_infinity;
+        t1 = 5.0;
         if max_over_supersat(t0) < 0:
             # Already OK
             return 0.0;
+        #for t1, infinity is too long: staying at this stop depth forever may lead to
+        #  too high loading for next stop (in the slow tissues). So there is a certain
+        #  point in time where the faster tissues are fine (because of the stop) and
+        #  the slower are still fine.
+        while max_over_supersat(t1) > 0 and t1 < self._stop_length_infinity:
+            t1 *= 2.0;
         if max_over_supersat(t1) > 0:
             # Still on-gassing
             return 0.0;
@@ -173,7 +179,7 @@ class Buhlmann:
                 p_amb_next_stop = p_amb_gas_switch;
         return p_amb_next_stop, new_gas;
 
-    def compute_deco_profile(self, tissue_state, p_amb, current_gas, gases, \
+    def compute_deco_profile(self, tissue_state, p_amb, current_gas, gases,
                              p_target = Util.SURFACE_PRESSURE,
                              add_gas_switch_time = False, amb_to_gf = None):
         # Returns triples depth, length, gas
