@@ -1,6 +1,7 @@
 # Please see LICENSE.md
 from abc import ABC, abstractmethod;
 from flask import url_for;
+from .features import AllowedFeature;
 
 
 class User(ABC):
