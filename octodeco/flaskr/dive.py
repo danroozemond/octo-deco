@@ -6,9 +6,10 @@ from flask import (
     g, Blueprint, flash, redirect, url_for, request, abort, jsonify, session
 )
 
-from . import plots, user, db_api_dive;
+from . import app, plots, user, db_api_dive;
 from .util.features import AllowedFeature as uft;
-from .app import cache;
+
+cache = app.get_the_cache();
 
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')

@@ -2,7 +2,7 @@
 import flask;
 from . import app, user;
 
-ENDPOINT = app.setting_flask_db_endpoint;
+ENDPOINT = app.get_db_endpoint();
 assert ENDPOINT.endswith('/');
 
 

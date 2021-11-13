@@ -1,1 +1,1 @@
-from .flaskr.app import app as flaskr_app
+from .flaskr.app import create_flaskr_app
