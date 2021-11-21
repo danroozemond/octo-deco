@@ -1,0 +1,1 @@
+from .flaskr.app import create_flaskr_app

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html lang="en">
 	<head>
-		<title>Octo-Deco - {% block title %}{% endblock %}</title>
+		<title>Octo-Deco Dive Planning - {% block title %}{% endblock %}</title>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="description" content="" />
 		<meta name="keywords" content="" />
@@ -26,12 +26,12 @@
 		<script src="{{ url_for('static', filename='js/skel.min.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/skel-panels.min.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/init.js') }}"></script>
-		{% block extrascripts %}{% endblock %}
 		<noscript>
 			<link rel="stylesheet" href="{{ url_for('static', filename='css/skel-noscript.css') }}">
 			<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 		</noscript>
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style-customs.css') }}">
+		{% block extrascripts %}{% endblock %}
 	</head>
 	<body>
 		<div id="wrapper">
@@ -43,13 +43,8 @@
 					<!-- Login box -->
 					<div class="login_info">
 						{% if g.user_details.is_logged_in() %}
-						<img class="profile_pic" src="{{ g.user_details['google_picture'] }}" alt="google profile pic">
-						<div class="given_name">{{ g.user_details['google_given_name'] }}</div>
-						<a href="{{ g.user_details.logout_link }}">logout</a>
-						{% else %}
-						<a href="{{ g.user_details.login_link }}">
-							<img class="google_signin" src="{{ url_for('static', filename='images/google_signin.png') }}" alt="google sign in">
-						</a>
+						<img class="profile_pic" src="{{ g.user_details.user_picture_url() }}" alt="profile pic">
+						<div class="given_name">{{ g.user_details.user_given_name() }}</div>
 						{% endif %}
 					</div>
 
@@ -144,7 +139,7 @@
 			<div id="copyright">
 				<div class="container">
 					<p>
-						Octo-Deco is <a href="https://github.com/danroozemond/octo-deco" target="_blank">open source</a> (LPGLv3).
+						Octo-Deco is <a href="https://github.com/danroozemond/octo-deco" target="_blank">open source</a> (LGPLv3).
 						I'm serving you <a href="https://github.com/danroozemond/octo-deco/commit/{{g.current_git_commit}}" target="_blank">{{g.current_git_commit[:10]}}</a>
 						(on <a href="https://github.com/danroozemond/octo-deco/tree/{{g.current_git_branch}}" target="_blank">{{g.current_git_branch}}</a>).
 					</p>

@@ -36,9 +36,12 @@ def _migrate_up_to_current(from_version, diveprofile):
             setattr(diveprofile, attrname, None);
 
     # Bool
-    for attrname in [ 'is_demo_dive', 'is_public', 'is_ephemeral'  ]:
+    for attrname in [ 'is_demo_dive', 'is_ephemeral'  ]:
         if not hasattr(diveprofile, attrname):
             setattr(diveprofile, attrname, False);
+    for attrname in [ 'is_public'  ]:
+        if not hasattr(diveprofile, attrname):
+            setattr(diveprofile, attrname, True);
 
     # Point attributes
     for point in diveprofile.points():

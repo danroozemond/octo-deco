@@ -10,11 +10,6 @@
     <p>session_id: {{ session['session_id'] }} </p>
     <p>user details: {{ g.user_details }} </p>
 
-    <form method="post" action="{{url_for('user.update')}}">
-        <input type="submit" name="action" value="Destroy session" onclick="return confirm('Sure?');">
-        <input type="submit" name="action" value="Destroy entire profile" onclick="return confirm('Sure? You will lose stuff!');">
-    </form>
-
     <h2>Sessions</h2>
     <ul>
         {% for sid in allsessions %}
@@ -23,12 +18,11 @@
     </ul>
 
     <h2>Dives</h2>
-    <ul>
+    <ul style="list-style-type: disc;">
         {% for row in diveinfos %}
         <li>
-            {{ row['dive_id'] }} :
             <a href="{{url_for('dive.show', dive_id=row['dive_id'])}}">{{ row['dive_desc'] }}</a>
-            {% if row['is_public'] %}(Public){% endif %}
+            {% if row['is_public'] %}(Shareable){% endif %}
         </li>
         {% endfor %}
     </ul>

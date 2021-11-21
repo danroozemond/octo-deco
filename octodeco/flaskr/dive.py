@@ -6,10 +6,10 @@ from flask import (
     g, Blueprint, flash, redirect, url_for, request, abort, jsonify, session
 )
 
-from . import db_dive;
-from . import plots;
-from . import user;
-from .app import cache;
+from . import app, plots, user, db_api_dive;
+from .util.features import AllowedFeature as uft;
+
+cache = app.get_the_cache();
 
 
 bp = Blueprint('dive', __name__, url_prefix='/dive')
@@ -58,7 +58,7 @@ class CachedDiveProfile:
 
     @cache.memoize()
     def profile_base(self):
-        dp = db_dive.get_one_dive(self.dive_id);
+        dp = db_api_dive.get_one_dive(self.dive_id);
         if dp is None:
             return None;
         return dp;
@@ -224,26 +224,34 @@ class CachedDiveProfile:
 
 
 @cache.memoize()
-def get_cached_dive(dive_id: int):
+def get_cached_dive(dive_id: str, user_id: str):
+    # Have to have a cache per user/dive combination,
+    # since behaviour could/should be different.
+    assert user_id == user.get_user_details().user_id();
     cdp = CachedDiveProfile(dive_id);
-    if cdp is None:
-        flash('Dive not found [%i]' % dive_id);
+    if cdp is None or cdp.profile_base() is None:
         session[ 'last_dive_id' ] = None;
-        return redirect(url_for('dive.show_any'));
-    if not db_dive.is_display_allowed(cdp.profile_base()):
+        flash(f'There was a problem finding the dive {dive_id}');
+        return None;
+    if not user.get_user_details().is_allowed(uft.DIVE_VIEW, dive=cdp.profile_base()):
         session[ 'last_dive_id' ] = None;
-        abort(403);
+        flash(f'There was a problem showing the dive {dive_id}');
+        return None;
     if not cdp.profile_base().is_ephemeral:
         session[ 'last_dive_id' ] = dive_id;
     return cdp;
 
 
-def invalidate_cached_dive(dive_id: int):
-    cache.delete_memoized(get_cached_dive, dive_id);
+def invalidate_cached_dive(dive_id: str):
+    user_id = user.get_user_details().user_id();
+    cache.delete_memoized(get_cached_dive, dive_id, user_id);
 
 
-def get_diveprofile_for_display(dive_id: int):
-    return get_cached_dive(dive_id).profile_args(get_gf_args_from_request());
+def get_diveprofile_for_display(dive_id: str):
+    cdp = get_cached_dive(dive_id, user.get_user_details().user_id());
+    if cdp is None:
+        return None;
+    return cdp.profile_args(get_gf_args_from_request());
 
 
 #

@@ -1,6 +1,5 @@
 # Please see LICENSE.md
 import json;
-import math;
 
 import numpy;
 import plotly;

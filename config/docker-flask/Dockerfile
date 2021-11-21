@@ -1,11 +1,9 @@
-FROM python:3.9.5-buster
+FROM python:3.9-buster
 
 COPY data /data
+RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r /data/requirements.txt
 
-# /scripts will be mapped by docker-compose
-#COPY scripts /scripts
-
-# Idea is that you map the right drives and then /scripts/run_flask.sh
+# Idea is that you map the right drives in docker-compose and then use /scripts/run_...
 CMD [ "/bin/bash" ]
 

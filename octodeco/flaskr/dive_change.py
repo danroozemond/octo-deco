@@ -1,4 +1,4 @@
-from . import dive, dive_new, db_dive;
+from . import dive, db_api_dive;
 from .dive import bp;
 from flask import (
     flash, redirect, url_for, request, abort, session
@@ -8,19 +8,19 @@ from flask import (
 #
 # Update (GF), delete, modify
 #
-@bp.route('/update/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/update/<string:dive_id>', methods = [ 'POST' ])
 def update(dive_id):
     action = request.form.get('action');
     dp = dive.get_diveprofile_for_display(dive_id);
     # Check
-    if dp is None and action != 'Duplicate dive':
-        abort(405);
+    if dp is None:
+        abort(404);
     # Do
     if action == 'Update Stops':
         olddecotime = dp.decotime();
         dp.set_gf(dp.gf_low_display, dp.gf_high_display, updateStops = True);
-        flash('Recomputed stops (deco time: %i -> %i mins)' % (round(olddecotime), round(dp.decotime())));
-        db_dive.store_dive(dp);
+        flash('Recomputed stops (deco time: {} -> {} mins)'.format(round(olddecotime), round(dp.decotime())));
+        db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     elif action == 'Duplicate dive':
@@ -29,18 +29,18 @@ def update(dive_id):
         abort(405);
 
 
-@bp.route('/delete/<int:dive_id>', methods = [ 'GET', 'POST' ])
+@bp.route('/delete/<string:dive_id>', methods = [ 'GET', 'POST' ])
 def delete(dive_id):
-    aff = db_dive.delete_dive(dive_id);
+    aff = db_api_dive.delete_dive(dive_id);
     if aff == 0:
         abort(405);
-    flash('Dive %i is now history' % dive_id);
+    flash(f'Dive {dive_id} is now history');
     dive.invalidate_cached_dive(dive_id);
     session[ 'last_dive_id' ] = None;
     return redirect(url_for('dive.show_any'));
 
 
-@bp.route('/modify/meta/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/modify/meta/<string:dive_id>', methods = [ 'POST' ])
 def modify_meta(dive_id):
     if request.form.get('action_update', '') != '':
         # Some input sanitation
@@ -48,6 +48,8 @@ def modify_meta(dive_id):
         ipt_description = request.form.get('ipt_description')[:100];
         ipt_public = ( request.form.get('ipt_public', 'off').lower() == 'on')
         dp = dive.get_diveprofile_for_display(dive_id);
+        if dp is None:
+            abort(403);
         if abs(dp.length_of_surface_section() - ipt_surface_section) > 0.1:
             dp.remove_surface_at_end();
             if ipt_surface_section > 0:
@@ -63,25 +65,27 @@ def modify_meta(dive_id):
             else:
                 dp.custom_desc = None;
         if ipt_public != dp.is_public:
-            flash('Made dive {}'.format( 'public' if ipt_public else 'private'));
+            flash('Made dive {}'.format( 'shareable' if ipt_public else 'private'));
             dp.is_public = ipt_public;
-        db_dive.store_dive(dp);
+        db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     else:
         abort(405);
 
 
-@bp.route('/modify/settings/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/modify/settings/<string:dive_id>', methods = [ 'POST' ])
 def modify_settings(dive_id):
     if request.form.get('action_update_settings', '') != '':
         dp = dive.get_diveprofile_for_display(dive_id);
+        if dp is None:
+            abort(403);
         # Update depth of last stop
         ipt_last_stop_depth = max(3, min(21, request.form.get('ipt_last_stop_depth', 3, type=int)));
         if ipt_last_stop_depth != dp._last_stop_depth:
             dp._last_stop_depth = ipt_last_stop_depth;
             dp.update_deco_info();
-            flash("Change last stop to %i m" % ipt_last_stop_depth);
+            flash(f'Change last stop to {ipt_last_stop_depth} m');
         # Update gas consumption settings
         ipt_gas_consmp_bottom = max(1, min(50, request.form.get('ipt_gas_consmp_bottom', 20, type=int)));
         ipt_gas_consmp_deco = max(1, min(50, request.form.get('ipt_gas_consmp_deco', 20, type=int)));
@@ -96,20 +100,20 @@ def modify_settings(dive_id):
             dp.update_stops( actually_add_stops = False );
             flash('Removed all stops');
         # Update database and invalidate cache
-        db_dive.store_dive(dp);
+        db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     else:
         abort(405);
 
 
-@bp.route('/update/keep/<int:dive_id>', methods = [ 'POST' ])
+@bp.route('/update/keep/<string:dive_id>', methods = [ 'POST' ])
 def update_keep(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
     if dp is not None:
         dp.is_ephemeral = False;
         flash('Keeping this dive permanently.');
-        db_dive.store_dive(dp);
+        db_api_dive.store_dive(dp);
         dive.invalidate_cached_dive(dive_id);
         return redirect(url_for('dive.show', dive_id=dive_id));
     else:

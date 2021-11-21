@@ -1,6 +1,6 @@
-from . import dive, user;
-from . import db_dive;
+from . import dive, user, db_api_dive;
 from .dive import bp;
+from .util.features import AllowedFeature as uft;
 from flask import (
     redirect, url_for, request, abort, session, render_template, Response
 )
@@ -9,19 +9,21 @@ from flask import (
 #
 # Showing the dive: separate elements
 #
-@bp.route('/show/<int:dive_id>/plot/profile', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/plot/profile', methods = ['GET'])
 def show_elt_plot_profile(dive_id):
-    return dive.get_cached_dive(dive_id).plot_profile(dive.get_gf_args_from_request());
+    cdp = dive.get_cached_dive(dive_id, user.get_user_details().user_id());
+    return cdp.plot_profile(dive.get_gf_args_from_request());
 
 
-@bp.route('/show/<int:dive_id>/plot/heatmap', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/plot/heatmap', methods = ['GET'])
 def show_elt_plot_heatmap(dive_id):
-    return dive.get_cached_dive(dive_id).plot_heatmap(dive.get_gf_args_from_request());
+    cdp = dive.get_cached_dive(dive_id, user.get_user_details().user_id());
+    return cdp.plot_heatmap(dive.get_gf_args_from_request());
 
 
-@bp.route('/show/<int:dive_id>/summary', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/summary', methods = ['GET'])
 def show_elt_summary_table(dive_id):
-    cdp = dive.get_cached_dive(dive_id);
+    cdp = dive.get_cached_dive(dive_id, user.get_user_details().user_id());
     reqargs = dive.get_gf_args_from_request();
     r1 = cdp.summary_table(reqargs);
     r2 = cdp.runtime_table(reqargs);
@@ -29,23 +31,22 @@ def show_elt_summary_table(dive_id):
     return '{}\n<h3>Runtime</h3>\n{}\n<h3>Gas consumption</h3>\n{}\n'.format(r1,r2,r3);
 
 
-@bp.route('/show/<int:dive_id>/fulldata', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/fulldata', methods = ['GET'])
 def show_elt_full_table(dive_id):
-    return dive.get_cached_dive(dive_id).full_table(dive.get_gf_args_from_request());
+    cdp = dive.get_cached_dive(dive_id, user.get_user_details().user_id());
+    return cdp.full_table(dive.get_gf_args_from_request());
 
 
-@bp.route('/show/<int:dive_id>/gfdecodata', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/gfdecodata', methods = ['GET'])
 def show_elt_gfdeco_table(dive_id):
-    cdp = dive.get_cached_dive(dive_id);
-    if user.get_user_details().is_logged_in():
-        return cdp.gfdeco_table(dive.get_gf_args_from_request());
-    else:
-        return render_template('dive/elt_login_please.html');
+    cdp = dive.get_cached_dive(dive_id, user.get_user_details().user_id());
+    return cdp.gfdeco_table(dive.get_gf_args_from_request());
 
 
-@bp.route('/show/<int:dive_id>/plot/pressuregraph', methods = ['GET'])
+@bp.route('/show/<string:dive_id>/plot/pressuregraph', methods = ['GET'])
 def show_elt_pressure_graph(dive_id):
-    return dive.get_cached_dive(dive_id).plot_pressure_graph(dive.get_gf_args_from_request());
+    cdp = dive.get_cached_dive(dive_id, user.get_user_details().user_id());
+    return cdp.plot_pressure_graph(dive.get_gf_args_from_request());
 
 
 #
@@ -58,21 +59,21 @@ def show_none():
 
 @bp.route('/show/get')
 def show_get():
-    dive_id = request.args.get("dive_id", 0, type=int);
+    dive_id = request.args.get("dive_id", '', type=str);
     return redirect(url_for('dive.show', dive_id=dive_id));
 
 
-@bp.route('/show/<int:dive_id>', methods = ['GET'])
+@bp.route('/show/<string:dive_id>', methods = ['GET'])
 def show(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
-    # This will never return None, get_diveprofile_for_display will redirect/abort if necessary
-    assert dp is not None;
+    if dp is None:
+        return redirect(url_for('dive.show_any'));
 
-    alldives = db_dive.get_all_dives();
+    alldives = db_api_dive.get_all_dives();
     return render_template('dive/show.html',
                            dive = dp,
                            alldives = alldives,
-                           modify_allowed = db_dive.is_modify_allowed(dp)
+                           modify_allowed = user.get_user_details().is_allowed(uft.DIVE_MODIFY, dive=dp)
                            );
 
 
@@ -81,7 +82,7 @@ def show_any():
     last_dive_id = session.get('last_dive_id', None);
     if last_dive_id is not None:
         return redirect(url_for('dive.show', dive_id = last_dive_id));
-    dive_id = db_dive.get_any_dive_id();
+    dive_id = db_api_dive.get_any_dive_id();
     if dive_id is None:
         return redirect(url_for('dive.show_none'));
     else:
@@ -91,13 +92,13 @@ def show_any():
 #
 # Downloading CSV
 #
-@bp.route('/csv/<int:dive_id>')
+@bp.route('/csv/<string:dive_id>')
 def csv(dive_id):
     dp = dive.get_diveprofile_for_display(dive_id);
     if dp is None:
-        abort(405);
+        abort(403);
     r = Response(dp.dataframe().to_csv(),
                  mimetype = "text/csv",
-                 headers = { "Content-disposition": "attachment; filename=dive_%i.csv" % dive_id }
+                 headers = { "Content-disposition": "attachment; filename=dive_{}.csv".format(dive_id) }
                  );
     return r;

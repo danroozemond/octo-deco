@@ -1,7 +1,9 @@
 #!/bin/sh
-# Copy this file to flask_info.sh and set FLASK_SECRET_KEY
+# Copy this file to flask_settings.sh and set FLASK_SECRET_KEY
 export FLASK_APP=octodeco/flaskr
-export FLASK_INSTANCE_PATH=/flask_instance
-export FLASK_SECRET_KEY=abcd
-export GOOGLE_OAUTH_JSON=/scripts/client_secret.json
-export FLASK_CACHE_DIR=/tmp
+export FLASK_ENV=development
+export FLASK_SECRET_KEY=dev
+export FLASK_CACHE_DIR=cache
+export FLASK_CACHE_THRESHOLD=1000
+export FLASK_PORT=5000 #Also in uwsgi.ini
+export FLASK_DB_ENDPOINT=http://fastapi_db:8001/
