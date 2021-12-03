@@ -23,7 +23,6 @@ def load_user_details():
 @bp.route('/info')
 def info():
     return render_template('user/info.html',
-                           divecount = db_api_dive.get_dive_count(),
                            diveinfos = db_api_dive.get_all_dives(),
                            allsessions = []
                            );

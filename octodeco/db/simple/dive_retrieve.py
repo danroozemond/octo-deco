@@ -9,18 +9,6 @@ router = APIRouter(
 );
 
 
-@router.get("/count/")
-def get_dive_count(user_id: str, db: Connection = Depends(get_db)):
-    cur = db.cursor();
-    cur.execute('''
-            SELECT COUNT(*)
-            FROM dives
-            WHERE user_id = ?
-            ''', [ user_id ]
-                );
-    return {'dive_count': cur.fetchone()[ 0 ]};
-
-
 @router.get("/all/", response_model = List[ DBDive ])
 def get_all_dives(user_id: str, db: Connection = Depends(get_db)):
     cur = db.cursor();
