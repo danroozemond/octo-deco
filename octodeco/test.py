@@ -12,7 +12,7 @@ t0 = time.perf_counter();
 # simon mitchell's first example, NEDU study, : GF53/53 should give 927.1
 # see video 56:39
 
-dp = DiveProfile(gf_low=53, gf_high=53);
+dp = DiveProfile(gf_low=55, gf_high=80);
 dp.append_section(52, 30, gas = Gas.Air());
 #dp.add_gas(Gas.Nitrox(50))
 dp.add_stops_to_surface();
@@ -26,12 +26,22 @@ print('====')
 
 dt = dp.decotime();
 
-for i in range(1,10):
+dp0 = dp.clean_copy();
+
+for i in range(1,18):
     gf_low = 5*i;
-    gf_high = dp.find_gf_high(gf_low, dt);
+    gf_high = dp0.find_gf_high(gf_low, dt);
     assert gf_high is not None;
-    dp.set_gf(gf_low, gf_high, updateStops = True);
-    print(f'{gf_low:5}/{gf_high:5} -> deco time: {dp.decotime():5.1f} mins, int. supersat: {dp.integral_supersaturation():5.1f}');
+    cp = dp0.clean_copy();
+    cp.remove_surface_at_end();
+    cp.set_gf(gf_low, gf_high, updateStops = True);
+    is1 = cp.integral_supersaturation();
+    cp.append_section(0, 10);
+    cp.update_deco_info();
+    is2 = cp.integral_supersaturation();
+    cp.interpolate_points();
+    is3 = cp.integral_supersaturation();
+    print(f'{gf_low:5}/{gf_high:5} -> deco time: {cp.decotime():5.1f} mins, int. supersat: {is1:6.1f}, {is2:6.1f}, {is3:6.1f}');
 
 
 

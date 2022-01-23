@@ -514,7 +514,11 @@ class DiveProfile:
                 a = h;
             else:
                 b = h;
-        return h; # noqa
+        # Not entirely nice, but necessary evil given we only have integral GFs
+        da = abs(vdt(a) - target_deco_time);
+        db = abs(vdt(b) - target_deco_time);
+        return a if da < db else b;
+
 
     '''
     Gas consumption computations
