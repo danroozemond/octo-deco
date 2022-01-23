@@ -21,21 +21,21 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"     
     mem_limit: 40m
   flask:
-    image: danroozemond/octo-deco-uwsgi
+    build: docker-flask-fastapi
     restart: always
     ports:
       - "127.0.0.1:9191:9191"
     volumes:
       - ~/git-master/octo-deco:/octo-deco
-      - ../docker-flask/scripts:/scripts
+      - ./scripts:/scripts
     mem_limit: 500m
     command: "/bin/sh -c '/scripts/run_uwsgi_ini.sh'"
   fastapi_db:
-    image: danroozemond/octo-deco-uwsgi
+    build: docker-flask-fastapi
     restart: always
     volumes:
       - ~/git-master/octo-deco:/octo-deco
       - ~/flask_instance:/flask_instance
-      - ../docker-flask/scripts:/scripts
+      - ./scripts:/scripts
     mem_limit: 100m
     command: "/bin/sh -c '/scripts/run_uvicorn.sh'"
