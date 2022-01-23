@@ -78,7 +78,7 @@ table.dataframe th {
     color: black;
     text-align: left;
 }
-table.dataframe th, td {
+table.dataframe th, table.dataframe td {
     padding: .3em;
     font-family: monospace;
     font-size: .9em;
@@ -170,15 +170,13 @@ img.profile_pic
 {
     display: block;
     width: 50px;
+    margin-left: auto;
+    margin-right: auto;
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;
     -ms-border-radius: 50%;
     -o-border-radius: 50%;
     border-radius: 50%;
-}
-img.google_signin
-{
-
 }
 div.login_info div.given_name
 {

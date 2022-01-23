@@ -1,0 +1,15 @@
+# If you modify this, you perhaps also need to modify setup.py
+pandas
+numpy
+plotly
+flask
+Flask-Caching
+click
+uwsgi
+oauthlib
+requests
+cython
+gitpython
+fastapi
+uvicorn[standard]
+pydantic

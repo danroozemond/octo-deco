@@ -37,6 +37,8 @@ class TissueState:
             cstate[2*i+1] = p_alv * gasc[1];
             i += 1;
 
+    def print_pps(self):
+        return ' '.join([ '{:.2f}'.format(self._state[2*i] + self._state[2*i+1]) for i in range(N_TISSUES) ]);
 
     #
     # Storing the constants in cython format

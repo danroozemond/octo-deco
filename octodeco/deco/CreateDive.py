@@ -94,7 +94,7 @@ def create_from_shearwater_csv(lines):
     except KeyError as err:
         raise ParseError('Could not parse header row (%s)' % err.args);
     result = DiveProfile(gf_low = gf_low, gf_high = gf_high);
-    result.add_custom_desc = 'SW-%i' % int(divenr);
+    result.add_custom_desc = f'SW-{divenr}';
     # Rest is actually the dive
     # (Using DictReader is probably not the most efficient, but soit)
     del lines[ 0:2 ];
