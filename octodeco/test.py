@@ -24,6 +24,20 @@ for x, y in dp.dive_summary().items():
     print('{:25}: {}'.format(x,y));
 print('====')
 
+dt = dp.decotime();
+
+for i in range(1,10):
+    gf_low = 5*i;
+    gf_high = dp.find_gf_high(gf_low, dt);
+    assert gf_high is not None;
+    dp.set_gf(gf_low, gf_high, updateStops = True);
+    print(f'{gf_low:5}/{gf_high:5} -> deco time: {dp.decotime():5.1f} mins, int. supersat: {dp.integral_supersaturation():5.1f}');
+
+
+
+
+sys.exit(0);
+
 # Hemmoor planning was 50m, 28 mins, {Nx50, Tx21/30}
 
 # Simon mitchell's third example,
@@ -56,7 +70,7 @@ print('====')
 #     print(p.debug_info());
 
 
-#sys.exit(0);
+sys.exit(0);
 
 for gfs in [(5,75), (35,65), (60,60), (80,55), (200,50), (55,65), (30,90) ]:
     dp = DiveProfile(gf_low = gfs[0], gf_high = gfs[1]);

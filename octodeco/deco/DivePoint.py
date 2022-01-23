@@ -93,7 +93,7 @@ class DivePoint:
         p_amb_section = ( self.p_amb + self.prev.p_amb ) / 2;
         # Tissue state
         self.tissue_state = self.prev.tissue_state.updated_state( self.duration, p_amb_section, self.prev.gas );
-        # CNS & integral supersaturation
+        # CNS
         pp_o2, _, _ = self.prev.gas.partial_pressures(p_amb_section);
         self.cns_perc = CNSConstants.cns_perc_update(self.prev.cns_perc, p_amb_section, pp_o2, self.duration);
         # Integral supersaturation - approximate with a triangle

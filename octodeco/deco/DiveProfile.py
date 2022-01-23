@@ -495,6 +495,27 @@ class DiveProfile:
                 res[ gflow ][ gfhigh ] = cp.decotime_for_gf( gflow, gfhigh );
         return res;
 
+    def find_gf_high(self, given_gf_low, target_deco_time):
+        cp = self.clean_copy();
+        def vdt(x):
+            return cp.decotime_for_gf(given_gf_low, x);
+        a = 5;
+        b = 120;
+        if vdt(a) < target_deco_time or vdt(b) > target_deco_time:
+            # The lowerbound is too short or the upperbound is too long -> abort
+            return None;
+        n = 0;
+        while b > a + 1:
+            # Anti-infinite loop
+            n += 1; assert n < 100;
+            # The real search
+            h = int(a + (b-a)/2);
+            if vdt(h) > target_deco_time:
+                a = h;
+            else:
+                b = h;
+        return h; # noqa
+
     '''
     Gas consumption computations
     '''
