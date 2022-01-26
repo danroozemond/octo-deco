@@ -46,6 +46,13 @@ def show_diveprofile(diveprofile):
                              line = {'color': 'rgb(176,42,143)', 'width': 2},
                              visible = "legendonly"),
                   secondary_y = True);
+    # Integral Supersat (scaled; using customdata)
+    fig.add_trace(go.Scatter(x = df[ "time" ], y = 0.3*df[ "IntSuperSat" ], name = 'IntSuperSat',
+                             hovertemplate = 'IntSuperSat: %{customdata:.1f} @ %{x:.1f}mins<extra></extra>',
+                             customdata = df[ "IntSuperSat" ],
+                             line = {'color': 'rgb(176,42,143)', 'width': 1},
+                             visible = "legendonly"),
+                  secondary_y = True);
     # TTS (scaled to make visible; using customdata)
     fig.add_trace(go.Scatter(x = df[ "time" ], y = 2*df[ "TTS" ], name = 'TTS',
                              hovertemplate = 'TTS: %{customdata:.1f}mins @ %{x:.1f}mins<extra></extra>',

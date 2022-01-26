@@ -47,13 +47,13 @@ class DivePoint:
 
     @staticmethod
     def dataframe_columns():
-        return [ 'time', 'depth', 'gas', 'ppO2', 'CNS' ]  \
+        return [ 'time', 'depth', 'gas', 'ppO2', 'CNS', 'IntSuperSat' ]  \
                 + DivePoint.dataframe_columns_deco_info() \
                 + [ 'Stops' ]                             \
                 + [ 'IsDecoStop', 'IsAscent', 'IsInterpolated', 'DiveGFLow', 'DiveGFHigh'];
 
     def repr_for_dataframe(self, diveprofile = None):
-        r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * self.p_amb, self.cns_perc ];
+        r = [ self.time, self.depth, str(self.gas), self.gas['fO2'] * self.p_amb, self.cns_perc, self.integral_supersat ];
         if self.deco_info is not None:
             r += [ self.deco_info[n] for n in DivePoint.dataframe_columns_deco_info() ];
             r += [ Util.stops_to_string_precise( self.deco_info['Stops'] ) ]
