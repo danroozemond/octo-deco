@@ -30,7 +30,7 @@ for i in range(1,18):
     gf_high = dp0.find_gf_high(gf_low, dt);
     assert gf_high is not None;
     cp = dp0.clean_copy();
-    trmv = cp.remove_surface_at_end();
+    cp.remove_surface_at_end();
     cp.set_gf(gf_low, gf_high, updateStops = True);
     is1 = cp.integral_supersaturation_at_end();
     cp.append_section(0, 10);

@@ -411,8 +411,8 @@ class DiveProfile:
             self.update_deco_info();
 
     def _find_idx_of_surfacing_point(self):
-        i = -1;
-        while -i < len(self._points) and self._points[i].depth == 0:
+        i = len(self._points)-1;
+        while i > 1 and self._points[i-1].depth == 0:
             i -= 1;
         return i;
 
@@ -426,7 +426,7 @@ class DiveProfile:
         endtime = self._points[-1].time;
         i = self._find_idx_of_surfacing_point();
         begintime = self._points[i].time;
-        del self._points[i:];
+        del self._points[i+1:];
         return endtime-begintime;
 
     def remove_points(self, remove_filter, fix_durations, update_deco_info = True):
