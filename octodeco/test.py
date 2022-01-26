@@ -7,8 +7,6 @@ from octodeco.deco.DiveProfile import DiveProfile;
 
 t0 = time.perf_counter();
 
-
-
 # simon mitchell's first example, NEDU study, : GF53/53 should give 927.1
 # see video 56:39
 
@@ -25,7 +23,6 @@ for x, y in dp.dive_summary().items():
 print('====')
 
 dt = dp.decotime();
-
 dp0 = dp.clean_copy();
 
 for i in range(1,18):
@@ -33,14 +30,14 @@ for i in range(1,18):
     gf_high = dp0.find_gf_high(gf_low, dt);
     assert gf_high is not None;
     cp = dp0.clean_copy();
-    cp.remove_surface_at_end();
+    trmv = cp.remove_surface_at_end();
     cp.set_gf(gf_low, gf_high, updateStops = True);
-    is1 = cp.integral_supersaturation();
+    is1 = cp.integral_supersaturation_at_end();
     cp.append_section(0, 10);
     cp.update_deco_info();
-    is2 = cp.integral_supersaturation();
+    is2 = cp.integral_supersaturation_at_end();
     cp.interpolate_points();
-    is3 = cp.integral_supersaturation();
+    is3 = cp.integral_supersaturation_at_end();
     print(f'{gf_low:5}/{gf_high:5} -> deco time: {cp.decotime():5.1f} mins, int. supersat: {is1:6.1f}, {is2:6.1f}, {is3:6.1f}');
 
 
@@ -90,5 +87,5 @@ for gfs in [(5,75), (35,65), (60,60), (80,55), (200,50), (55,65), (30,90) ]:
     dp.append_section(0.0, 60.0)
     dp.interpolate_points()
     dp.update_deco_info();
-    print('GF: {:3d}/{:3d}, deco time: {:5.1f} mins, integral supersat: {:6.1f}'.\
-          format(gfs[0], gfs[1], dp.decotime(), dp.integral_supersaturation()));
+    print('GF: {:3d}/{:3d}, deco time: {:5.1f} mins, integral supersat: {:6.1f}'. \
+          format(gfs[0], gfs[1], dp.decotime(), dp.integral_supersaturation_at_end()));
