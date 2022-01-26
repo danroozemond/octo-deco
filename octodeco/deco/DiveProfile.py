@@ -405,22 +405,23 @@ class DiveProfile:
         else:
             self.update_deco_info();
 
-    def length_of_surface_section(self):
+    def _find_idx_of_surfacing_point(self):
         i = -1;
-        endtime = self._points[i].time;
-        begintime = endtime;
         while -i < len(self._points) and self._points[i].depth == 0:
-            begintime = self._points[i].time;
             i -= 1;
+        return i;
+
+    def length_of_surface_section(self):
+        endtime = self._points[ -1 ].time;
+        begintime = self._points[self._find_idx_of_surfacing_point()].time;
         return round(endtime-begintime);
 
     def remove_surface_at_end(self):
         # Removes surface section at end, returns amt of time removed
         endtime = self._points[-1].time;
-        begintime = endtime;
-        while self._points[-1].depth == 0:
-            p = self._points.pop();
-            begintime = p.time;
+        i = self._find_idx_of_surfacing_point();
+        begintime = self._points[i].time;
+        del self._points[i:];
         return endtime-begintime;
 
     def remove_points(self, remove_filter, fix_durations, update_deco_info = True):
