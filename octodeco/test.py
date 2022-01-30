@@ -10,12 +10,13 @@ t0 = time.perf_counter();
 # simon mitchell's first example, NEDU study, : GF53/53 should give 927.1
 # see video 56:39
 
-dp = DiveProfile(gf_low=55, gf_high=80);
-dp.append_section(52, 30, gas = Gas.Air());
-#dp.add_gas(Gas.Nitrox(50))
+dp = DiveProfile(gf_low=55, gf_high=70);
+dp.append_section(50, 30, gas = Gas.Trimix(21, 35));
+dp.add_gas(Gas.Nitrox(50))
+dp.add_gas(Gas.Nitrox(80))
 dp.add_stops_to_surface();
 dp.interpolate_points();
-dp.append_section(0.0, 60.0)
+dp.append_section(0.0, 30.0)
 dp.update_deco_info();
 
 for x, y in dp.dive_summary().items():
@@ -36,23 +37,21 @@ for i in range(1,18):
     cp.append_section(0, 10);
     cp.update_deco_info();
     is2 = cp.integral_supersaturation_at_end();
-    cp.interpolate_points();
+    cp.append_section(0, 20);
+    cp.update_deco_info();
     is3 = cp.integral_supersaturation_at_end();
-    print(f'{gf_low:5}/{gf_high:5} -> deco time: {cp.decotime():5.1f} mins, int. supersat: {is1:6.1f}, {is2:6.1f}, {is3:6.1f}');
-
-
+    print(f'{gf_low:5}/{gf_high:5} -> deco time: {cp.decotime():5.1f} mins, int. supersat: 0m: {is1:6.1f}, 10m: {is2:6.1f}, 30m: {is3:6.1f}');
 
 
 sys.exit(0);
 
-# Hemmoor planning was 50m, 28 mins, {Nx50, Tx21/30}
 
 # Simon mitchell's third example,
 # RT=70, GF 50/54 gives 342.2
 # RT=58, GF 30/85 gives 480.8
 # 50 meters, 25 mins, on 18/45
 
-dp = DiveProfile(gf_low=50, gf_high=54);
+dp = DiveProfile(gf_low=30, gf_high=85);
 dp.append_section(50, 25, gas = Gas.Trimix(18,45));
 dp.add_gas(Gas.Nitrox(50))
 dp.add_stops_to_surface();
@@ -77,7 +76,7 @@ print('====')
 #     print(p.debug_info());
 
 
-sys.exit(0);
+
 
 for gfs in [(5,75), (35,65), (60,60), (80,55), (200,50), (55,65), (30,90) ]:
     dp = DiveProfile(gf_low = gfs[0], gf_high = gfs[1]);
