@@ -103,6 +103,8 @@ class DiveProfile:
              'Total dive time': f'{self.divetime():.1f} mins',
              'Decompression time': f'{self.decotime():.1f} mins',
              'CNS max': f'{self.cns_max():.1f}%',
+             'Integral supersaturation (at end)': f'{self.integral_supersaturation_at_end():.1f} bar*mins',
+             'Integral supersaturation (at surfacing)': f'{self.integral_supersaturation_at_surfacing():.1f} bar*mins',
              'Deco profile comp time': f'{self._deco_stops_computation_time:.2f} secs',
              'Full info comp time': f'{self._full_info_computation_time:.2f} secs'
              };
@@ -120,6 +122,13 @@ class DiveProfile:
 
     def max_depth(self):
         return max(map(lambda p: p.depth, self._points));
+
+    def integral_supersaturation_at_end(self):
+        return self._points[-1].integral_supersat;
+
+    def integral_supersaturation_at_surfacing(self):
+        i = self._find_idx_of_surfacing_point();
+        return self._points[i].integral_supersat;
 
     def description(self):
         if self.custom_desc is not None:
@@ -401,22 +410,23 @@ class DiveProfile:
         else:
             self.update_deco_info();
 
-    def length_of_surface_section(self):
-        i = -1;
-        endtime = self._points[i].time;
-        begintime = endtime;
-        while -i < len(self._points) and self._points[i].depth == 0:
-            begintime = self._points[i].time;
+    def _find_idx_of_surfacing_point(self):
+        i = len(self._points)-1;
+        while i > 1 and self._points[i-1].depth == 0:
             i -= 1;
+        return i;
+
+    def length_of_surface_section(self):
+        endtime = self._points[ -1 ].time;
+        begintime = self._points[self._find_idx_of_surfacing_point()].time;
         return round(endtime-begintime);
 
     def remove_surface_at_end(self):
         # Removes surface section at end, returns amt of time removed
         endtime = self._points[-1].time;
-        begintime = endtime;
-        while self._points[-1].depth == 0:
-            p = self._points.pop();
-            begintime = p.time;
+        i = self._find_idx_of_surfacing_point();
+        begintime = self._points[i].time;
+        del self._points[i+1:];
         return endtime-begintime;
 
     def remove_points(self, remove_filter, fix_durations, update_deco_info = True):
@@ -490,6 +500,31 @@ class DiveProfile:
             for gfhigh in gfhighs:
                 res[ gflow ][ gfhigh ] = cp.decotime_for_gf( gflow, gfhigh );
         return res;
+
+    def find_gf_high(self, given_gf_low, target_deco_time):
+        cp = self.clean_copy();
+        def vdt(x):
+            return cp.decotime_for_gf(given_gf_low, x);
+        a = 5;
+        b = 120;
+        if vdt(a) < target_deco_time or vdt(b) > target_deco_time:
+            # The lowerbound is too short or the upperbound is too long -> abort
+            return None;
+        n = 0;
+        while b > a + 1:
+            # Anti-infinite loop
+            n += 1; assert n < 100;
+            # The real search
+            h = int(a + (b-a)/2);
+            if vdt(h) > target_deco_time:
+                a = h;
+            else:
+                b = h;
+        # Not entirely nice, but necessary evil given we only have integral GFs
+        da = abs(vdt(a) - target_deco_time);
+        db = abs(vdt(b) - target_deco_time);
+        return a if da < db else b;
+
 
     '''
     Gas consumption computations
